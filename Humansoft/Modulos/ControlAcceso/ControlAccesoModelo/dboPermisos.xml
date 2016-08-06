@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+<Permisos>    
+    <ObtenerSiguienteClave>
+        <sql>
+        <![CDATA[
+            BEGIN
+              SELECT ISNULL(MAX(cve_solicitudjusti),0) + 1 cve_solicitudjusti FROM CTR_solicitudjusti;
+            END
+        ]]>
+        </sql>   
+    </ObtenerSiguienteClave>
+    
+    <Nuevo>
+      <campo leyenda="Clave" db_nombre="cve_solicitudjusti" form_nombre="cve_solicitudjusti" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Número de empleado" db_nombre="num_empleado" form_nombre="num_empleado" requerido="true" charsize="20" tipo="string"/>
+      <campo leyenda="Usuario" db_nombre="num_emplcreo" form_nombre="cve_usuario" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Fecha última trans?? " db_nombre="fechaultimatrans" form_nombre="fechaultimatrans" requerido="false" charsize="20" tipo="string"/>
+      <campo leyenda="Fecha de inicio" db_nombre="fechainicio" form_nombre="fechainicio" requerido="true" charsize="20" tipo="string"/>
+      <campo leyenda="Fecha fin" db_nombre="fechafin" form_nombre="fechafin" requerido="true" charsize="20" tipo="string"/>
+      <campo leyenda="Tipo de justificación" db_nombre="cve_tipojustificacion" form_nombre="cve_tipojustificacion" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Motivo" db_nombre="cve_motivo" form_nombre="cve_motivo" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Comentario" db_nombre="comentario" form_nombre="comentario" requerido="false" charsize="500" tipo="string" default=""/>
+      <campo leyenda="Posición" db_nombre="num_plantilla" form_nombre="num_plantilla" requerido="false" charsize="0" tipo="int"/>
+        <sql>          
+          <![CDATA[
+              BEGIN
+                  SET NOCOUNT ON;
+                  SET LANGUAGE Español;
+                  SET DATEFORMAT dmy;
+                  DECLARE @fechaInicioDate DATE; SET @fechaInicioDate= @fechainicio;
+                  DECLARE @fechaFinDate DATE; SET @fechaFinDate=@fechafin;
+                  DECLARE @estaDentroDePlazo BIT;
+                  
+                  SELECT @estaDentroDePlazo=(
+                    SELECT TOP(1)
+                    CASE WHEN 
+                    --B.descripcion,C.simbolo,
+                    --SELECT 
+                    dbo.dynamic_date_diff(C.simbolo,@fechainicio,GETDATE()) 
+                    <=
+                    
+                    C.nveces*B.plazo
+                    --permitido	
+                    THEN 1 ELSE 0 END dentroPlazo 
+                    FROM CTR_motivojustifi B INNER JOIN SIS_dadoen C ON B.cve_dadoplazo=C.cve_dado
+                    WHERE cve_motivo=@cve_motivo
+                  );
+                  
+                 BEGIN TRY
+                   IF @fechaFinDate < @fechaInicioDate  BEGIN
+                      SELECT -11 AS estatus,  'La fecha final no puede ser menor que la fecha de inicio.' mensaje;
+                   END ELSE IF @estaDentroDePlazo=1 BEGIN
+                      INSERT INTO CTR_solicitudjusti(
+                          cve_solicitudjusti,
+                          num_empleado,
+                          num_emplcreo,
+                          fechacreo,
+                          fechaultimatrans,
+                          fechainicio,
+                          fechafin,
+                          cve_tipojustificacion,
+                          cve_motivo,
+                          comentario,
+                          num_plantilla,
+                          cve_estatus
+                      )
+                      VALUES(
+                          @cve_solicitudjusti,
+                          @num_empleado,
+                          @num_emplcreo,
+                          GETDATE(),
+                          @fechaultimatrans,
+                          @fechainicio,
+                          @fechafin,
+                          @cve_tipojustificacion,
+                          @cve_motivo,
+                          @comentario,
+                          @num_plantilla,
+                          1
+                      ); 
+                        INSERT INTO CTR_HistorialSolicitudJusti(cve_solicitudjusti,num_empleado_cambio,estatus,subestatus,nota,fecha) VALUES(@cve_solicitudjusti,@num_emplcreo,1, 0, 'Incidencia Creada', GETDATE());
+                        SELECT @cve_solicitudjusti estatus, 'Registro guardado correctamente' mensaje, '' SQLMensaje;
+                    END ELSE BEGIN
+                      SELECT -10 AS estatus,  'Expiró el plazo para registrar la incidencia.' mensaje;                      
+                    END
+                  END TRY BEGIN CATCH 
+                      SELECT -1 AS estatus,  'Error: No se guardo el registro.' + ERROR_MESSAGE() mensaje, ERROR_MESSAGE() SQLMensaje;
+                  END CATCH
+              END
+          ]]>
+        </sql>
+   </Nuevo>
+
+    <ObtenerCatalogo>      
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default="%"/>
+      <campo leyenda="Número de empleado" db_nombre="num_empleado" form_nombre="num_empleado" requerido="false" charsize="30" tipo="string" default="%"/>
+      <campo leyenda="Nombre de empleado" db_nombre="nombre_empleado" form_nombre="nombre_empleado" requerido="false" charsize="200" tipo="string" default="%"/>
+      <campo leyenda="Estatus" db_nombre="estatus" form_nombre="estatus" requerido="false" charsize="10" tipo="string" default="%"/>
+      <campo leyenda="Departamento" db_nombre="departamento" form_nombre="departamento" requerido="false" charsize="200" tipo="string" default="%"/>
+      <campo leyenda="Puesto" db_nombre="puesto" form_nombre="puesto" requerido="false" charsize="200" tipo="string" default="%"/>
+      <campo leyenda="Número de solicitud" db_nombre="num_solicitud" form_nombre="num_solicitud" requerido="false" charsize="20" tipo="string" default="%"/>
+      
+      <sql>
+        <![CDATA[
+            BEGIN
+              SET NOCOUNT ON;
+              SET LANGUAGE ESPAÑOL;	            
+                 
+              --DECLARE @pagina INT=0;
+              --DECLARE @longitudPagina INT=100;
+              --DECLARE @num_empleado NVARCHAR(30)='%';
+              --DECLARE @nombre_empleado NVARCHAR(50)='%';
+              --DECLARE @estatus NVARCHAR(10)='%';
+              --DECLARE @departamento NVARCHAR(50)='gener';
+              --DECLARE @puesto varchar(20)='%';
+              --DECLARE @num_solicitud varchar(20)='29';	
+              --DECLARE @criterio varchar(20)='%';	
+                  
+                DECLARE @tEmpleadosVisibles AS TABLE(
+	                num_empleado VARCHAR(30)
+                )
+                INSERT INTO @tEmpleadosVisibles
+                EXEC PA_SG_CObtenerEmpleadosVisibles 3;
+              
+	              DECLARE @inicio INT;
+	              SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+	              DECLARE @TablaAuxiliarPaginacion AS TABLE(
+		              indiceRegistro INT,
+		              cve_solicitudjusti INT,
+                  num_empleado VARCHAR(20),
+                  num_emplcreo INT,
+                  fechacreo DATETIME,
+                  fechaultimatrans DATETIME,
+                  fechainicio DATETIME,
+                  fechafin DATETIME,
+                  cve_tipojustificacion INT,
+                  cve_motivo INT,
+                  comentario VARCHAR(500),
+                  num_plantilla INT,                
+                  nombrecompleto VARCHAR(200),
+                  descripcion VARCHAR(200),
+                  sestatus VARCHAR(200),
+                  cve_estatus INT,                
+		              departamento NVARCHAR(200),
+		              puesto VARCHAR(200)
+	              )
+	             INSERT INTO @TablaAuxiliarPaginacion
+	              SELECT 
+		              ROW_NUMBER() OVER(ORDER BY A.fechacreo DESC) AS indiceRegistro,
+                  A.cve_solicitudjusti,
+                  A.num_empleado,
+                  A.num_emplcreo,
+                  A.fechacreo,
+                  A.fechaultimatrans,
+                  A.fechainicio,
+                  A.fechafin,
+                  A.cve_tipojustificacion,
+                  A.cve_motivo,
+                  A.comentario,
+                  A.num_plantilla,
+                  B.nombrecompleto,
+                  C.descripcion,
+                  D.descripcion sestatus,
+                  A.cve_estatus,
+	              E.nombredep,
+	              PG.Nombre_Puesto
+	              FROM 
+		              CTR_solicitudjusti A LEFT OUTER JOIN CTR_motivojustifi C ON A.cve_motivo=C.cve_motivo
+                  INNER JOIN SIS_estatus D ON A.cve_estatus=D.cve_estatus AND cve_modulo=5	            
+		              INNER JOIN @tEmpleadosVisibles EV ON A.num_empleado=EV.num_empleado
+		              INNER JOIN ES_emplplantilla B ON A.num_empleado=B.id_empleado
+		              INNER JOIN ES_posiciones P ON B.id_empleado=P.id_empleado
+		              INNER JOIN ES_puestosgenericos PG ON P.cve_puesto=PG.cve_puesto
+		              INNER JOIN ES_departamentos E ON P.cve_departamento=E.cve_departamento
+                  INNER JOIN (SELECT cve_estatus, descripcion FROM SIS_estatus WHERE cve_modulo=5) G ON G.cve_estatus= A.cve_estatus
+	              WHERE  
+                      ISNULL(B.nombrecompleto,'') like '%' + @nombre_empleado + '%' AND
+	                  ISNULL(A.cve_estatus,'') like @estatus AND
+	                  ISNULL(A.cve_solicitudjusti,'') like @num_solicitud AND		
+	                  ISNULL(E.nombredep,'') like '%' + @departamento + '%' AND
+	                  ISNULL(PG.Nombre_Puesto,'') like '%' + @puesto + '%' AND
+	                  ISNULL(A.num_empleado,'') like '%' + @num_empleado + '%' AND
+	                  ISNULL(PG.Nombre_Puesto,'') like '%' + @puesto + '%'
+	              GROUP BY
+		              A.cve_solicitudjusti,
+					        A.num_empleado,
+					        A.num_emplcreo,
+					        A.fechacreo,
+					        A.fechaultimatrans,
+					        A.fechainicio,
+					        A.fechafin,
+					        A.cve_tipojustificacion,
+					        A.cve_motivo,
+					        A.comentario,
+					        A.num_plantilla,
+					        B.nombrecompleto,
+					        C.descripcion,
+					        D.descripcion,
+					        A.cve_estatus,                
+					        E.nombredep,
+					        PG.Nombre_Puesto
+                    
+	             --Paginacion
+	              SELECT TOP(@longitudPagina)
+		              indiceRegistro,
+		              @@ROWCOUNT as totalRegistros,
+		              cve_solicitudjusti,
+					        num_empleado,
+					        num_emplcreo,
+					        REPLACE(CONVERT(VARCHAR(20),fechacreo,106),' ', '/') fechacreo,
+					        fechaultimatrans,
+					        fechainicio,
+					        fechafin,
+					        cve_tipojustificacion,
+					        cve_motivo,
+					        comentario,
+					        num_plantilla,
+					        nombrecompleto,
+					        descripcion,
+					        sestatus,
+					        cve_estatus,      
+					        departamento,
+					        puesto    
+				          FROM @TablaAuxiliarPaginacion
+				          WHERE indiceRegistro > @inicio
+		        ORDER BY indiceRegistro ASC
+        END            
+        ]]>
+      </sql>
+    </ObtenerCatalogo>
+
+    <ObtenerDetallePermiso>
+      <campo leyenda="Clave" db_nombre="cve_solicitudjusti" form_nombre="cve_solicitudjusti" requerido="true" charsize="0" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+                BEGIN
+	                SET NOCOUNT ON;
+                  SELECT 
+                    cve_solicitudjusti,
+                    num_empleado,
+                    I.nombrecompleto,
+                    num_emplcreo,
+                    fechacreo,
+                    fechaultimatrans,
+                    CONVERT(VARCHAR(20),fechainicio,103) fechainicio,
+                    CONVERT(VARCHAR(20),fechafin,103) fechafin,
+                    SUBSTRING(CONVERT(VARCHAR(10),fechainicio,108),0,6) horainicio,
+                    SUBSTRING(CONVERT(VARCHAR(10),fechafin,108),0,6) horafin,
+                    CTR_solicitudjusti.cve_tipojustificacion,
+                    C.descripcion stipojustificacion,
+                    CTR_solicitudjusti.cve_motivo,
+                    B.descripcion smotivo,
+                    comentario,
+                    F.nombredep departamento,
+                    G.Nombre_Puesto puesto,
+                    J.descripcion sestatus,
+                    B.cve_flujo,
+                    CTR_solicitudjusti.cve_estatus
+                  FROM CTR_solicitudjusti
+                    INNER JOIN CTR_motivojustifi B ON CTR_solicitudjusti.cve_motivo=B.cve_motivo
+                    INNER JOIN CTR_tipojustificacion C ON CTR_solicitudjusti.cve_tipojustificacion= C.cve_tipojustificacion
+                    LEFT OUTER JOIN ES_posiciones D ON CTR_solicitudjusti.num_empleado=D.id_empleado
+                    LEFT OUTER JOIN ES_departamentos F ON F.cve_departamento=D.cve_departamento
+                    LEFT OUTER JOIN ES_puestosgenericos G ON D.cve_puesto=G.cve_puesto
+                    LEFT OUTER JOIN ES_lugartrabajo H ON D.cve_lugartrabajo=H.cve_lugar
+                    LEFT OUTER JOIN ES_emplplantilla I ON CTR_solicitudjusti.num_empleado=I.id_empleado
+                    LEFT OUTER JOIN SIS_estatus J ON CTR_solicitudjusti.cve_estatus=J.cve_estatus AND cve_modulo=5
+              
+                  WHERE cve_solicitudjusti=@cve_solicitudjusti
+                  
+                END
+            ]]>
+      </sql>
+    </ObtenerDetallePermiso>
+
+  <Editar>
+    <campo leyenda="Clave" db_nombre="cve_solicitudjusti" form_nombre="cve_solicitudjusti" requerido="true" charsize="0" tipo="int"/>
+    <campo leyenda="Comentario" db_nombre="comentario" form_nombre="comentario" requerido="false" charsize="500" tipo="string" default=""/>
+    <sql>
+      <![CDATA[
+              BEGIN
+                  SET NOCOUNT ON;
+                  SET DATEFORMAT dmy;
+                  SET LANGUAGE Español;
+                 BEGIN TRY
+                  UPDATE CTR_solicitudjusti SET
+                      comentario=@comentario
+                   WHERE 
+                      cve_solicitudjusti=@cve_solicitudjusti
+                  ;
+                    SELECT @cve_solicitudjusti  estatus, 'Registro guardado correctamente' mensaje;
+                  END TRY BEGIN CATCH 
+                      SELECT -1 AS estatus,  'Error: No se guardo el registro:' + ERROR_MESSAGE() mensaje;
+                  END CATCH
+              END
+          ]]>
+    </sql>
+    </Editar>
+  <ObtenerRestriccionesSolicitud>
+    <campo leyenda="Tipo de justificación" db_nombre="cve_tipojustificacion" form_nombre="cve_tipojustificacion" requerido="true" charsize="0" tipo="int"/>
+    <campo leyenda="Motivo" db_nombre="cve_motivo" form_nombre="cve_motivo" requerido="true" charsize="0" tipo="int"/>
+    <sql>
+      <![CDATA[
+              BEGIN
+                  SET NOCOUNT ON;
+                  SELECT TOP(1) escaneo requiereEscaneo FROM CTR_motivojustifi WHERE @cve_tipojustificacion=cve_tipojustificacion AND cve_motivo=@cve_motivo;
+              END
+          ]]>
+    </sql>
+  </ObtenerRestriccionesSolicitud>
+  <ObtenerAcciones>
+    <campo leyenda="Clave" db_nombre="cve_solicitudjusti" form_nombre="cve_solicitudjusti" requerido="true" charsize="0" tipo="int"/>
+    <sql>
+      <![CDATA[
+             --DECLARE @num_empleadoPideInformacion VARCHAR(20)=3;	DECLARE @cve_solicitudjusti INT=4;
+              /**********************************************************************************************************************
+              CON LA CLAVE DE LA SOLICITUD SE PUEDEN SABER LAS ACCIONES QUE SE PUEDEN REALIZAR, EL ROLE Y LOS EMPLEADOS AUTORIZADOS,
+              TAMBIÉN SE PUEDE SABER DE QUIÉN ES LA SOLICITUD, Y QUIÉNES SON  LOS JEFES.
+
+              CON LA CLAVE DE USUARIO SE PUEDE SABER SI ES EL JEFE DEL EMPLEADO DE LA SOLICITUD O SI ES EL TITULAR DE LA SOLICITUD, Y EL NÚMERO 
+              DE EMPLEADO DE QUIÉN PIDE INFORMACIÓN.
+              **********************************************************************************************************************/
+
+              DECLARE @num_empleadoDeSolicitud VARCHAR(20);
+              DECLARE @cve_motivo INT;
+              DECLARE @cve_tipojustificacion INT;
+              DECLARE @cve_flujo INT;
+              DECLARE @cve_estatus INT;
+              DECLARE @cve_orden INT;
+              DECLARE @cve_role INT;
+              --SELECT * FROM SG_usuarios
+              --Información del flujo
+              SELECT TOP(1)@cve_estatus=cve_estatus, @cve_motivo=cve_motivo,@cve_tipojustificacion=cve_tipojustificacion, @num_empleadoDeSolicitud=num_empleado FROM CTR_solicitudjusti WHERE cve_solicitudjusti=@cve_solicitudjusti;
+              SELECT TOP(1) @cve_flujo=cve_flujo FROM CTR_motivojustifi WHERE cve_motivo=@cve_motivo AND cve_tipojustificacion=@cve_tipojustificacion;
+              SELECT @cve_orden=orden FROM CTR_flujoestatusorden WHERE cve_flujo=@cve_flujo AND cve_estatus=@cve_estatus;
+              --SELECT @cve_flujo cve_flujo, @cve_estatus cve_estatus, @cve_orden cve_orden;
+              ------------------------------------------------------------------------------------------------------------------------------------
+              --Obtener Jefes de titular de solicitud
+              DECLARE @tJefes AS TABLE(num_empleado_jefe VARCHAR(30), num_posicion_jefe INT);
+              INSERT INTO @tJefes
+              SELECT B.id_empleado,A.spliter
+              FROM dbo.Split((SELECT TOP(1) orden_posicion FROM ES_posiciones WHERE id_empleado=@num_empleadoDeSolicitud),'.')A 
+              INNER JOIN ES_posiciones B ON B.num_plantilla=A.spliter AND id_empleado <> @num_empleadoDeSolicitud
+              --------------------------------------------------------------------------------------------------------------------------------------
+              DECLARE @tAcciones AS TABLE(cve_accion INT, saccion VARCHAR(200), cve_role INT, num_empleado_autorizado VARCHAR(30), cve_estatus INT);
+              INSERT INTO @tAcciones
+              SELECT V.cve_accion, M.descripcion, V.cve_role, W.num_empleado, M.cve_estatus  FROM CTR_flujoestatusroleaccion V
+              INNER JOIN CTR_flujoacciones M ON V.cve_accion=M.cve_accion
+              LEFT OUTER JOIN CTR_flujoestatusroleempleados W ON V.cve_flujo=W.cve_flujo AND V.cve_estatus=W.cve_estatus
+              WHERE V.cve_flujo=@cve_flujo AND V.cve_estatus=@cve_estatus
+
+              IF @num_empleadoPideInformacion=@num_empleadoDeSolicitud BEGIN
+              --SI EL NUMERO DE EMPLEADO DEL USUARIO ES DEL TITULAR ENTONCES ES EMPLEADO
+	              SELECT cve_accion, saccion, cve_estatus, @cve_flujo cve_flujo FROM @tAcciones WHERE cve_role=2
+              END ELSE BEGIN
+	              DECLARE @posicionJefe INT;
+	              SELECT TOP(1) @posicionJefe=num_posicion_jefe FROM @tJefes WHERE num_empleado_jefe=@num_empleadoPideInformacion;
+	              IF @posicionJefe IS NOT NULL BEGIN
+	              --	SI EL NUMERO ES DE UN JEFE ENTONCES ES JEFE
+		              SELECT cve_accion, saccion, cve_estatus, @cve_flujo cve_flujo FROM @tAcciones WHERE cve_role=1
+	              END ELSE BEGIN
+	              --	OTRO BUSCAR CON EL NUMERO DEL EMPLEADO, A VER SI TIENE ACCIONES
+		              SELECT cve_accion,saccion, cve_estatus, @cve_flujo cve_flujo FROM @tAcciones WHERE cve_role>2 AND num_empleado_autorizado=@num_empleadoPideInformacion		
+	              END
+              END
+          ]]>
+    </sql>
+  </ObtenerAcciones>  
+  
+  <ObtenerAccionesHT>
+    <campo leyenda="Clave" db_nombre="cve_accion" form_nombre="cve_accion" requerido="true" charsize="0" tipo="int"/>
+    <sql>
+      <![CDATA[
+        SELECT cve_estatus, accion FROM CTR_flujoacciones WHERE cve_accion=@cve_accion;        
+    ]]>
+    </sql>
+  </ObtenerAccionesHT>
+
+  <ObtenerSiguienteEstatus>
+    <campo leyenda="Clave" db_nombre="cve_estatusActual" form_nombre="cve_estatusActual" requerido="true" charsize="0" tipo="int"/>
+    <campo leyenda="Clave de flujo" db_nombre="cve_flujo" form_nombre="flujo" requerido="true" charsize="0" tipo="int"/>
+    <sql>
+      <![CDATA[
+      DECLARE @pasoActual SMALLINT;
+      SELECT @pasoActual=orden FROM CTR_flujoestatusorden WHERE cve_flujo=@cve_flujo AND cve_estatus=@cve_estatusActual;
+      SELECT cve_estatus FROM CTR_flujoestatusorden WHERE cve_flujo=@cve_flujo AND orden=@pasoActual+1;
+    ]]>
+  </sql>
+  </ObtenerSiguienteEstatus>
+
+  <ActualizarEstatus>
+    <campo leyenda="Clave" db_nombre="cve_solicitudjustifi" form_nombre="cve_solicitudjusti" requerido="true" charsize="0" tipo="int"/>
+    <campo leyenda="Clave de siguiente estatus" db_nombre="cve_estatus" form_nombre="cve_estatus" requerido="true" charsize="0" tipo="int"/>
+    <campo leyenda="Clave de subestatus" db_nombre="subestatus" form_nombre="subestatus" requerido="false" charsize="0" tipo="int"/>
+    <campo leyenda="Nota" db_nombre="nota" form_nombre="nota" requerido="false" charsize="200" tipo="string" default=""/>
+    <sql>
+      <![CDATA[
+	        UPDATE CTR_solicitudjusti SET cve_estatus=@cve_estatus WHERE cve_solicitudjusti=@cve_solicitudjustifi;
+          SELECT @cve_solicitudjustifi estatus, 'Actualización correcta' mensaje;
+          INSERT INTO CTR_HistorialSolicitudJusti(cve_solicitudjusti,num_empleado_cambio,estatus,subestatus,nota,fecha) VALUES(@cve_solicitudjustifi,@num_empleado, @cve_estatus, @subestatus,'Actualización correcta', GETDATE());
+      ]]>
+    </sql>
+  </ActualizarEstatus>
+  
+   <HistorialUnaIncidencia>
+    <campo leyenda="Clave" db_nombre="cve_solicitudjustifi" form_nombre="cve_solicitudjusti" requerido="true" charsize="0" tipo="int"/>
+    <sql>
+      <![CDATA[
+	        SELECT 
+             A.cve_solicitudjusti
+            ,REPLACE(CONVERT(VARCHAR(20),A.fecha,106),' ', '/') fecha
+            ,B.descripcion, C.nombrecompleto
+          FROM CTR_HistorialSolicitudJusti A 
+	          INNER JOIN SIS_estatus B ON A.estatus=B.cve_estatus 
+	          LEFT OUTER JOIN ES_emplplantilla C ON A.num_empleado_cambio=C.id_empleado
+          WHERE A.cve_solicitudjusti= @cve_solicitudjustifi AND B.cve_modulo=5;
+      ]]>
+    </sql>
+  </HistorialUnaIncidencia>
+
+  <ObtenerUsuarioJefeInmediato>
+    <campo leyenda="Número de empleado" db_nombre="num_empleado" form_nombre="num_empleado" requerido="true" charsize="0" tipo="int"/>
+    <sql>
+      <![CDATA[
+        DECLARE @cve_usuario INT;
+	        SELECT cve_usuario, nombre FROM SG_Usuarios WHERE num_empleado=(SELECT TOP(1) id_empleado FROM ES_Posiciones WHERE num_plantilla=(SELECT TOP(1) num_plantilladep FROM ES_Posiciones WHERE id_empleado=@num_empleado));
+      ]]>
+    </sql>
+  </ObtenerUsuarioJefeInmediato>
+
+  <NotificarJefeInmediato>
+    <campo leyenda="Clave" db_nombre="cve_solicitudjustifi" form_nombre="cve_solicitudjusti" requerido="true" charsize="0" tipo="int"/>
+    <campo leyenda="Clave de usuario" db_nombre="cve_usuario" form_nombre="cve_usuario" requerido="true" charsize="0" tipo="int"/>
+    <campo leyenda="Nota" db_nombre="nota" form_nombre="nota" requerido="true" charsize="1024" tipo="string"/>
+    <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="500" tipo="string"/>
+    <campo leyenda="Referencia" db_nombre="referencia" form_nombre="referencia" requerido="false" charsize="50" tipo="string"/>
+    <campo leyenda="Requiere Confirmación" db_nombre="requiereConfirmacion" form_nombre="requiereConfirmacion" requerido="false" charsize="0" tipo="bool"/>
+    <sql>
+      <![CDATA[
+	        INSERT INTO Notificaciones(num_usuario,fecha,nota,pagina,referencia,requiereConfirmacion) VALUES(@cve_usuario,GETDATE(),@nota,@pagina,@referencia,@requiereConfirmacion);
+      ]]>
+    </sql>
+  </NotificarJefeInmediato>
+  
+</Permisos>
+</Secciones>

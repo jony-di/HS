@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Secciones>
+  <elementos>
+    <obtenersecciones>
+      <campo leyenda="Posicion" db_nombre="num_plantilla" form_nombre="numplantilla" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+         SELECT
+          E.descripcion AS Seccion, '['+
+          STUFF((SELECT ',{"key":"'+CAST(b.cve_seccion  AS VARCHAR(MAX)) + '-'+ CAST(ISNULL(b.cve_subseccion,0) AS VARCHAR(MAX))+'","name":"'+ B.descripcion +'","multi":"'+ CAST(B.multivalores AS VARCHAR(2))
+          +'","catalogo":{'
+          +ISNULL(
+          STUFF((
+              SELECT ',"'+ CAST(B.cve_catalogo  AS VARCHAR(MAX)) + '-'+ CAST(ISNULL(D.cve_subcatalogo,0) AS VARCHAR(MAX)) +'":"'+  descripcion 
+	          +'|' + case when ISNULL(valor1,'')='' then 'null' else valor1 end + '-' + case when ISNULL(valor2,'')='' then 'null' else valor2 end  +'"'
+              FROM ES_catperdet D
+              WHERE (cve_catalogo=B.cve_catalogo) 
+              FOR XML PATH(''),TYPE).value('(./text())[1]','VARCHAR(MAX)')
+            ,1,1,''),'')+'}}'
+              FROM  ES_pstperfilsubseccion B
+	          WHERE B.activo=1
+	          AND B.cve_seccion=F.cve_seccion
+			  --AND B.cve_subseccion=F.cve_subsecuencia
+              FOR XML PATH(''),TYPE).value('(./text())[1]','VARCHAR(MAX)')
+            ,1,1,'')+']' AS JSON
+          FROM ES_pstperfilseccion E
+          INNER JOIN Es_PstPerfilValor F
+		      ON E.CVE_SECCION=F.CVE_SECCION
+		      INNER JOIN ES_POSICIONES G
+		      ON F.NUM_platilla=G.cve_puesto
+          WHERE G.num_plantilla=@num_plantilla
+          GROUP BY F.cve_seccion,E.descripcion
+        ]]>
+      </sql>
+    </obtenersecciones>
+    <obtenerdatos>
+      <campo leyenda="Posicion" db_nombre="num_plantilla" form_nombre="numplantilla" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+           select num_platilla, '['+
+          STUFF(( select ',{"key":"'+
+					CAST(cve_seccion AS VARCHAR(MAX))
+					+'-'+CAST(cve_subseccion AS VARCHAR(MAX))
+					+'","valor":"'+ isnull(desvalor,'null') 
+					+'","publico":"'+CAST(publicar AS VARCHAR(MAX))
+					+'","catalogo":{'+
+					STUFF(( select ',"'+ 
+					ISNULL(CAST(cve_catalogo AS VARCHAR(MAX)),'null')
+					+'-'+ ISNULL(CAST(cve_subcatalogo AS VARCHAR(MAX)),'null')
+					 +'":"'+ ISNULL(CAST(valor1 AS VARCHAR(MAX)),'null')
+					+'-'+ ISNULL(CAST(valor2 AS VARCHAR(MAX)),'null') +'"'
+					from Es_PstPerfilValor 
+					where num_platilla=a.num_platilla
+					and cve_seccion=b.cve_seccion and cve_subseccion=b.cve_subseccion
+					ORDER BY NUMERO
+					FOR XML PATH(''),TYPE).value('(./text())[1]','VARCHAR(MAX)'),1,1,'') +'}}'
+					from Es_PstPerfilValor b
+					where num_platilla=a.num_platilla
+					--and cve_seccion=a.cve_seccion
+					--and cve_subseccion=a.cve_subseccion
+					ORDER BY NUMERO
+				  FOR XML PATH(''),TYPE).value('(./text())[1]','VARCHAR(MAX)'),1,1,'') +']' AS JSON, 
+				   (select nombredep from ES_departamentos where cve_departamento=g.cve_departamento) as dep,
+				   (select Nombre_Puesto from ES_puestosgenericos where cve_puesto=G.cve_puesto) as puest,
+				   g.nivel
+
+          from Es_PstPerfilValor a
+          INNER JOIN ES_posiciones G
+		  on A.num_platilla=G.cve_puesto
+          WHERE G.num_plantilla=@num_plantilla
+          group by num_platilla,g.cve_departamento,G.cve_puesto,g.nivel
+        ]]>
+      </sql>
+    </obtenerdatos>
+  </elementos>
+</Secciones>

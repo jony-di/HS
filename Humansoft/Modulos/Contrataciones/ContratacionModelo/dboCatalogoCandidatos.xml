@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Secciones>
+  <filtros>
+    <obtenerSubEstapas>
+      <campo leyenda="Calve de Etapa" db_nombre="etapa" form_nombre="etapa" requerido="true" charsize="0" tipo="int"/>
+      <sql>
+        <![CDATA[
+          Select cve_subetapa, descripcion, pantalla From CON_F_SubEtapaContratacion where cve_etapa =@etapa
+        ]]>
+      </sql>
+    </obtenerSubEstapas>
+  </filtros>
+  <Candidatos>
+    <obtenerLista>
+      <campo leyenda="Calve de vacante" db_nombre="vacante" form_nombre="vacante" requerido="true" charsize="0" tipo="int"/>
+      <sql>
+        <![CDATA[
+          SET NOCOUNT ON;
+           SELECT 
+           Candidatos.RFC
+          ,Candidatos.cve_vacante
+          ,Candidatos.cve_Estatus_Proceso
+          ,Candidatos.Nombres
+          ,Candidatos.Apellido_Paterno
+          ,Candidatos.Apellido_Materno
+          ,Candidatos.cve_Estdo
+          ,estados.nombreestado as 'Estado'
+          ,Candidatos.cve_Municipio
+          ,Municipios.nombremuni as 'Municipio'
+          ,Candidatos.AniosExperiencia
+          ,Candidatos.FechaNacimiento
+          ,Candidatos.AreaDeExperiencia
+          ,Candidatos.sexo
+          ,Candidatos.EstadoCivil
+          ,Candidatos.GradoEstudios
+          ,Candidatos.EstadoGradoEstudios
+          ,Candidatos.FotoBase64
+          ,Candidatos.Telfonos
+          FROM CON_Candidatos Candidatos
+          INNER JOIN ES_estados estados
+          ON Candidatos.cve_Estdo=estados.cve_estado
+          LEFT JOIN ES_municipio Municipios
+          ON Candidatos.cve_Estdo=Municipios.cve_estado
+          AND Candidatos.cve_Municipio = Municipios.cve_Municipio
+          WHERE cve_vacante=@vacante
+        ]]>
+      </sql>
+    </obtenerLista>
+  </Candidatos>
+  <!--********************************************************************************************************************************************-->
+  <Candidato>
+    <obtenerInfoEstapas>
+      <campo leyenda="RFC" db_nombre="RFC" form_nombre="RFC" requerido="true" charsize="30" tipo="string"/>
+      <campo leyenda="Calve de flujo" db_nombre="flujo" form_nombre="flujo" requerido="true" charsize="0" tipo="int"/>
+      <sql>
+        <![CDATA[
+	        SET NOCOUNT ON
+          DECLARE @TABLA AS TABLE(terminadas INT,actual INT,rechazada int)
+          INSERT INTO @TABLA 
+	          SELECT cve_etapa,NULL,NULL FROM(SELECT A.cve_etapa
+	          FROM CON_F_SubEtapaContratacion A
+	          INNER JOIN CON_F_SubEtapasContratacionCandidato B
+	          ON A.cve_etapa=B.cve_etapa AND  A.cve_subetapa=B.cve_subetapa
+	          INNER JOIN CON_F_EtapasFlujo C
+	          ON A.cve_etapa= C.cve_etapa 
+	          WHERE C.cve_flujo=@FLUJO AND RFC LIKE @RFC
+          EXCEPT
+	          SELECT A.cve_etapa
+	          FROM CON_F_SubEtapaContratacion A
+	          LEFT JOIN CON_F_SubEtapasContratacionCandidato B
+	          ON A.cve_etapa=B.cve_etapa AND  A.cve_subetapa=B.cve_subetapa
+	          INNER JOIN CON_F_EtapasFlujo C
+	          ON A.cve_etapa= C.cve_etapa 	
+	          WHERE C.cve_flujo=@FLUJO AND B.cve_etapa IS NULL AND  B.cve_subetapa IS NULL AND RFC LIKE @RFC
+	          GROUP BY A.cve_etapa)T1
+
+          INSERT INTO @TABLA
+	          SELECT NULL,MIN(A.cve_etapa) AS 'cve_etapa', NULL
+	          FROM CON_F_SubEtapaContratacion A
+	          LEFT JOIN CON_F_SubEtapasContratacionCandidato B
+	          ON A.cve_etapa=B.cve_etapa AND  A.cve_subetapa=B.cve_subetapa
+	          INNER JOIN CON_F_EtapasFlujo C
+	          ON A.cve_etapa= C.cve_etapa 	
+	          WHERE C.cve_flujo=@FLUJO AND B.cve_etapa IS NULL AND  B.cve_subetapa IS NULL AND RFC IS NULL
+
+          INSERT INTO @TABLA
+	          SELECT NULL,NULL,A.cve_etapa
+	          FROM CON_F_SubEtapaContratacion A
+	          INNER JOIN CON_F_SubEtapasContratacionCandidato B
+	          ON A.cve_etapa=B.cve_etapa AND  A.cve_subetapa=B.cve_subetapa
+	          INNER JOIN CON_F_EtapasFlujo C
+	          ON A.cve_etapa= C.cve_etapa 
+	          WHERE C.cve_flujo=@FLUJO AND cve_estatus=6 AND RFC LIKE @RFC
+          SELECT isnull(terminadas,0) AS TERMINADAS, isnull(actual,0) AS ACTUAL, isnull(rechazada,0) AS RECHAZADA FROM @TABLA
+      ]]>
+      </sql>
+    </obtenerInfoEstapas>
+    <obtenerflujo>
+      <sql>
+        <![CDATA[
+          SELECT
+          A.cve_etapa,
+          A.descripcion
+          FROM CON_F_EtapasContratacion A
+          INNER JOIN CON_F_EtapasFlujo B
+          ON A.cve_etapa=B.cve_etapa
+          WHERE B.cve_flujo=1
+          ORDER BY B.orden
+        ]]>
+      </sql>
+    </obtenerflujo>
+    <obtenerCandidato>
+      <campo leyenda="RFC" db_nombre="RFC" form_nombre="RFC" requerido="true" charsize="30" tipo="string"/>
+      <campo leyenda="Calve de vacante" db_nombre="vacante" form_nombre="vacante" requerido="true" charsize="0" tipo="int"/>
+      <sql>
+        <![CDATA[
+            SET LANGUAGE Español
+            SELECT 
+             Candidatos.RFC
+            ,Candidatos.cve_vacante
+            ,Vacantes.num_plantilla
+            ,Vacantes.cve_puesto
+            ,Candidatos.cve_Estatus_Proceso
+            ,Candidatos.Nombres + ' ' + Candidatos.Apellido_Paterno + ' ' +Candidatos.Apellido_Materno as 'Nombres'
+            ,Candidatos.cve_Estdo
+            ,estados.nombreestado as 'Estado'
+            ,Candidatos.cve_Municipio
+            ,Municipios.nombremuni as 'Municipio'
+            ,Candidatos.AniosExperiencia
+            ,CONVERT(VARCHAR,DATEPART(DAY,Candidatos.FechaNacimiento)) +' de '+ DATENAME(MONTH,Candidatos.FechaNacimiento) + ' del ' + CONVERT(VARCHAR,DATEPART(YEAR,Candidatos.FechaNacimiento)) AS 'FechaNacimiento'
+            ,Candidatos.AreaDeExperiencia
+            ,Candidatos.sexo
+            ,Candidatos.EstadoCivil
+            ,Candidatos.GradoEstudios
+            ,Candidatos.EstadoGradoEstudios
+            ,Candidatos.FotoBase64
+            ,Candidatos.Telfonos
+            FROM CON_Candidatos Candidatos
+            INNER JOIN CON_SolicitudVacante Vacantes
+            ON Vacantes.cve_solicitudvacante=Candidatos.cve_vacante
+            INNER JOIN ES_estados estados
+            ON Candidatos.cve_Estdo=estados.cve_estado
+            LEFT JOIN ES_municipio Municipios
+            ON Candidatos.cve_Estdo=Municipios.cve_estado
+            AND Candidatos.cve_Municipio = Municipios.cve_Municipio
+            WHERE cve_vacante = @vacante
+            AND RFC = @RFC
+        ]]>
+      </sql>
+    </obtenerCandidato>
+    <obtenerCV>
+      <campo leyenda="RFC" db_nombre="RFC" form_nombre="RFC" requerido="true" charsize="30" tipo="string"/>
+      <campo leyenda="Calve de vacante" db_nombre="vacante" form_nombre="vacante" requerido="true" charsize="0" tipo="int"/>
+      <sql>
+        <![CDATA[
+           SELECT isnull(CVWordBase64,' ') as 'CVWordBase64'
+           FROM CON_Candidatos
+           WHERE cve_vacante=@vacante
+          AND RFC = @RFC
+        ]]>
+      </sql>
+    </obtenerCV>
+    <guardarEtapa>
+      <campo leyenda="RFC" db_nombre="RFC" form_nombre="RFC" requerido="true" charsize="30" tipo="string"/>
+      <campo leyenda="Calve de vacante" db_nombre="vacante" form_nombre="vacante" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Calve de etapa" db_nombre="etapa" form_nombre="etapa" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Calve de sub-etapa" db_nombre="subetapa" form_nombre="subetapa" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="opcion" db_nombre="opcion" form_nombre="opcion" requerido="false" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Detalle" db_nombre="detalle" form_nombre="detalle" requerido="true" charsize="255"  tipo="string"/>
+      <sql>
+        <![CDATA[
+          INSERT CON_F_SubEtapasContratacionCandidato(
+           cve_subetapa
+          ,cve_etapa
+          ,cve_candidato
+          ,cve_estatus
+          ,cve_resultado
+          ,fechaInicio
+          ,resumen
+          ,archivo)
+          VALUES(
+           @subetapa
+          ,@etapa
+          ,@RFC
+          ,@opcion
+          ,NULL
+          ,@detalle
+          )
+        ]]>
+      </sql>
+    </guardarEtapa>
+  </Candidato>
+</Secciones>

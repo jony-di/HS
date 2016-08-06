@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+  <Tipocatalogo>
+    <obtenerSiguienteClave>
+        <sql>
+          <![CDATA[
+            SELECT ISNULL(MAX(cve_tipocatalogo),0) + 1 clave FROM ES_tipocatalogo;
+          ]]>
+        </sql>
+    </obtenerSiguienteClave>
+    <Nuevo>
+      <campo leyenda="Clave" db_nombre="cve_tipocatalogo" form_nombre="cve_tipocatalogo" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Descripcion" db_nombre="descripcion" form_nombre="descripcion"  requerido="true" charsize="50" tipo="string" default=""/>
+      <sql>
+        <![CDATA[
+          SET NOCOUNT ON;
+          BEGIN TRY
+              INSERT INTO ES_tipocatalogo(cve_tipocatalogo,descripcion)
+              VALUES(@cve_tipocatalogo,@descripcion)
+              SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+          END TRY BEGIN CATCH
+              SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+          END CATCH
+        ]]>
+      </sql>
+    </Nuevo>
+
+    <obtenerCatalogo>
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+      <campo leyenda="Clave" db_nombre="cve_tipocatalogo" form_nombre="cve_tipocatalogo"  requerido="false"  charsize="0" tipo="int"  default=""/>
+      <sql>
+        <![CDATA[
+        SET NOCOUNT ON;
+        DECLARE @inicio INT;
+        SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+        DECLARE @TablaAuxiliarPaginacion AS TABLE(
+        indiceRegistro INT,
+        cve_tipocatalogo INT,
+        descripcion VARCHAR(50))
+
+        INSERT INTO @TablaAuxiliarPaginacion
+        SELECT
+        ROW_NUMBER() OVER(ORDER BY CONVERT(INT,cve_tipocatalogo ) DESC) AS indiceRegistro,
+        cve_tipocatalogo,
+        descripcion
+        FROM
+        ES_tipocatalogo
+        WHERE  ( ((CONVERT(VARCHAR(20),cve_tipocatalogo) like '%' + @criterio + '%') OR (descripcion like '%' + @criterio + '%')) AND @cve_tipocatalogo=0)
+        OR ((cve_tipocatalogo=@cve_tipocatalogo) AND (@cve_tipocatalogo != 0));
+          
+        --Paginacion
+        SELECT TOP(@longitudPagina)
+        indiceRegistro,
+        @@ROWCOUNT as totalRegistros,
+        a.cve_tipocatalogo,
+        a.descripcion
+        FROM @TablaAuxiliarPaginacion a
+        WHERE indiceRegistro > @inicio
+        ORDER BY indiceRegistro ASC
+        ]]>
+      </sql>
+    </obtenerCatalogo>
+    <Editar>
+      <campo leyenda="Clave" db_nombre="cve_tipocatalogo" form_nombre="cve_tipocatalogo" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Descripcion" db_nombre="descripcion" form_nombre="descripcion"  requerido="true" charsize="50" tipo="string" default=""/>
+      <sql>
+        <![CDATA[
+            SET NOCOUNT ON;
+            BEGIN TRY
+              UPDATE ES_tipocatalogo
+              SET
+              cve_tipocatalogo= @cve_tipocatalogo,
+              descripcion=@descripcion
+              WHERE cve_tipocatalogo= @cve_tipocatalogo
+              SELECT 1  estatus, 'Registro actualizado correctamente' mensaje;
+            END TRY BEGIN CATCH
+              SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+            END CATCH
+        ]]>
+      </sql>
+    </Editar>
+  </Tipocatalogo>
+</Secciones>

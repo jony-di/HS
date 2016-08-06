@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+    <Giro>
+    
+    <obtenerSiguienteClave>
+        <sql>
+BEGIN
+	SET NOCOUNT ON;	
+	DECLARE @siguiente AS INT;
+	SELECT ISNULL(MAX(cve_giro),0) + 1 clave FROM SG_giro;
+END
+
+        </sql>   
+    </obtenerSiguienteClave>
+    
+    <Nuevo>
+        <campo leyenda="Clave" db_nombre="cve_giro" form_nombre="cve_giro" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Nombre" db_nombre="nombre" form_nombre="nombre"  requerido="true" charsize="150" tipo="string" default=""/>
+        
+        <sql>
+BEGIN
+	SET NOCOUNT ON;	
+	BEGIN TRY
+		INSERT INTO SG_Giro(
+			cve_giro,
+			nombre
+		)
+		VALUES(
+			@cve_giro,
+			@nombre
+		)
+		SELECT 1  estatus, 'Registro guardado correctamente.' mensaje;
+	END TRY BEGIN CATCH	
+		SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+	END CATCH	
+END
+        </sql>
+   </Nuevo>
+
+    <obtenerCatalogo>
+        <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+        <campo leyenda="Clave" db_nombre="cve_giro" form_nombre="cve_giro"  requerido="false"  charsize="0" tipo="int"  default=""/>
+        <sql>
+            BEGIN
+	SET NOCOUNT ON;
+	DECLARE @inicio INT;
+	SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+	DECLARE @TablaAuxiliarPaginacion AS TABLE(
+		indiceRegistro INT, 
+		cve_giro SMALLINT,
+		nombre VARCHAR(80)
+	)		
+	INSERT INTO @TablaAuxiliarPaginacion		
+	SELECT 
+		ROW_NUMBER() OVER(ORDER BY CONVERT(INT,cve_giro) DESC) AS indiceRegistro,		
+		cve_giro,
+		nombre
+	FROM 
+		SG_giro
+	WHERE 
+		(( ((CONVERT(VARCHAR(80),cve_giro) like @criterio) OR(nombre like '%' + @criterio + '%')) AND @cve_giro=0)) 
+		OR ((cve_giro=@cve_giro) AND (@cve_giro !=0))
+		
+	--Paginacion	
+	SELECT TOP(@longitudPagina)
+		indiceRegistro,
+		@@ROWCOUNT as totalRegistros,
+		cve_giro,
+		nombre
+	FROM @TablaAuxiliarPaginacion
+	WHERE indiceRegistro > @inicio	 
+	ORDER BY indiceRegistro ASC
+END
+
+        </sql>        
+    </obtenerCatalogo>
+
+     <Editar>        
+        <campo leyenda="Clave" db_nombre="cve_giro" form_nombre="cve_giro" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Nombre" db_nombre="nombre" form_nombre="nombre"  requerido="true" charsize="150" tipo="string" default=""/>
+
+        <sql>
+           BEGIN
+	SET NOCOUNT ON;	
+	BEGIN TRY
+		UPDATE SG_Giro 
+		SET	
+		cve_giro=@cve_giro,
+		nombre=@nombre	
+		WHERE cve_giro= @cve_giro
+		SELECT 1  estatus, 'Registro actualizado correctamente' mensaje;
+	END TRY BEGIN CATCH	
+		SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+	END CATCH	
+END
+        </sql>
+    </Editar>
+</Giro>  
+</Secciones>  
+    
+    
+    
+    
+

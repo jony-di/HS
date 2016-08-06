@@ -1,0 +1,256 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Secciones>
+  <filtros>
+    <obtenerPerfilesEmpresa>
+      <sql>
+        <![CDATA[
+          SELECT * FROM Es_PstPerfilEmpresa where Activa=1
+        ]]>
+      </sql>
+    </obtenerPerfilesEmpresa>
+  </filtros>
+  <perfiles>
+    <obtenerSiguienteClave>
+      <sql>
+        <![CDATA[
+        BEGIN
+          SELECT ISNULL(MAX(cve_Perfil),0) + 1 as 'clave' FROM Es_PstPerfilEmpresa;
+        END
+         ]]>
+      </sql>
+    </obtenerSiguienteClave>
+    <nuevo>
+      <campo leyenda="Empresa" db_nombre="empresa" form_nombre="empresa" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Nombre" db_nombre="descripcion" form_nombre="descripcion"  requerido="true" charsize="2000" tipo="string" default=""/>
+      <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="false"  charsize="10" tipo="bool"  default="true"/>
+      <sql>
+        <![CDATA[
+        BEGIN
+          SET NOCOUNT ON;
+          BEGIN TRY
+            INSERT INTO Es_PstPerfilEmpresa(cve_Empresa,nombre,Activa)
+            VALUES(@empresa,@descripcion,@activo)
+            SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+          END TRY BEGIN CATCH
+            SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+          END CATCH
+        END
+        ]]>
+      </sql>
+    </nuevo>
+    <editar>
+      <campo leyenda="Clave" db_nombre="clave" form_nombre="clave" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Empresa" db_nombre="empresa" form_nombre="empresa" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Nombre" db_nombre="descripcion" form_nombre="descripcion"  requerido="true" charsize="2000" tipo="string" default=""/>
+      <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="false"  charsize="10" tipo="bool"  default="true"/>
+      <sql>
+        <![CDATA[
+        UPDATE Es_PstPerfilEmpresa
+        SET
+        cve_Empresa=@empresa,
+        nombre=@descripcion,
+        Activa=@activo
+        WHERE 
+        cve_Perfil=@clave
+        ]]>
+      </sql>
+    </editar>
+    <agregarSecciones>
+      <campo leyenda="Pantilla" db_nombre="pantilla" form_nombre="pantilla" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Clave Seccion" db_nombre="cve_seccion" form_nombre="cve_seccion" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Clave Apartado" db_nombre="cve_subseccion" form_nombre="cve_subseccion" requerido="true" charsize="200" tipo="string" default=""/>
+      <sql>
+        <![CDATA[
+        SET NOCOUNT ON;
+        BEGIN TRY
+          INSERT INTO ES_pstPerfilSecciones select @pantilla,@cve_seccion,* from dbo.Split(@cve_subseccion,',')
+        END TRY BEGIN CATCH
+        SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+        END CATCH
+        ]]>
+      </sql>
+    </agregarSecciones>
+    <obtenerPerfilEmpresa>
+      <campo leyenda="Clave" db_nombre="clave" form_nombre="clave" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+          SELECT * FROM Es_PstPerfilEmpresa WHERE cve_Perfil=@clave
+        ]]>
+      </sql>
+    </obtenerPerfilEmpresa>
+    <obtenerPerfilesEmpresa>
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio" requerido="false"  charsize="200" tipo="string"  default=""/>
+      <sql>
+        <![CDATA[
+        SET NOCOUNT ON;
+        DECLARE @inicio INT;
+        SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+        DECLARE @TablaAuxiliarPaginacion AS TABLE(
+        indiceRegistro INT,
+        cve_Perfil INT,
+        Nombre_Perfil VARCHAR(50),
+        Nombre_Empresa VARCHAR(50))
+
+        INSERT INTO @TablaAuxiliarPaginacion
+        SELECT
+        ROW_NUMBER() OVER(ORDER BY CONVERT(INT,A.cve_Perfil ) DESC) AS indiceRegistro,
+        A.cve_Perfil,
+        A.nombre,
+        B.nombre
+        FROM Es_PstPerfilEmpresa A
+        INNER JOIN SG_empresas B
+        ON A.cve_Empresa=B.cve_empresa
+        WHERE  (((CONVERT(VARCHAR(20),A.cve_Perfil) like '%' + @criterio + '%')
+        OR (A.nombre like '%' + @criterio + '%')
+        OR (B.nombre like '%' + @criterio + '%')))
+
+        --Paginacion
+        SELECT TOP(@longitudPagina)
+        indiceRegistro,
+        @@ROWCOUNT as totalRegistros,
+        cve_Perfil,
+        Nombre_Perfil,
+        Nombre_Empresa
+        FROM @TablaAuxiliarPaginacion
+        ORDER BY Nombre_Perfil
+        ]]>
+      </sql>
+    </obtenerPerfilesEmpresa>
+    <obtenerPerfilesPosicion>
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio" requerido="false"  charsize="200" tipo="string"  default=""/>
+      <sql>
+        <![CDATA[
+        SET NOCOUNT ON;
+            DECLARE @inicio INT;
+            SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+            DECLARE @TablaAuxiliarPaginacion AS TABLE(
+            indiceRegistro INT,
+            num_plantilla INT,
+            Nombre_Puesto VARCHAR(50),
+            Nombre_Departamento VARCHAR(50),
+            Nombre_Empresa VARCHAR(50))
+
+            INSERT INTO @TablaAuxiliarPaginacion
+            SELECT
+            ROW_NUMBER() OVER(ORDER BY CONVERT(INT,A.cve_perfil ) DESC) AS indiceRegistro,
+            A.cve_perfil,
+            C.Nombre_Puesto,
+            E.nombredep,
+            D.nombre
+            FROM ES_pstPerfilSecciones A
+            INNER JOIN ES_posiciones B
+            ON A.cve_perfil=B.num_plantilla
+            INNER JOIN ES_puestosgenericos C
+            ON B.cve_puesto=C.cve_puesto
+            INNER JOIN SG_empresas D
+            ON B.cve_empresa=D.cve_empresa
+            INNER JOIN ES_departamentos E
+            ON B.cve_departamento= E.cve_departamento
+            WHERE  (((CONVERT(VARCHAR(20),A.cve_perfil) like '%' + @criterio + '%')
+            OR (C.Nombre_Puesto like '%' + @criterio + '%')
+            OR (D.nombre like '%' + @criterio + '%')))
+			      GROUP BY A.cve_perfil,C.Nombre_Puesto,D.nombre,E.nombredep
+            --Paginacion
+            SELECT TOP(@longitudPagina)
+            indiceRegistro,
+            @@ROWCOUNT as totalRegistros,
+            num_plantilla,
+            Nombre_Puesto,
+            Nombre_Departamento,
+            Nombre_Empresa
+            FROM @TablaAuxiliarPaginacion
+            ORDER BY Nombre_Puesto
+        ]]>
+      </sql>
+    </obtenerPerfilesPosicion>
+    <obtenerSecciones>
+      <campo leyenda="Pantilla" db_nombre="pantilla" form_nombre="pantilla" requerido="true" charsize="10" tipo="string" default=""/>
+      <sql>
+        <![CDATA[
+            DECLARE @Productos AS TABLE(ID INT IDENTITY NOT NULL PRIMARY KEY, Producto VARCHAR(50) NOT NULL)
+            DECLARE @CadenaProductos NVARCHAR(MAX)
+            DECLARE @i INT
+            DECLARE @ProductoActual VARCHAR(50)
+            INSERT INTO @Productos
+            SELECT P.descripcion FROM ES_pstperfilseccion p INNER JOIN ES_pstPerfilSecciones A ON P.cve_seccion=A.cve_seccion AND A.cve_perfil=@pantilla GROUP BY P.descripcion,secuencia order by secuencia
+            SET @CadenaProductos = '[' + (SELECT producto FROM @Productos WHERE ID = 1) + ']'
+            SET @i = 2
+            DECLARE @SQL NVARCHAR(MAX)
+            IF (SELECT MAX(ID) FROM @Productos) >= @i begin
+            WHILE @i <= (SELECT MAX(ID) FROM @Productos)
+            BEGIN
+            SET @ProductoActual = (SELECT Producto FROM @Productos WHERE ID = @i)
+            SET @CadenaProductos = @CadenaProductos + N',['+ @ProductoActual + N']'
+            SET @i = @i + 1
+
+            SET @SQL = N'SELECT *
+            FROM (SELECT
+            ROW_NUMBER() OVER(PARTITION BY a.cve_seccion ORDER BY CONVERT(INT,a.cve_subsecuencia) DESC) AS indiceRegistro,
+            B.descripcion AS Seccion,
+            convert(varchar,a.cve_seccion) +''-''+ convert(varchar,a.cve_subsecuencia)+ ''-'' + C.descripcion AS Apartado
+            FROM ES_pstPerfilSecciones A
+            INNER JOIN ES_pstperfilseccion B
+            ON A.cve_seccion=B.cve_seccion
+            INNER JOIN ES_pstperfilsubseccion C
+            ON A.cve_subsecuencia=C.cve_subseccion
+            AND B.cve_seccion=C.cve_seccion
+            WHERE a.cve_perfil='+@pantilla+') pvt
+            PIVOT (MAX(Apartado) FOR [Seccion] IN (' + @CadenaProductos + ') ) AS Child'
+            END
+            EXECUTE SP_EXECUTESQL @SQL
+            END ELSE BEGIN
+            SET @ProductoActual = (SELECT Producto FROM @Productos WHERE ID = @i-1)			
+            SET @SQL = N'SELECT *
+            FROM (SELECT
+            ROW_NUMBER() OVER(PARTITION BY a.cve_seccion ORDER BY CONVERT(INT,a.cve_subsecuencia) DESC) AS indiceRegistro,
+            B.descripcion AS Seccion,
+            convert(varchar,a.cve_seccion) +''-''+ convert(varchar,a.cve_subsecuencia)+ ''-'' + C.descripcion AS Apartado
+            FROM ES_pstPerfilSecciones A
+            INNER JOIN ES_pstperfilseccion B
+            ON A.cve_seccion=B.cve_seccion
+            INNER JOIN ES_pstperfilsubseccion C
+            ON A.cve_subsecuencia=C.cve_subseccion
+            AND B.cve_seccion=C.cve_seccion
+            WHERE a.cve_perfil='+@pantilla+') pvt
+            PIVOT (MAX(Apartado) FOR [Seccion] IN (' + @CadenaProductos + ') ) AS Child'
+            EXECUTE SP_EXECUTESQL @SQL
+            END
+        ]]>
+      </sql>
+    </obtenerSecciones>
+    <eliminarApartado>
+      <campo leyenda="Pantilla" db_nombre="pantilla" form_nombre="pantilla" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Clave Seccion" db_nombre="cve_seccion" form_nombre="cve_seccion" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Clave Apartado" db_nombre="cve_subseccion" form_nombre="cve_subseccion" requerido="true" charsize="10" tipo="string" default=""/>
+      <sql>
+      <![CDATA[
+        DELETE ES_pstPerfilSecciones
+        WHERE 
+        cve_perfil=@pantilla
+        AND cve_seccion=@cve_seccion
+        AND cve_subsecuencia=@cve_subseccion
+      ]]>
+      </sql>
+    </eliminarApartado>
+    <obtenerPerfil>
+      <campo leyenda="Pantilla" db_nombre="pantilla" form_nombre="pantilla" requerido="true" charsize="10" tipo="string" default=""/>
+      <sql>
+        <![CDATA[
+         SELECT
+          A.nombre AS 'Nombre_Puesto',
+          C.nombre
+          FROM Es_PstPerfilEmpresa A
+          LEFT JOIN ES_pstPerfilSecciones B
+          ON A.cve_perfil=B.cve_perfil
+          LEFT JOIN SG_empresas C
+          ON A.cve_empresa=c.cve_empresa
+          WHERE  A.cve_perfil=@pantilla
+        ]]>
+      </sql>
+    </obtenerPerfil>
+  </perfiles>
+</Secciones>

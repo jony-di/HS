@@ -1,0 +1,21 @@
+﻿body {width:100%;font-family: Helvetica}
+a{cursor:pointer;}
+div.login { margin:100px auto; width:300px; height:300px; display: block;background: #fff;padding: 20px;border-radius: 7px;box-shadow: 2px 2px 2px #ddd;}
+div.login img {width:85%; margin:0px auto; display:block; float:none; box-shadow:5px 5px 3px #888888;}
+div.login h1  {font-family:"HelveticaN";font-size: 25px;color:#1d354d; text-shadow: black 0.1em 0.1em 0.2em; text-align:center;}  
+div.login input[type=text],div.login input[type=password]{font-family:"HelveticaN";font-weight: 300;display:block; width:85%; margin: 5px auto; font-size:20px; padding:12px;border-radius: 10px; border:2px solid #DCDCDC;background-color:#f0f0f0;}
+div.login input-placeholder{font-family:"HelveticaN";font-weight:300;font-size:19px;color:#FF00FF}
+div.login div.iniciarsesion input {float:left; width:85%; padding:0px;background:transparent;border:0px;margin-top:2px;}
+input[type=checkbox]{margin-left:65px;}
+div.login a {font-family:"HelveticaN";display:block; width:100%;font-size:15px; padding:8px;color:#00BFFF;}
+div.login label { font-family: HelveticaN; width:85%; font-size:15px; padding:12px;color:#1d354d;text-shadow: white 0.1em 0.1em 0.2em; margin-left:-10px;}
+div.login div.iniciarsesion button.iniciarsesion {background-image:url(/Recursos/imagenes/iniciarsesion2.png);float:right;padding:13px;background-repeat:no-repeat;border:0px;margin-top:3px;cursor:pointer;background-color:#F0F0F0;}
+div.iniciarsesion {border:2px solid #DCDCDC ; width:87.5%; padding:8px;background-color:#f0f0f0; height:28px;border-radius: 10px; margin:0px auto;margin-bottom:15px;font-family: Helvetica Neue;} 
+
+div.login div.olvidapassword a.olvidaste{font-family:"HelveticaN";display:block; font-weight:bolder;
+                                           font-size: 25px;color:#1d354d;
+                                          text-shadow: white 0.1em 0.1em 0.2em; text-align:center;margin:0px;padding:10px;}
+div.login p.email {font-family:"HelveticaN";display:block;font-weight:bolder; font-size:16px; padding:8px; text-align:justify;}
+div.login a.cancelar {float:right; cursor:pointer;margin-top:15px;font-family:"HelveticaN";display:block;margin-right:0px;font-size:16px; text-align:center;color:#00BFFF; }
+body .centrarTexto{text-align:center;margin:0px 0px;display:block;width:100%;font-weight:bolder;margin-left:-5px;}
+

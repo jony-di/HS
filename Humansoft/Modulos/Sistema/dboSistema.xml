@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+  <Comunes>
+    <ObtenerEstatusModulo>
+      <campo leyenda="Clave del Módulo" db_nombre="cve_modulo" form_nombre="cve_modulo" requerido="true" charsize="0" tipo="int"/>
+      <sql>
+        <![CDATA[
+              BEGIN
+                SELECT cve_estatus, descripcion 
+                FROM SIS_Estatus 
+                WHERE cve_modulo=@cve_modulo AND visual=1;
+              END
+				 ]]>
+      </sql>
+    </ObtenerEstatusModulo>
+  
+    <ObtenerAccionesModulo>
+      <campo leyenda="Clave del Módulo" db_nombre="cve_modulo" form_nombre="cve_modulo" requerido="true" charsize="0" tipo="int"/>
+      <sql>
+        <![CDATA[
+              BEGIN
+                SELECT cve_accion, descripcion
+                FROM CTR_flujoacciones;
+              END
+				 ]]>
+      </sql>
+    </ObtenerAccionesModulo>
+
+    <ObtenerRoles>
+      <campo leyenda="Clave del Módulo" db_nombre="cve_modulo" form_nombre="cve_modulo" requerido="true" charsize="0" tipo="int"/>
+      <sql>
+        <![CDATA[
+              BEGIN
+                SELECT cve_role, descripcion, tieneEmpleados 
+                FROM CTR_flujoroles;
+              END
+				 ]]>
+      </sql>
+    </ObtenerRoles>
+
+
+  </Comunes>  
+</Secciones>  
+    
+    
+    
+    
+

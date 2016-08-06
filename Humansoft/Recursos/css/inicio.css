@@ -1,0 +1,50 @@
+﻿body {width:100%;min-width:1200px;font-family:HelveticaN; margin:0px auto; overflow:hidden;background-image: url("/Recursos/imagenes/bg1.jpg");background-repeat: no-repeat;height:1500px;overflow:hidden;}
+div.principal {width:100%;}
+div.principal div.inicio a.iniciologo {font-size:20px;}
+div.principal div.sesionUsuario {margin-top:0px; float:right; padding-top:0px; min-width:300px; height:100px;margin-right:40px;cursor:pointer;}
+div.principal div.inicio {width:100%;height:30px;overflow:hidden;padding:10px;border-bottom:1px solid #DDD;}
+div.principal div.inicio div.sesionUsuario img.imgusuario {width:30px; height:30px; padding-top:5px;float:left; margin:0px 5px;}
+div.principal div.inicio div.sesionUsuario button.opcioneslist {width:35px; height:35px;background-image:url(/Recursos/imagenes/flecha_abajo.png); cursor:pointer;background-color:transparent;   border:0px; background-repeat:no-repeat; float:left; margin-top:9px;}
+div.principal div.inicio div.sesionUsuario a.nombre {font-size:15px; padding-top:9px; float:left; min-width:157px;font-weight:bolder;text-transform:capitalize;margin:5px 12px 0px 12px;;}
+div.principal div.inicio div.sesionUsuario button.ayuda {background-image:url(/Recursos/imagenes/ayuda1.png); width:45px; height:45px; float:left; background-repeat:no-repeat; cursor:pointer;background-color:transparent; border:0px; margin-top:4px;margin-left:30px;}
+div.spliter .spliter-left{width:28%;float:left;border-right:1px solid #ddd;position:absolute;}
+div.spliter .spliter-right{width:70%;float:right;border:0px;margin:0px;overflow:hidden;}
+div.spliter .spliter-right iframe{width:100%;}
+div.opciones-usuario{width:190px;position:absolute;margin-left:170px;margin-top:30px;z-index:1000;padding-top:20px;  background: center 5px url(/Recursos/imagenes/upmenu.png) no-repeat;}
+div.opciones-usuario ul{padding:0px;box-shadow: 1px 1px 1px #e8e8e8;border:1px solid #e8e8e8;list-style:none;margin:0px;padding-top:10px;padding-bottom:10px;border-radius:5px;background:#fff;}
+div.opciones-usuario li{padding:5px;text-align:center;display:block;cursor:pointer;font-size:14px;}
+div.opciones-usuario li:hover{color:#5F96CC;}
+div.spliter-left div.botones-auto-hide{height:35px;overflow:hidden;display:block;margin-top:-45px;}
+div.spliter-left div.botones-auto-hide button.auto-hide{padding:15px;border:0px;float:right;cursor:pointer;background:center center url(/Recursos/imagenes/showmenu.png) no-repeat;}
+div.spliter-left div.arbol-principal{min-height:500px;overflow-y:auto;clear:both;background-color:#fff}
+div div.busqueda {width:60%; margin:10px auto;background:#FBFBFB url(/Recursos/imagenes/search.png) no-repeat 5px center;padding-left:30px;border: 1px solid #E5E5E5;float:none;overflow:hidden;}
+div.busqueda input.buscar{color: #555;line-height:15px;padding: 0px 0px 0px 10px;margin-top: 0px;border:0px; width:250px;outline: 0;-webkit-box-shadow: inset 1px 1px 2px rgba(238, 238, 238, 0.2);box-shadow: inset 1px 1px 2px rgba(238, 238, 238, 0.2);font: 14px HelveticaN;}
+.sesionUsuario .notificaciones{float:left;display:block;width:45px;height:42px;background:url(/Recursos/imagenes/notificaciones.png) no-repeat center center;margin-right:30px;cursor:pointer;}
+.sesionUsuario .notificaciones b{float:left;margin-left:2px;margin-top:3px;color:#fff;width:20px;height:20px;overflow:hidden;text-align:center;display:block;font-size:12px;font-family:Calibri;}
+.sesionUsuario .notificaciones-sistemas{float:left;display:block;width:45px;height:42px;background:url(/Recursos/imagenes/bell.png) no-repeat center center;margin-right:30px;cursor:pointer;}
+.sesionUsuario .notificaciones-sistemas b{float:left;margin-left:2px;margin-top:4px;color:#fff;width:20px;height:20px;overflow:hidden;text-align:center;display:block;font-size:12px;font-family:Calibri;}
+span.notificaciones ul{position:absolute;width:300px;background:#fff;border:1px solid #e8e8e8;margin-left:-130px;margin-top:40px;padding:0px 5px 20px 5px;list-style:none;}
+span.notificaciones ul li.titulo{padding:30px 20px 10px 20px;border-bottom:1px dashed #e8e8e8;font-size:18px;font-weight:bolder;border:0px;}
+span.notificaciones ul li.titulo:hover{cursor:default;color:inherit;}
+span.notificaciones ul li{padding:10px 15px 4px 15px;border-bottom:1px dashed #e8e8e8;font-size:13px;}
+span.notificaciones ul li i{display:block;padding:3px;text-align:right;color:#aca4a4;}
+span.notificaciones ul li:hover{color:#00BFFF;cursor:pointer;}
+
+
+span.notificaciones-sistemas ul{position:absolute;width:300px;background:#fff;border:1px solid #e8e8e8;margin-left:-130px;margin-top:40px;padding:0px 5px 20px 5px;list-style:none;}
+span.notificaciones-sistemas ul li.titulo{padding:30px 20px 10px 20px;border-bottom:1px dashed #e8e8e8;font-size:18px;font-weight:bolder;border:0px;}
+span.notificaciones-sistemas ul li.titulo:hover{cursor:default;color:inherit;}
+span.notificaciones-sistemas ul li{padding:10px 15px 4px 15px;border-bottom:1px dashed #e8e8e8;font-size:13px;}
+span.notificaciones-sistemas ul li i{display:block;padding:3px;text-align:right;color:#aca4a4;}
+span.notificaciones-sistemas ul li:hover{color:#00BFFF;cursor:pointer;}
+
+
+/*Tabs-app*/
+ul.tabs-app{float:right;list-style:none;display:block;width:70%;}
+ul.tabs-app li{float:left;position:relative; border-bottom:1px solid #ddd;border-right:1px solid #ddd; padding: 2px 28px 7px 10px;margin-left:0px;color:#aca4a4;max-width:15%;text-overflow:ellipsis;overflow:hidden;white-space: nowrap;font-size:14px;}
+ul.tabs-app li:first-child:first-child{border-left:1px solid #ddd;}
+ul.tabs-app li.activo{color:#333;font-weight:bolder;}
+ul.tabs-app li:hover{cursor:pointer;}
+ul.tabs-app li:hover b{visibility:visible;}
+ul.tabs-app li b{position:absolute;padding:0px 10px 4px 4px;right:0px;top:1px; color:#555;margin-right:0px;z-index:+10;visibility:hidden;}
+ul.tabs-app li b:hover{color:#00BFFF;}

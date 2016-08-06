@@ -1,0 +1,18 @@
+﻿div.mascara div.principal div.catalogo table.listaN tr td {text-align:center}
+div.mascara div.principal div.catalogo table.listaN tr td label{float:none;}
+div.mascara div.principal div.catalogo button.editar {background-position:center center;padding:13px;float:none !important;background-image:url(/Recursos/imagenes/editar.png);background-repeat:no-repeat; border:0px; background-color:transparent; cursor:pointer;}
+div.mascara div.principal div.formulario div.alinear {height:400px;width:750px;margin:50px;}
+div.mascara div.principal div.formulario h2.dga {clear:both;}
+div.mascara div.principal div.formulario label.clave {margin-top:20px;float:left;clear:left;margin-bottom:20px;width:90px;}
+div.mascara div.principal div.formulario input.clave {margin-top:20px;float:left;margin-bottom:20px;width:200px;}
+div.mascara div.principal div.formulario div.alinear label.empresa { float:left;clear:left;width:90px;}
+div.mascara div.principal div.formulario div.alinear select.empresa {width:210px;margin-bottom:20px;float:left;float:left;}
+div.mascara div.principal div.formulario label.Nombre {float:left;clear:left;margin-bottom:20px;width:90px;}
+div.mascara div.principal div.formulario input.Nombre {float:left;margin-bottom:20px;width:200px;}
+div.mascara div.principal div.formulario div.alinear label.estatus { float:left;clear:left;width:90px;}
+div.mascara div.principal div.formulario div.alinear select.estatus {width:100px; float:left;float:left;}
+div.mascara div.principal div.formulario button.guardar {float:left; cursor:pointer; }        
+div.mascara div.principal div.formulario button.cancelar {float:right; cursor:pointer;}  
+div.barra-botones span{width:290px;}
+div.mascara div.principal div.formulario div.barra-botones {margin-top:0px;} 
+.mostrar{visibility:visible;}

@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+    <Sucursales>
+    <obtenerSiguienteClave>
+        <sql>
+            BEGIN
+            SET NOCOUNT ON;
+            DECLARE @siguiente AS INT;
+            SELECT ISNULL(MAX(cve_sucursal),0) + 1 clave FROM SG_sucursales;
+            END
+
+        </sql>   
+    </obtenerSiguienteClave>
+    
+    <Nuevo>
+        <campo leyenda="Clave" db_nombre="cve_sucursal" form_nombre="cve_sucursal" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Clave" db_nombre="cve_empresa" form_nombre="cve_empresa" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Nombre" db_nombre="nombre" form_nombre="nombre"  requerido="true" charsize="150" tipo="string" default=""/>
+        <campo leyenda="Calle" db_nombre="calle" form_nombre="calle"  requerido="true" charsize="150" tipo="string" default=""/>
+        <campo leyenda="Colonia" db_nombre="colonia" form_nombre="colonia"  requerido="true" charsize="150" tipo="string" default=""/>
+        <campo leyenda="DelgaMunic" db_nombre="delgamunic" form_nombre="delgamunic"  requerido="true" charsize="150" tipo="string" default=""/>
+        <campo leyenda="Estado" db_nombre="estado" form_nombre="estado"  requerido="true" charsize="150" tipo="string" default=""/>
+        <campo leyenda="Cp" db_nombre="cp" form_nombre="cp" requerido="true" charsize="150" tipo="string" default=""/>
+        <campo leyenda="EntreCalles" db_nombre="entrecalles" form_nombre="entrecalles"  requerido="true" charsize="150" tipo="string" default=""/>
+        <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="true" charsize="50" tipo="bool" default="true"/>
+        <campo leyenda="IdResponsable" db_nombre="id_responsable" form_nombre="id_responsable" requerido="true" charsize="150" tipo="string" default=""/>
+        <campo leyenda="NumReferencia" db_nombre="numreferencia" form_nombre="numreferencia" requerido="true" charsize="150" tipo="string" default=""/>
+        <campo leyenda="Tipo" db_nombre="cve_tipo" form_nombre="cve_tipo" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Region" db_nombre="cve_region" form_nombre="cve_region" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Zona" db_nombre="cve_zona" form_nombre="cve_zona" requerido="true" charsize="0" tipo="int" default=""/>
+
+        
+        <sql>
+BEGIN
+	SET NOCOUNT ON;	
+	BEGIN TRY
+		INSERT INTO SG_Sucursales(
+			cve_sucursal,
+			cve_empresa,
+			nombre,
+			calle,
+			colonia,
+			delgamunic,
+			estado,
+			cp,
+			entrecalles,
+			activo,
+			id_responsable,
+			numreferencia,
+			cve_tipo,
+			cve_region,
+			cve_zona
+		)
+		VALUES(
+			@cve_sucursal,
+			@cve_empresa,
+			@nombre,
+			@calle,
+			@colonia,
+			@delgamunic,
+			@estado,
+			@cp,
+			@entrecalles,
+			@activo,
+			@id_responsable,
+			@numreferencia,
+			@cve_tipo,
+			@cve_region,
+			@cve_zona
+		)
+		SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+	END TRY BEGIN CATCH	
+		SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+	END CATCH	
+END
+
+
+
+        </sql>
+   </Nuevo>
+
+    <obtenerCatalogo>
+        <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+        <campo leyenda="Clave" db_nombre="cve_sucursal" form_nombre="cve_sucursal"  requerido="false"  charsize="0" tipo="int"  default=""/>
+        <sql>
+BEGIN
+	SET NOCOUNT ON;
+	DECLARE @inicio INT;
+	SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+	DECLARE @TablaAuxiliarPaginacion AS TABLE(
+		indiceRegistro INT,		
+		cve_sucursal SMALLINT,
+		cve_empresa SMALLINT,
+		nombre VARCHAR(100),
+		calle VARCHAR(100),
+		colonia VARCHAR(100),
+		delgamunic VARCHAR(100),
+		estado VARCHAR(100),
+		cp VARCHAR(20),
+		entrecalles VARCHAR(150),
+		activo BIT,
+		id_responsable VARCHAR(20),
+		numreferencia VARCHAR(20),
+		cve_tipo SMALLINT,
+		cve_region SMALLINT,
+		cve_zona SMALLINT,
+		nombreEmpresa VARCHAR(100)
+	)		
+	INSERT INTO @TablaAuxiliarPaginacion		
+	SELECT
+		ROW_NUMBER() OVER(ORDER BY CONVERT(INT,cve_sucursal) DESC) AS indiceRegistro,		
+		A.cve_sucursal,
+		A.cve_empresa,
+		A.nombre,
+		A.calle,
+		A.colonia,
+		A.delgamunic,
+		A.estado,
+		A.cp,
+		A.entrecalles,
+		A.activo,
+		A.id_responsable,
+		A.numreferencia,
+		A.cve_tipo,
+		A.cve_region,
+		A.cve_zona,
+		B.nombre nombreEmpresa
+	FROM 
+		SG_Sucursales A INNER JOIN SG_empresas B ON A.cve_empresa=B.cve_empresa	
+	WHERE ( ((CONVERT(VARCHAR(20),A.cve_sucursal) like '%' + @criterio + '%') OR (A.nombre like '%' + @criterio + '%') OR (B.nombre like '%' + @criterio + '%')or (CASE WHEN(a.activo=1) THEN 'activo' ELSE 'inactivo' END like @criterio )) AND @cve_sucursal=0) 
+		OR ((A.cve_sucursal=@cve_sucursal) AND (@cve_sucursal !=0));	
+	--Paginacion	
+	SELECT TOP(@longitudPagina)
+		indiceRegistro,
+		@@ROWCOUNT as totalRegistros,
+		cve_sucursal,
+		cve_empresa,
+		nombre,
+		calle,
+		colonia,
+		delgamunic,
+		estado,
+		cp,
+		entrecalles,
+		activo,
+		id_responsable,
+		numreferencia,
+		cve_tipo,
+		cve_region,
+		cve_zona,
+		nombreEmpresa empresa
+	FROM @TablaAuxiliarPaginacion
+	WHERE indiceRegistro > @inicio	 
+	ORDER BY indiceRegistro ASC
+END
+
+
+
+        </sql>        
+    </obtenerCatalogo>
+
+     <Editar>
+         <campo leyenda="Clave" db_nombre="cve_sucursal" form_nombre="cve_sucursal" requerido="true" charsize="0" tipo="int" default=""/>
+         <campo leyenda="Clave" db_nombre="cve_empresa" form_nombre="cve_empresa" requerido="true" charsize="0" tipo="int" default=""/>
+         <campo leyenda="Nombre" db_nombre="nombre" form_nombre="nombre"  requerido="true" charsize="150" tipo="string" default=""/>
+         <campo leyenda="Calle" db_nombre="calle" form_nombre="calle"  requerido="true" charsize="150" tipo="string" default=""/>
+         <campo leyenda="Colonia" db_nombre="colonia" form_nombre="colonia"  requerido="true" charsize="150" tipo="string" default=""/>
+         <campo leyenda="DelgaMunic" db_nombre="delgamunic" form_nombre="delgamunic"  requerido="true" charsize="150" tipo="string" default=""/>
+         <campo leyenda="Estado" db_nombre="estado" form_nombre="estado"  requerido="true" charsize="150" tipo="string" default=""/>
+         <campo leyenda="Cp" db_nombre="cp" form_nombre="cp" requerido="true" charsize="150" tipo="string" default=""/>
+         <campo leyenda="EntreCalles" db_nombre="entrecalles" form_nombre="entrecalles"  requerido="true" charsize="150" tipo="string" default=""/>
+         <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="true" charsize="50" tipo="bool" default="true"/>
+         <campo leyenda="IdResponsable" db_nombre="id_responsable" form_nombre="id_responsable" requerido="true" charsize="150" tipo="string" default=""/>
+         <campo leyenda="NumReferencia" db_nombre="numreferencia" form_nombre="numreferencia" requerido="true" charsize="150" tipo="string" default=""/>
+         <campo leyenda="Tipo" db_nombre="cve_tipo" form_nombre="cve_tipo" requerido="true" charsize="0" tipo="int" default=""/>
+         <campo leyenda="Region" db_nombre="cve_region" form_nombre="cve_region" requerido="true" charsize="0" tipo="int" default=""/>
+         <campo leyenda="Zona" db_nombre="cve_zona" form_nombre="cve_zona" requerido="true" charsize="0" tipo="int" default=""/>
+        <sql>
+BEGIN
+	SET NOCOUNT ON;	
+	BEGIN TRY
+		UPDATE SG_Sucursales
+		SET			
+			cve_sucursal=@cve_sucursal,
+			cve_empresa=@cve_empresa,
+			nombre=@nombre,
+			calle=@calle,
+			colonia=@colonia,
+			delgamunic=@delgamunic,
+			estado=@estado,
+			cp=@cp,
+			entrecalles=@entrecalles,
+			activo=@activo,
+			id_responsable=@id_responsable,
+			numreferencia=@numreferencia,
+			cve_tipo=@cve_tipo,
+			cve_region=@cve_region,
+			cve_zona=@cve_zona
+		WHERE cve_sucursal= @cve_sucursal
+		SELECT 1  estatus, 'Registro actualizado correctamente' mensaje;
+	END TRY BEGIN CATCH	
+		SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+	END CATCH	
+END
+
+
+
+        </sql>
+    </Editar>
+</Sucursales>  
+</Secciones>  
+    
+    
+    
+    
+

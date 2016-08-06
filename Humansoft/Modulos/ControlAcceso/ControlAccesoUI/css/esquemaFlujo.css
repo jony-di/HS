@@ -1,0 +1,18 @@
+﻿div.flujo{}
+div.flujo img{clear:both;display:block;width:90px;margin:auto;}
+div.flujo div.paso, div.flujo div.fin{padding-top:80px;background:transparent top center url(/Recursos/imagenes/sigproc.png) no-repeat;width:300px;margin:auto;position:relative;}
+div.flujo div.paso span{display:block;border:1px solid #7892c2;padding:10px;min-height:50px;}
+div.flujo div.paso b.num-paso{float:right;margin:-10px;background:#7892c2;color:#d3dff5;text-align:center;padding:3px 6px 3px 6px;font-size:11px;}
+div.flujo div.paso b{display:block;}
+div.flujo div.paso i{color:#4a689f;font-size:11px;font-weight:normal;font-style:normal;}
+div.flujo div.paso div.editarPaso{display:none;}
+div.flujo div.paso:hover div.editarPaso{cursor:pointer;display:block;position:absolute;left:0px;bottom:0px;width:100%;height:60px;background:rgba(50,50,50,0.5);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#50990000,endColorstr=#50990000); }
+div.flujo div.paso div.editarPaso button{cursor:pointer;}
+div.flujo div.paso div.editarPaso div.orden{width:20%;float:left;}
+div.flujo div.paso div.editarPaso div.orden button{width:100%;height:30px;margin-top:10px;border:0px;}
+div.flujo div.paso div.editarPaso div.orden button:hover{}
+div.flujo div.paso div.editarPaso div.orden .arriba{background-color:transparent; background-position:center center;background-image:url(/Recursos/imagenes/flechaUp.png);background-repeat:no-repeat;}
+div.flujo div.paso div.editarPaso div.orden .abajo{background-color:transparent;background-position:center center;background-image:url(/Recursos/imagenes/flechaDown.png);background-repeat:no-repeat;}
+div.flujo div.paso div.editarPaso button.editarpaso{width:30%;float:left;margin-left:5%;margin-top:30px;}
+div.flujo div.paso div.editarPaso button.eliminar{width:30%;float:right;margin-right:5%;margin-top:30px;}
+

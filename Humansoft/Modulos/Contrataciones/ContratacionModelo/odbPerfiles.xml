@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Secciones>
+  <perfiles>
+    <obtenerPerfiles>
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio" requerido="false"  charsize="200" tipo="string"  default=""/>
+      <sql>
+        <![CDATA[
+        SET NOCOUNT ON;
+        DECLARE @inicio INT;
+        SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+        DECLARE @TablaAuxiliarPaginacion AS TABLE(
+        indiceRegistro INT,
+        cve_perfil INT,
+        num_plantilla INT,
+        Nombre_Puesto VARCHAR(50),
+        Nombre_Empresa VARCHAR(50),
+        Activo BIT)
+        
+        INSERT INTO @TablaAuxiliarPaginacion
+        SELECT
+        ROW_NUMBER() OVER(ORDER BY CONVERT(INT,cve_perfil ) DESC) AS indiceRegistro,
+        A.cve_perfil,
+        A.num_plantilla,
+        C.Nombre_Puesto,
+        D.nombre,
+        A.Activo
+        FROM ES_perfilPuesto A
+        INNER JOIN ES_posiciones B
+        ON A.num_plantilla=B.num_plantilla
+        INNER JOIN ES_puestosgenericos C
+        ON B.cve_puesto=C.cve_puesto
+        INNER JOIN SG_empresas D
+        ON B.cve_empresa=D.cve_empresa
+        WHERE  (((CONVERT(VARCHAR(20),A.cve_perfil) like '%' + @criterio + '%')
+        OR (C.Nombre_Puesto like '%' + @criterio + '%')
+        OR (D.nombre like '%' + @criterio + '%')))
+        --Paginacion
+        SELECT TOP(@longitudPagina)
+        indiceRegistro,
+        @@ROWCOUNT as totalRegistros,
+        cve_perfil,
+        num_plantilla,
+        Nombre_Puesto,
+        Nombre_Empresa,
+        activo
+        FROM @TablaAuxiliarPaginacion
+        ORDER BY Nombre_Puesto
+        ]]>
+      </sql>
+    </obtenerPerfiles>
+  </perfiles>
+</Secciones>

@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Secciones>
+  <elementos>
+
+    <obtenerinfopuesto>
+      <campo leyenda="Puesto" db_nombre="cve_puesto" form_nombre="cve_puesto" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+        
+        ]]>
+      </sql>
+    </obtenerinfopuesto>
+    <obtenersecciones>
+      <campo leyenda="Perfil" db_nombre="cve_perfil" form_nombre="cve_perfil" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Puesto" db_nombre="cve_puesto" form_nombre="cve_puesto" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+   if exists(select * from Es_PstPerfilValor where num_platilla=@cve_puesto) begin
+      SELECT
+          E.descripcion AS Seccion, '['+
+          STUFF((SELECT ',{"key":"'+CAST(b.cve_seccion  AS VARCHAR(MAX)) + '-'+ CAST(ISNULL(b.cve_subseccion,0) AS VARCHAR(MAX))+'","name":"'+ B.descripcion 
+		  +'","multi":"'+ case when cve_tipocatalogo=2  then '1' else '0' end
+          +'","compuesto":"'+ case when cve_tipocatalogo=3  then (Select descripcion+'-'+label1 + '-' +label2 from ES_catpermae WHERE cve_catalogo=b.cve_catalogo AND activo=1 ) else '0' end +'","catalogo":{'
+          +ISNULL(
+          STUFF((
+              SELECT ',"'+ CAST(B.cve_catalogo  AS VARCHAR(MAX)) + '-'+ CAST(ISNULL(D.cve_subcatalogo,0) AS VARCHAR(MAX)) +'":"'+  descripcion 
+	          +'|' + case when ISNULL(valor1,'')='' then 'null' else char(39)+valor1+char(39) end + '-' + case when ISNULL(valor2,'')='' then 'null' else char(39)+valor2+char(39) end  +'"'
+              FROM ES_catperdet D
+              WHERE (cve_catalogo=B.cve_catalogo and activo=1) 
+              FOR XML PATH(''),TYPE).value('(./text())[1]','VARCHAR(MAX)')
+            ,1,1,''),'')+'}}'
+              FROM  ES_pstperfilsubseccion B
+	          WHERE B.activo=1
+	          AND B.cve_seccion=F.cve_seccion
+			  --AND B.cve_subseccion=F.cve_subsecuencia
+              FOR XML PATH(''),TYPE).value('(./text())[1]','VARCHAR(MAX)')
+            ,1,1,'')+']' AS JSON
+          FROM ES_pstperfilseccion E
+          INNER JOIN Es_PstPerfilValor F
+          ON E.cve_seccion=F.cve_seccion
+          WHERE num_platilla=@cve_puesto
+          GROUP BY F.cve_seccion,E.descripcion
+  END ELSE BEGIN
+  
+  SELECT
+          E.descripcion AS Seccion, '['+
+          STUFF((SELECT ',{"key":"'+CAST(b.cve_seccion  AS VARCHAR(MAX)) + '-'+ CAST(ISNULL(b.cve_subseccion,0) AS VARCHAR(MAX))+'","name":"'+ B.descripcion 
+		  +'","multi":"'+ case when cve_tipocatalogo=2  then '1' else '0' end
+          +'","compuesto":"'+ case when cve_tipocatalogo=3  then (Select descripcion+'-'+label1 + '-' +label2 from ES_catpermae WHERE cve_catalogo=b.cve_catalogo AND activo=1 )  else '0' end +'","catalogo":{'
+          +ISNULL(
+          STUFF((
+              SELECT ',"'+ CAST(B.cve_catalogo  AS VARCHAR(MAX)) + '-'+ CAST(ISNULL(D.cve_subcatalogo,0) AS VARCHAR(MAX)) +'":"'+  descripcion 
+	          +'|' + case when ISNULL(valor1,'')='' then 'null' else char(39)+valor1+char(39) end + '-' + case when ISNULL(valor2,'')='' then 'null' else char(39)+valor2+char(39) end  +'"'
+              FROM ES_catperdet D
+              WHERE (cve_catalogo=B.cve_catalogo and activo=1) 
+              FOR XML PATH(''),TYPE).value('(./text())[1]','VARCHAR(MAX)')
+            ,1,1,''),'')+'}}'
+              FROM  ES_pstperfilsubseccion B
+	          WHERE B.activo=1
+	          AND B.cve_seccion=F.cve_seccion
+			  --AND B.cve_subseccion=F.cve_subsecuencia
+              FOR XML PATH(''),TYPE).value('(./text())[1]','VARCHAR(MAX)')
+            ,1,1,'')+']' AS JSON
+          FROM ES_pstperfilseccion E
+          INNER JOIN ES_pstPerfilSecciones F
+          ON E.cve_seccion=F.cve_seccion
+          WHERE F.cve_perfil=@cve_perfil
+          GROUP BY F.cve_seccion,E.descripcion
+          end
+        ]]>
+      </sql>
+    </obtenersecciones>
+    <guardar>
+      <campo leyenda="Puesto" db_nombre="cve_puesto" form_nombre="cve_puesto" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Datos" db_nombre="valores" form_nombre="campos" requerido="true" charsize="7000" tipo="string"/>
+      <sql>
+        <![CDATA[
+        BEGIN TRANSACTION 
+        BEGIN TRY
+          DELETE Es_PstPerfilValor WHERE num_platilla=@cve_puesto
+          DECLARE @QRY VARCHAR(8000) = 'INSERT INTO 
+          Es_PstPerfilValor(
+          num_platilla
+          ,cve_seccion
+          ,cve_subseccion
+          ,numero
+          ,publicar
+          ,cve_catalogo
+          ,cve_subcatalogo
+          ,valor1
+          ,valor2
+          ,desvalor
+          ,fechaModificacion)
+          VALUES' + @valores  
+          EXEC(@QRY)
+          COMMIT TRANSACTION
+        END TRY BEGIN CATCH
+         ROLLBACK TRANSACTION
+         SELECT -1 AS estatus,  'Error: ' + @QRY mensaje
+        END CATCH
+        ]]>
+      </sql>
+    </guardar>
+    <mostrarparaeditar>
+      <campo leyenda="Puesto" db_nombre="cve_puesto" form_nombre="cve_puesto" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+          SET LANGUAGE Español;
+          select num_platilla, CONVERT(char(10),ISNULL(fechaModificacion,GETDATE()),103) AS 'fechaModificacion', CONVERT(char(2),DATEPART(DAY,ISNULL(fechaModificacion,GETDATE()))) +' de '+  DATENAME(MONTH,ISNULL(fechaModificacion,GETDATE())) + ' del ' +  CONVERT(char(4),DATEPART(YEAR,ISNULL(fechaModificacion,GETDATE()))) AS 'FECHA', '['+
+          STUFF(( select ',{"key":"'+
+		          CAST(cve_seccion AS VARCHAR(MAX))
+		          +'-'+CAST(cve_subseccion AS VARCHAR(MAX))
+		          +'","valor":"'+ isnull(desvalor,'null') 
+		          +'","publico":"'+CAST(publicar AS VARCHAR(MAX))
+		          +'","catalogo":{'+
+		          STUFF(( select ',"'+ 
+		          ISNULL(CAST(cve_catalogo AS VARCHAR(MAX)),'null')
+		          +'-'+ ISNULL(CAST(cve_subcatalogo AS VARCHAR(MAX)),'null')
+			          +'":"'+ ISNULL(char(39)+CAST(valor1 AS VARCHAR(MAX))+char(39),'null')
+		          +'-'+ ISNULL(char(39)+CAST(valor2 AS VARCHAR(MAX))+char(39),'null') +'"'
+		          from Es_PstPerfilValor 
+		          where num_platilla=a.num_platilla
+		          and cve_seccion=b.cve_seccion and cve_subseccion=b.cve_subseccion
+		          ORDER BY NUMERO
+		          FOR XML PATH(''),TYPE).value('(./text())[1]','VARCHAR(MAX)'),1,1,'') +'}}'
+		          from Es_PstPerfilValor b
+		          where num_platilla=a.num_platilla
+		          --and cve_seccion=a.cve_seccion
+		          --and cve_subseccion=a.cve_subseccion
+		          ORDER BY NUMERO
+		          FOR XML PATH(''),TYPE).value('(./text())[1]','VARCHAR(MAX)'),1,1,'') +']' AS JSON
+          from Es_PstPerfilValor a
+          where num_platilla=@cve_puesto
+          group by num_platilla,fechaModificacion
+          SET LANGUAGE us_english;
+        ]]>
+      </sql>
+    </mostrarparaeditar>
+  </elementos>
+</Secciones>

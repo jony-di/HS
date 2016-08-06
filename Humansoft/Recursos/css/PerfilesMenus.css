@@ -1,0 +1,42 @@
+﻿body{margin:0px auto;min-width:900px;width:90%;}
+a:link, a:visited,a{text-decoration:none;color:inherit;}
+div.alinear-derecha{}
+div.alinear-derecha div.tabs-conf{font-size:14px;clear:both;border:0px;background:transparent;}
+
+.perfilseleccionado{margin:0px auto;padding:10px;margin-bottom:20px;width:96%;float:left;clear:left;border:1px solid #ddd;line-height:6px;}
+.perfilseleccionado label{display:block;clear:both;margin-bottom:0px;font-size:1.1em;}
+.perfilseleccionado label b{color:#555;font-weight:bolder;display:block;clear:both;padding-left:20px;height:20px;}
+
+table.__tablaDinamica{width:80%;}
+div.__seccion div.alinear-izquierda{float:left;width:25%;}
+div.__seccion div.alinear-izquierda .listaCatalogo{height:260px;}
+div.__seccion div.alinear-derecha{float:right;width:70%;height:640px;}
+
+ul.eme_treeview{list-style:none;margin:0px;}
+ul.eme_treeview li a{display:block;cursor:pointer;padding:2px;}
+ul.eme_treeview li a:hover{display:block;cursor:pointer;background:none repeat scroll 0% 0% #BEEBFF;}
+
+img.indicadorDerecha{float:right;width:15%;margin-top:70px;}
+div.busqueda {float:none;width:74%;margin-bottom:10px;clear:both;}
+
+div.asignar-a-perfil{min-width:300px;color:#666;}
+div.asignar-a-perfil ol{float:left;min-height:300px;overflow:auto;float:right;padding-left:0px;list-style:none;margin:auto;padding:10px;display:block;width:90%;}
+div.asignar-a-perfil .lista-cp{float:left;}
+div.asignar-a-perfil .lista-cp li{padding-left:20px;padding-right:10px;border-bottom:1px dashed #ccc;padding-top:7px;padding-bottom:7px;}
+div.asignar-a-perfil .lista-cp li i{color:#258EC8;}
+div.asignar-a-perfil .lista-cp li:hover{background-color:#ddd;}
+div.asignar-a-perfil .lista-cp li button{background:transparent url(/Recursos/imagenes/lecha-opciones.png) no-repeat;border:0px;padding:12px;float:right;cursor:pointer;}
+body div.asignar-a-perfil ol.sinNavegacion li{background:none;}
+body div.asignar-a-perfil button.regresar{border:0px;background:#fff;float:right;clear:right;padding:7px;color:black;font-weight:bolder;}
+body div.asignar-a-perfil button.regresar:hover{color:#7892C2;cursor:pointer;}
+
+.lista-roles{float:right;overflow:auto;}
+div.alinear-derecha button.btn{padding:5px;margin:10px auto;display:block;}
+div.alinear-derecha div.asignar-a-perfil ol{width:100%;min-height:200px;padding:0px;margin:0px;}
+div.alinear-derecha div.asignar-a-perfil div.izq {float:left;border-right:1px solid #ccc;width:48%;}
+div.alinear-derecha div.asignar-a-perfil div.der {float:right;width:48%;}
+div.__seccion{min-height:700px;}
+div.botones-perfiles{margin-top:10px;}
+div.__seccion div.barra-botones span{width:90px;}
+div.__seccion{}
+div.arbol-editar, .sucursalesPerfil, .empresasPerfil, .modulosPerfil, .rolesPerfil{height:360px;overflow-x:hidden;overflow-y:auto;}

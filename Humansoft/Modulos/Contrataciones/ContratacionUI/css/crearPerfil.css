@@ -1,0 +1,283 @@
+﻿body
+{
+    overflow: hidden !important;
+}
+
+.catalogo
+{
+    margin: 50px 0px;
+    width: 800px !important;
+}
+
+div.mascara div.principal div.catalogo table.lista tr.columnas
+{
+    border: 0px;
+    border-bottom: 1px dashed #aaaaaa;
+}
+
+div.mascara div.principal div.catalogo table.lista tr.columnas th label
+{
+    padding: 10px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    color: White;
+    font-weight: bold;
+}
+
+div.mascara div.principal div.catalogo table.lista tr.columnas th label.c-cat-1
+{
+    display: block;
+    width: 55px;
+    float: left;
+    background-color: #5F96CC;
+    margin-left: 5px;
+}
+
+div.mascara div.principal div.catalogo table.lista tr.columnas th label.c-cat-2
+{
+    display: block;
+    width: 90px;
+    float: left;
+    background-color: #77AFE7;
+    margin-left: 5px;
+}
+
+div.mascara div.principal div.catalogo table.lista tr.columnas th label.c-cat-3
+{
+    display: block;
+    width: 250px;
+    float: left;
+    background-color: #5F96CC;
+    margin-left: 5px;
+}
+
+div.mascara div.principal div.catalogo table.lista tr.columnas th label.c-cat-4
+{
+    display: block;
+    width: 100px;
+    float: left;
+    background-color: #77AFE7;
+    margin-left: 5px;
+}
+
+div.mascara div.principal div.catalogo table.lista tr.columnas th label.c-cat-5
+{
+    display: block;
+    width: 100px;
+    float: left;
+    background-color: #5F96CC;
+}
+
+div.mascara div.principal div.catalogo button.editar
+{
+    background-position: center center;
+    padding: 13px;
+    clear: left;
+    float: left;
+    background-image: url(/Recursos/imagenes/editar.png);
+    background-repeat: no-repeat;
+    border: 0px;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+div.mascara div.principal div.catalogo table.lista tr.columnas .editar
+{
+    display: block;
+    width: 75px;
+    float: left;
+}
+
+div.mascara div.principal div.catalogo table.lista tr.columnas .ItemCat
+{
+    display: block;
+    width: 121px;
+    float: left;
+}
+
+div.mascara div.principal div.catalogo table.lista tr.columnas .descripcion
+{
+    display: block;
+    width: 281px;
+    float: left;
+}
+
+div.mascara div.principal div.catalogo table.lista tr.columnas .estatus
+{
+    display: block;
+    width: 131px;
+    float: left;
+}
+
+div.mascara div.principal div.catalogo table.lista tr.columnas .seleccionar
+{
+    display: block;
+    width: 131px;
+    float: left;
+}
+
+div.mascara div.principal div.catalogo table.lista tr.columnas img.seleccionar
+{
+    width: 25px;
+    display: block;
+    margin: auto;
+    float: none;
+}
+
+div.mascara div.principal div.formulario div.alinear
+{
+    height: 400px;
+    width: 750px;
+    margin: 50px;
+}
+
+div.mascara div.principal div.formulario h2.dga
+{
+    clear: both;
+}
+
+.etiquetas
+{
+    float: left;
+    clear: left;
+    margin-bottom: 10px;
+    width: 130px;
+    padding: 3px;
+}
+
+.campos
+{
+    margin-bottom: 10px;
+    width: 250px;
+    float: left;
+    background: #e9e9e9;
+    font-weight: bold;
+    padding: 3px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.Secciones
+{
+    height: 350px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+div.mascara div.principal div.formulario div.barra-botones
+{
+    margin-top: 0px;
+}
+
+.ocultar
+{
+    visibility: hidden;
+}
+
+.mostrar
+{
+    visibility: visible;
+}
+
+.fancybox-skin
+{
+    text-align: -moz-center !important;
+}
+
+.fancybox-inner
+{
+    overflow: hidden !important;
+}
+
+div.base
+{
+    overflow: auto;
+}
+
+.Seccion
+{
+    box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.16), 0px 2px 10px 0px rgba(0, 0, 0, 0.12);
+    position: relative;
+    overflow: hidden;
+    margin: 10px auto;
+    padding: 0px;
+    background-color: #FFF;
+    transition: box-shadow 0.25s ease 0s;
+    border-radius: 2px;
+    width: 400px;
+    border: 0px;
+}
+
+.Seccion legend
+{
+    margin: 0px 0px 15px -2px;
+}
+.fileUpload
+{
+    position: relative;
+    overflow: hidden;
+    margin: 5px 0px;
+    width: 50px;
+    float: left;
+    padding: 5px 20px;
+}
+
+.fileUpload input.upload
+{
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}
+
+.marco
+{
+    width: 250px;
+    border: 2px dashed #8F56A4;
+    height: 105px;
+    padding: 10px;
+    float: right;
+    margin-right: 10px;
+    position: relative;
+}
+
+.logo
+{
+    max-height: 100%;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+}
+
+.etiquetasSeccion
+{
+    float: none !important;
+    max-width: 300px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: bold;
+    overflow-x: hidden;
+    vertical-align: middle;
+    padding: 10px;
+    padding-left: 30px;
+    margin: -10px 0px 5px 0px !important;
+}
+/*.etiquetasSeccion:hover{max-width:100% !important;white-space:normal !important;text-align:justify !important;position:relative;clear:both}*/
+.quitarSubSeccion
+{
+    margin-right: 10px;
+    cursor: pointer;
+    float: left;
+}

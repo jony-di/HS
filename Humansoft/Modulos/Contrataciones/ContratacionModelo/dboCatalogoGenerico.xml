@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Secciones>
+  <Elementos>
+    <obtenerElementos>
+    <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+    <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+    <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+    <campo leyenda="Clave" db_nombre="cve_catalogo" form_nombre="cve_catalogo"  requerido="true"  charsize="0" tipo="int"  default=""/>
+    <sql>
+      <![CDATA[
+        SET NOCOUNT ON;
+        DECLARE @inicio INT;
+        SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+        DECLARE @TablaAuxiliarPaginacion AS TABLE(
+        indiceRegistro INT,
+        cve_subcatalogo INT,
+        descripcion VARCHAR(50),
+        valor1 VARCHAR(100),
+        valor2 VARCHAR(100),
+        activo bit
+        )
+            
+        INSERT INTO @TablaAuxiliarPaginacion
+        SELECT
+        ROW_NUMBER() OVER(ORDER BY CONVERT(INT,cve_catalogo ) DESC) AS indiceRegistro,
+        cve_subcatalogo,
+        descripcion,
+        valor1,
+        valor2,
+        activo
+        FROM
+        ES_catperdet
+        WHERE  ( ((CONVERT(VARCHAR(20),cve_subcatalogo) like '%' + @criterio + '%') OR (descripcion like '%' + @criterio + '%')))
+        AND cve_catalogo=@cve_catalogo;
+
+        --Paginacion
+        SELECT TOP(@longitudPagina)
+        indiceRegistro,
+        @@ROWCOUNT as totalRegistros,
+        a.cve_subcatalogo,
+        a.descripcion,
+        a.valor1,
+        a.valor2,
+        a.activo
+        FROM @TablaAuxiliarPaginacion a
+        WHERE indiceRegistro > @inicio
+        ORDER BY indiceRegistro ASC
+      ]]>
+    </sql>
+    </obtenerElementos>
+  </Elementos>
+
+  <Elemento>
+  <obtenerEtiquetasValor>
+    <campo leyenda="Clave Catalogo" db_nombre="Catalogoclave" form_nombre="Catalogoclave" requerido="true" charsize="10" tipo="int" default=""/>
+    <sql>
+      <![CDATA[
+        Select label1, label2 from ES_catpermae WHERE cve_catalogo=@Catalogoclave AND activo=1
+      ]]>
+    </sql>
+  </obtenerEtiquetasValor>
+    <obtenerSiguienteClave>
+      <campo leyenda="Clave Catalogo" db_nombre="Catalogoclave" form_nombre="clave" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+          SELECT ISNULL(MAX(cve_subcatalogo),0) + 1 as 'clave' FROM ES_catperdet WHERE cve_catalogo=@Catalogoclave;
+        ]]>
+      </sql>
+    </obtenerSiguienteClave>
+    <Nuevo>
+    <campo leyenda="Clave Catalogo" db_nombre="Catalogoclave" form_nombre="Catalogoclave" requerido="true" charsize="10" tipo="int" default=""/>
+    <campo leyenda="Clave" db_nombre="clave" form_nombre="clave" requerido="true" charsize="10" tipo="int" default=""/>
+    <campo leyenda="Nombre" db_nombre="descripcion" form_nombre="descripcion"  requerido="true" charsize="2000" tipo="string" default=""/>
+    <campo leyenda="Valor Principal" db_nombre="Valor1" form_nombre="Valor1"  requerido="false" charsize="2000" tipo="string" default=""/>
+    <campo leyenda="Valor Secundaria" db_nombre="Valor2" form_nombre="Valor2"  requerido="false" charsize="2000" tipo="string" default=""/>
+    <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="false"  charsize="10" tipo="bool"  default="true"/>
+    <sql>
+    <![CDATA[
+      SET NOCOUNT ON;
+      BEGIN TRY
+        INSERT INTO ES_catperdet(cve_catalogo,cve_subcatalogo,descripcion,valor1,valor2,activo)
+        VALUES(@Catalogoclave,@clave,@descripcion,@Valor1,@Valor2,@activo)
+        SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+      END TRY BEGIN CATCH
+        SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+      END CATCH
+    ]]>
+    </sql>
+    </Nuevo>
+    <obtenerElemento>
+    <campo leyenda="Clave Catalogo" db_nombre="Catalogoclave" form_nombre="cve_catalogo" requerido="true" charsize="10" tipo="int" default=""/>
+    <campo leyenda="Clave" db_nombre="clave" form_nombre="clave" requerido="true" charsize="10" tipo="int" default=""/>
+    <sql>
+      <![CDATA[
+        Select * FROM ES_catperdet where cve_catalogo=@Catalogoclave and cve_subcatalogo=@clave;
+      ]]>
+    </sql>
+    </obtenerElemento>
+    <Editar>
+    <campo leyenda="Clave Catalogo" db_nombre="Catalogoclave" form_nombre="cve_catalogo" requerido="true" charsize="10" tipo="int" default=""/>
+    <campo leyenda="Clave" db_nombre="clave" form_nombre="clave" requerido="true" charsize="10" tipo="int" default=""/>
+    <campo leyenda="Nombre" db_nombre="descripcion" form_nombre="descripcion"  requerido="true" charsize="2000" tipo="string" default=""/>
+    <campo leyenda="Valor Principal" db_nombre="Valor1" form_nombre="Valor1"  requerido="false" charsize="2000" tipo="string" default=""/>
+    <campo leyenda="Valor Secundaria" db_nombre="Valor2" form_nombre="Valor2"  requerido="false" charsize="2000" tipo="string" default=""/>
+    <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="true"  charsize="10" tipo="bool"  default=""/>
+    <sql>
+       <![CDATA[
+        SET NOCOUNT ON;
+        BEGIN TRY
+          UPDATE ES_catperdet
+          SET
+          descripcion=@descripcion,
+          valor1=@Valor1,
+          valor2=@Valor2,
+          activo=@activo
+          WHERE
+          cve_catalogo=@Catalogoclave
+          AND cve_subcatalogo=@clave
+          SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+        END TRY BEGIN CATCH
+          SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+        END CATCH
+       ]]> 
+    </sql>
+    </Editar>
+  </Elemento>
+</Secciones>

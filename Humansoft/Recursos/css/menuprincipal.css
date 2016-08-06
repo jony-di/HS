@@ -1,0 +1,8 @@
+﻿div.principal ul.listaopciones li {border:0px solid; width:180px; height:180px;float:left;}
+div.principal ul.listaopciones li img {cursor:pointer;background-color:transparent; border:0px; display:block; width:120px; margin:0px auto;}
+div.principal ul.listaopciones li button {cursor:pointer;background-color:transparent; border:0px; display:block; width:120px; margin:0px auto;font-size:15px;}
+div.principal ul.listaopciones {width:80%;display:block; margin:80px auto; list-style:none;}
+div.principal ul.listaopciones hr.cleaner {clear:both; visibility:hidden;}
+
+
+

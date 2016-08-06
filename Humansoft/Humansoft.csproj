@@ -1,0 +1,863 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{628D306B-3347-4B8B-A64E-D2B25F28738F}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>HumansoftUI</RootNamespace>
+    <AssemblyName>HumansoftUI</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+    <TargetFrameworkProfile />
+    <UseIISExpress>false</UseIISExpress>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>4.0</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="DatosSesion.aspx" />
+    <Content Include="Expedientes\Empleados\escaneo_130.png" />
+    <Content Include="Expedientes\Empleados\escaneo_131.jpg" />
+    <Content Include="Expedientes\Empleados\escaneo_133.jpg" />
+    <Content Include="Expedientes\Empleados\escaneo_134.jpg" />
+    <Content Include="Expedientes\Empleados\escaneo_135.jpg" />
+    <Content Include="Expedientes\Empleados\escaneo_136.jpg" />
+    <Content Include="Expedientes\Empleados\escaneo_137.jpg" />
+    <Content Include="Global.asax" />
+    <Content Include="Modulos\Contrataciones\ContratacionModelo\dboCatalogoCandidatos.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Contrataciones\ContratacionModelo\dboExamenes.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Contrataciones\ContratacionModelo\dboCatalogoAgencias.xml" />
+    <Content Include="Modulos\Contrataciones\ContratacionModelo\dboCatalogoGenerico.xml" />
+    <Content Include="Modulos\Contrataciones\ContratacionModelo\dboCatalogosGenericos.xml" />
+    <Content Include="Modulos\Contrataciones\ContratacionModelo\dboCatalogoVacantes.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Contrataciones\ContratacionModelo\dboCatcontroles.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Contrataciones\ContratacionModelo\dboconfigAsignacion.xml" />
+    <Content Include="Modulos\Contrataciones\ContratacionModelo\dboFlujos.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Contrataciones\ContratacionModelo\dboPaqExamenes.xml" />
+    <Content Include="Modulos\Contrataciones\ContratacionModelo\dboPerfilApartados.xml" />
+    <Content Include="Modulos\Contrataciones\ContratacionModelo\dboPerfiles.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Contrataciones\ContratacionModelo\dboPerfillSecc.xml" />
+    <Content Include="Modulos\Contrataciones\ContratacionModelo\dboPerfilPosicion.xml" />
+    <Content Include="Modulos\Contrataciones\ContratacionModelo\dboPerfilPuesto.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Contrataciones\ContratacionModelo\dboCatalogoEtapas.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Contrataciones\ContratacionModelo\dboFlujoEtapas.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Contrataciones\ContratacionModelo\dboTipocatalogo.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Contrataciones\ContratacionModelo\odbPerfiles.xml" />
+    <Content Include="Modulos\Contrataciones\ContratacionNegocio\NCatalogoCandidatos.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionNegocio\NExamenes.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionNegocio\NCataloAgencias.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionNegocio\NCatalogoGenerico.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionNegocio\NCatalogosGenericos.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionNegocio\NCatalogoVacantes.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionNegocio\NCatcontroles.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionNegocio\NconfigAsignacion.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionNegocio\NFlujos.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionNegocio\NPaqExamenes.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionNegocio\NperfilApartados.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionNegocio\NPerfiles.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionNegocio\NperfilPosisicion.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionNegocio\NperfilPuesto.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionNegocio\NperfilSecc.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionNegocio\NFlujoSubetapas.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionNegocio\NFlujosEtapas.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionNegocio\NTipoCatalogo.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionNegocio\NTipoPlantilla.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_catAgencias.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_catalogoCandidatos.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_catalogoGenerico.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_catalogosGenericos.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_catalogoVacantes.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_catControles.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_configAsignacion.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_configAsignacionSecciones.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_crearPerfil.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_llenarPerfil.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_mostrarPerfil.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_pefilApartados.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_PerfilesEmpresa.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_PerfilesPosisicion.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_perfilSecc.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_registroPublicaciones.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_tipocatalogo.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_tipoPlantilla.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\EXA_examen.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\flujosubetapas.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\flujoetapas.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\ValidarCandidato.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_Flujos.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\EXA_Respuestas_Candidato.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\EXA_variablesExaminar.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\CatalogoGenerico.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\CatalogosGenericos.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\CatalogoVacantes.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\catcontroles.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\cat_Agencias.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\CAT_Candidatos.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\CN_PerfilesEmpresa.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\configAsignacion.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\configAsignacionSecc.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\contrataciones.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\crearPerfil.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\llenarPerfil.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\perfilApartados.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\Perfiles.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\PerfilesEmpresa.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\perfilSecc.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\registroPublicaciones.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\tipocatalogo.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\css\tipoplantilla.css" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\EXA_editar_examen.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\EXA_paqexamenes.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\CatalogoGenerico.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\CatalogosGenericos.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\CatalogoVacantes.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\catcontroles.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\cat_Agencias.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\CAT_Candidatos.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\configAsignacion.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\configAsignacionSecc.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\contrataciones.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\examenes.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\crearPerfil.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\flujos.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\llenarform.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\mostrarPerfil.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\paq_examenes.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\perfilApartados.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\Perfiles.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\PerfilesEmpresa.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\PerfilesPosisicion.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\perfilSecc.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\flujosubetapas.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\flujoetapas.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\registroPublicaciones.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\tipocatalogo.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\tipoplantilla.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_ValidarCandidato.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\js\ValidarCandidato.js" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_FlujoSubetapas.aspx" />
+    <Content Include="Modulos\Contrataciones\ContratacionUI\CN_FlujoEtapas.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoModelo\dboPoliticas.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\ControlAcceso\ControlAccesoModelo\dboFlujos.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\ControlAcceso\ControlAccesoModelo\dboMotivos.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\ControlAcceso\ControlAccesoModelo\dboPermisos.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\ControlAcceso\ControlAccesoModelo\dboHorarios.xml" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoModelo\dboControlAcceso.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\ControlAcceso\ControlAccesoModelo\dboTurnos.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\ControlAcceso\ControlAccesoNegocio\NPoliticas.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoNegocio\NFlujos.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoNegocio\NAccion.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoNegocio\NPermisos.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoNegocio\NMotivos.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoNegocio\NHorarios.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoNegocio\NControlAcceso.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoNegocio\NTurnos.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\css\control-acceso.css" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\CTR_ResumenPeriodosProcesados.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\CTR_ProcesarPeriodo.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\CTR_PeriodoProcesado.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\CTR_Permisos.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\CTR_Politicas.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\css\accion.css" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\CTR_IncidenciaEstatus.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\CTR_IncidenciasHistorial.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\CTR_IncidenciasBusqueda.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\css\esquemaFlujo.css" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\CTR_EsquemaFlujo.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\CTR_Flujos.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\CTR_Horarios.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\CTR_Motivos.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\CTR_IncidenciaSolicitar.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\CTR_Accion.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\js\controlacceso.js" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\js\politicas.js" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\js\flujos.js" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\js\accion.js" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\js\motivos.js" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\js\permisos.js" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\js\horarios.js" />
+    <Content Include="Modulos\Estructuras\EstructurasModelo\dboEstructuras.xml" />
+    <Content Include="Modulos\Estructuras\EstructurasModelo\dboPoliticasVacaciones.xml" />
+    <Content Include="Modulos\Estructuras\EstructurasModelo\dboPosiciones.xml" />
+    <Content Include="Modulos\Estructuras\EstructurasModelo\dboTipocatalogo.xml" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NMunicipio.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NNacionalidad.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NTipoPlantilla.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NTipoRed.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\CTR_Turnos.aspx" />
+    <Content Include="Modulos\ControlAcceso\ControlAccesoUI\js\turnos.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\tipoplantilla.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\EncabezadoEmpleado.ascx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_tipoplantilla.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\tipoplantilla.js" />
+    <Content Include="Modulos\Seguridad\SeguridadModelo\dboSeguridad.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Seguridad\SeguridadModelo\dboZona.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Seguridad\SeguridadModelo\dboUsuarios.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Seguridad\SeguridadModelo\dboTipoSuc.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Seguridad\SeguridadModelo\dboSucursales.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Seguridad\SeguridadModelo\dboTipoPassword.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NGiros.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NPaises.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NTiposSuc.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NZona.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NUsuarios.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NTipoSuc.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NSucursales.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NTipoPassword.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\SG_ConfiguracionPerfiles.aspx" />
+    <Content Include="Modulos\Sistema\dboSistema.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Sistema\NSistema.aspx" />
+    <Content Include="Modulos\Vacaciones\PlantillasXML\solicitud_vacaciones_1.0.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Vacaciones\VacacionesUI\css\ParamProcesos.css" />
+    <Content Include="Modulos\Vacaciones\VacacionesUI\VAC_SolicitudesUsuario.aspx" />
+    <Content Include="Modulos\Vacaciones\VacacionesUI\VAC_ListadoSolicitudes.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadModelo\dboRoles.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Seguridad\SeguridadModelo\dboRegion.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Seguridad\SeguridadModelo\dboPais.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Seguridad\SeguridadModelo\dboModulos.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Seguridad\SeguridadModelo\dboIdiomas.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Seguridad\SeguridadModelo\dboGiro.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Seguridad\SeguridadModelo\dboEmpresas.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NRoles.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NRegion.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NPais.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NModulos.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NIdiomas.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NGiro.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NEmpresas.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\css\cambiarpassword.css" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\css\empresas.css" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\css\giro.css" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\css\idiomas.css" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\css\imagenes.css" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\css\menus.css" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\css\modulos.css" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\css\pais.css" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\css\perfiles.css" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\css\region.css" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\css\roles.css" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\css\seguridad.css" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\css\sucursales.css" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\css\tipopassword.css" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\css\tiposuc.css" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\css\usuarios.css" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\css\zona.css" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\js\ConfiguracionPerfiles.js" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\js\empresas.js" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\js\giro.js" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\js\idiomas.js" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\js\imagenes.js" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\js\menus.js" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\js\modulos.js" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\js\pais.js" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\js\perfiles.js" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\js\region.js" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\js\roles.js" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\js\seguridad.js" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\js\sucursales.js" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\js\tipopassword.js" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\js\tiposuc.js" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\js\usuarios.js" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\js\zona.js" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\Login\css\blur.css" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\Login\css\login.css" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\Login\js\login.js" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\Login\login.htm" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\SG_cambiarpassword.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\SG_empresas.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\SG_giro.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\SG_idiomas.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\SG_imagenes.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\SG_menus.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\SG_modulos.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\SG_pais.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\SG_perfiles.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\SG_region.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\SG_roles.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\SG_sucursales.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\SG_tipopassword.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\SG_tiposuc.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\SG_usuarios.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadUI\SG_zona.aspx" />
+    <Content Include="Modulos\Vacaciones\VacacionesModelo\dboDiasFeriados.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Vacaciones\VacacionesNegocio\NDiasFeriados.aspx" />
+    <Content Include="Modulos\Vacaciones\VacacionesUI\css\diasferiados.css" />
+    <Content Include="Modulos\Vacaciones\VacacionesUI\js\diasferiados.js" />
+    <Content Include="Modulos\Vacaciones\VacacionesUI\VAC_DiasFeriados.aspx" />
+    <Content Include="Modulos\Vacaciones\VacacionesUI\VAC_SolicitudEstatus.aspx" />
+    <Content Include="Recursos\Actualizacion\actualizacion.htm" />
+    <Content Include="Recursos\Actualizacion\css\awards.css" />
+    <Content Include="Recursos\Actualizacion\css\fonts.css" />
+    <Content Include="Recursos\Actualizacion\css\ie8-and-down.min.css" />
+    <Content Include="Recursos\Actualizacion\css\ie9-and-down.min.css" />
+    <Content Include="Recursos\Actualizacion\css\mobile.css" />
+    <Content Include="Recursos\Actualizacion\css\outdatedBrowser.css" />
+    <Content Include="Recursos\Actualizacion\imgs\browsers-bg.png" />
+    <Content Include="Recursos\Actualizacion\imgs\operatingsystems-bg.png" />
+    <Content Include="Recursos\Actualizacion\js\analytics.js" />
+    <Content Include="Recursos\Actualizacion\js\html5.js" />
+    <Content Include="Recursos\Actualizacion\js\jquery-1.js" />
+    <Content Include="Recursos\Actualizacion\js\main.js" />
+    <Content Include="Recursos\Actualizacion\js\main.min.js" />
+    <Content Include="Recursos\Actualizacion\js\modernizr-2.js" />
+    <Content Include="Recursos\Actualizacion\js\outdatedBrowser.js" />
+    <Content Include="Recursos\Actualizacion\Outdated Browser Archivos\analytics.js" />
+    <Content Include="Recursos\Actualizacion\Outdated Browser Archivos\awards.css" />
+    <Content Include="Recursos\Actualizacion\Outdated Browser Archivos\browsers-bg.png" />
+    <Content Include="Recursos\Actualizacion\Outdated Browser Archivos\fonts.css" />
+    <Content Include="Recursos\Actualizacion\Outdated Browser Archivos\jquery-1.js" />
+    <Content Include="Recursos\Actualizacion\Outdated Browser Archivos\main.js" />
+    <Content Include="Recursos\Actualizacion\Outdated Browser Archivos\mobile.css" />
+    <Content Include="Recursos\Actualizacion\Outdated Browser Archivos\modernizr-2.js" />
+    <Content Include="Recursos\Actualizacion\Outdated Browser Archivos\operatingsystems-bg.png" />
+    <Content Include="Recursos\Actualizacion\Outdated Browser Archivos\outdatedBrowser.css" />
+    <Content Include="Recursos\Actualizacion\Outdated Browser Archivos\outdatedBrowser.js" />
+    <Content Include="Recursos\CatalogoPlantillasPDF\NplantillasPDF.aspx" />
+    <Content Include="Recursos\Chart.js-master\Chart.js" />
+    <Content Include="Recursos\Chart.js-master\Chart.min.js" />
+    <Content Include="Recursos\Chart.js-master\gulpfile.js" />
+    <Content Include="Recursos\Chart.js-master\samples\bar.html" />
+    <Content Include="Recursos\Chart.js-master\samples\doughnut.color.html" />
+    <Content Include="Recursos\Chart.js-master\samples\doughnut.html" />
+    <Content Include="Recursos\Chart.js-master\samples\line-customTooltips.html" />
+    <Content Include="Recursos\Chart.js-master\samples\line.html" />
+    <Content Include="Recursos\Chart.js-master\samples\pie-customTooltips.html" />
+    <Content Include="Recursos\Chart.js-master\samples\pie.html" />
+    <Content Include="Recursos\Chart.js-master\samples\polar-area.html" />
+    <Content Include="Recursos\Chart.js-master\samples\radar.html" />
+    <Content Include="Recursos\Chart.js-master\src\Chart.Bar.js" />
+    <Content Include="Recursos\Chart.js-master\src\Chart.Core.js" />
+    <Content Include="Recursos\Chart.js-master\src\Chart.Doughnut.js" />
+    <Content Include="Recursos\Chart.js-master\src\Chart.Line.js" />
+    <Content Include="Recursos\Chart.js-master\src\Chart.PolarArea.js" />
+    <Content Include="Recursos\Chart.js-master\src\Chart.Radar.js" />
+    <Content Include="Recursos\css\arbolmenu.css" />
+    <Content Include="Recursos\css\index.css" />
+    <Content Include="Recursos\css\inicio.css" />
+    <Content Include="Recursos\css\menuprincipal.css" />
+    <Content Include="Recursos\css\paginate.css" />
+    <Content Include="Recursos\css\PerfilesMenus.css" />
+    <Content Include="Recursos\css\layoutGenerico.css" />
+    <Content Include="Recursos\css\tema.css" />
+    <Content Include="default.htm" />
+    <Content Include="Modulos\Estructuras\EstructurasModelo\dboPuestoGenerico.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Vacaciones\VacacionesModelo\dboPoliticasVacaciones.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Estructuras\EstructurasModelo\dboCatalogosTresCampos.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NTipocatalogo.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\catalogos.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_catalogos.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\tipocatalogo.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_tipocatalogo.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_administracionempleados.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_empleados.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_puestogenerico.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\puestogenerico.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\catalogos.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\tipocatalogo.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\puestogenerico.js" />
+    <Content Include="Recursos\fancybox\blank.gif" />
+    <Content Include="Recursos\fancybox\fancybox_loading%402x.gif" />
+    <Content Include="Recursos\fancybox\fancybox_loading.gif" />
+    <Content Include="Recursos\fancybox\fancybox_overlay.png" />
+    <Content Include="Recursos\fancybox\fancybox_sprite%402x.png" />
+    <Content Include="Recursos\fancybox\fancybox_sprite.png" />
+    <Content Include="Recursos\fancybox\jquery.fancybox.css" />
+    <Content Include="Recursos\fancybox\jquery.fancybox.js" />
+    <Content Include="Recursos\imagenes\ayuda1.png" />
+    <Content Include="Recursos\imagenes\bell.png" />
+    <Content Include="Recursos\imagenes\bg.gif" />
+    <Content Include="Recursos\imagenes\bg1.jpg" />
+    <Content Include="Recursos\imagenes\down-arrow.png" />
+    <Content Include="Recursos\imagenes\editar.png" />
+    <Content Include="Recursos\imagenes\eliminar.png" />
+    <Content Include="Recursos\imagenes\empl_baja.png" />
+    <Content Include="Recursos\imagenes\empl_cancelada.png" />
+    <Content Include="Recursos\imagenes\empl_ocupada.png" />
+    <Content Include="Recursos\imagenes\empl_suspendida.png" />
+    <Content Include="Recursos\imagenes\empl_vacante.png" />
+    <Content Include="Recursos\imagenes\engine.png" />
+    <Content Include="Recursos\imagenes\engrane.png" />
+    <Content Include="Recursos\imagenes\error.png" />
+    <Content Include="Recursos\imagenes\eval.png" />
+    <Content Include="Recursos\imagenes\excel-down.png" />
+    <Content Include="Recursos\imagenes\facear-ead-rh2.jpg" />
+    <Content Include="Recursos\imagenes\finproc.png" />
+    <Content Include="Recursos\imagenes\flecha-menu.png" />
+    <Content Include="Recursos\imagenes\flecha-opciones.png" />
+    <Content Include="Recursos\imagenes\flechaDerecha.png" />
+    <Content Include="Recursos\imagenes\flechaDown.png" />
+    <Content Include="Recursos\imagenes\flechaUp.png" />
+    <Content Include="Recursos\imagenes\flecha_abajo.png" />
+    <Content Include="Recursos\imagenes\folder.png" />
+    <Content Include="Recursos\imagenes\go_up.png" />
+    <Content Include="Recursos\imagenes\humansoft.jpg" />
+    <Content Include="Recursos\imagenes\humansoftInicio.jpg" />
+    <Content Include="Recursos\imagenes\imagen_18.png" />
+    <Content Include="Recursos\imagenes\imagen_19.png" />
+    <Content Include="Recursos\imagenes\iniciarsesion2.png" />
+    <Content Include="Recursos\imagenes\iniproc.png" />
+    <Content Include="Recursos\imagenes\interrogacion.png" />
+    <Content Include="Recursos\imagenes\list.gif" />
+    <Content Include="Recursos\imagenes\loading.gif" />
+    <Content Include="Recursos\imagenes\loading_blue.gif" />
+    <Content Include="Recursos\imagenes\LogoEmpresa.jpg" />
+    <Content Include="Recursos\imagenes\notice.png" />
+    <Content Include="Recursos\imagenes\notificaciones.png" />
+    <Content Include="Recursos\imagenes\office.jpg" />
+    <Content Include="Recursos\imagenes\ok.png" />
+    <Content Include="Recursos\imagenes\open.gif" />
+    <Content Include="Recursos\imagenes\palomita.png" />
+    <Content Include="Recursos\imagenes\perfil.png" />
+    <Content Include="Recursos\imagenes\perfiles.png" />
+    <Content Include="Recursos\imagenes\photodefault.png" />
+    <Content Include="Recursos\imagenes\reload.png" />
+    <Content Include="Recursos\imagenes\search.png" />
+    <Content Include="Recursos\imagenes\seguridad.png" />
+    <Content Include="Recursos\imagenes\select.png" />
+    <Content Include="Recursos\imagenes\showmenu.png" />
+    <Content Include="Recursos\imagenes\sigproc.png" />
+    <Content Include="Recursos\imagenes\small_asc.gif" />
+    <Content Include="Recursos\imagenes\small_desc.gif" />
+    <Content Include="Recursos\imagenes\smile-people 02.jpg" />
+    <Content Include="Recursos\imagenes\smile-people.jpg" />
+    <Content Include="Recursos\imagenes\smile-people.png" />
+    <Content Include="Recursos\imagenes\success.png" />
+    <Content Include="Recursos\imagenes\upmenu.png" />
+    <Content Include="Recursos\imagenes\usuario1.png" />
+    <Content Include="Recursos\imagenes\vacaciones.png" />
+    <Content Include="Recursos\imagenes\verDetalle.png" />
+    <Content Include="Recursos\imagenes\verhistorial.png" />
+    <Content Include="Recursos\js\generico.js" />
+    <Content Include="Recursos\js\jquery.base64.js" />
+    <Content Include="Recursos\js\SeleccionSecuencial.js" />
+    <Content Include="Modulos\Vacaciones\VacacionesModelo\dboVacaciones.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Modulos\Vacaciones\VacacionesUI\EncabezadoVacaciones.ascx" />
+    <Content Include="Modulos\Vacaciones\VacacionesUI\js\politicavacaciones.js" />
+    <Content Include="Modulos\Vacaciones\VacacionesNegocio\NPoliticaVacaciones.aspx" />
+    <Content Include="Modulos\Vacaciones\VacacionesNegocio\NPoliticaVacacionesMaes.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NCatalogosTresCampos.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NEstatusplan.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NPosiciones.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NDireccionEmpl.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NBanco.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NConcepto.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NCurso.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NDeduccion.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NDepartamento.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NDGA.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NEstado.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NEstadoCivil.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NEstatusEmpl.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NFamiliaPuesto.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NGrado.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NGrupoEmp.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NGrupoPago.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NLugarTrabajo.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NNivelPuesto.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NPaqCompensacion.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NPaqCompensacionDet.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NPaqConcepto.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NPeriosidad.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NPlaza.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NPuesto.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NPuestosGenericos.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NSegmento.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NSexo.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NTabulador.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NTelefono.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NTelefonoEmpl.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NTipoContrato.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NTipoCurso.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NTipoEmpl.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NTipoPago.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NTurno.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasNegocio\NEmpleados.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\busqueda-3-c.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\confirmaciones.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_R_MovimientosEmpleado.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_TabuladorDescripciones.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_telefonoempl.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\arbolposiciones.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\telefonoempl.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_direccionempl.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\banco.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\direccionempl.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\estatusempl.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\posiciones.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\turno.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\empleados.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_banco.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_estatusempl.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_posiciones.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_tabulador.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\tabulador.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_telefonos.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\telefonos.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_puesto.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\puesto.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_paqconcepto.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\paqconcepto.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_paqcompensaciondet.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\paqcompensaciondet.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_paqcompensacion.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\paqcompensacion.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_nivelpuesto.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\nivelpuesto.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_municipio.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\municipio.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_curso.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\curso.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_tipopago.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\tipopago.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_tipoempl.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\tipoempl.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_tipocurso.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\tipocurso.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_tipocontrato.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\tipocontrato.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_sexo.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\sexo.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_segmento.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\segmento.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_plazas.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\plazas.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_periosidad.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\periosidad.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_nacionalidad.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\nacionalidad.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_lugartrabajo.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\lugartrabajo.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_grupopago.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\grupopago.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_grupoemp.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\grupoemp.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_grado.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\grado.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\familiapuesto.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_familiapuesto.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\estado.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\estadocivil.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_estado.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_estadocivil.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\dga.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_dga.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\departamento.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_departamento.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\deduccion.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_deduccion.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\estructura.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\css\concepto.css" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_concepto.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\ES_turno.aspx" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\arbolposiciones.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\banco.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\catalogo-3-c.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\telefonoempl.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\direccionempl.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\estatusempl.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\posiciones.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\tabulador.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\telefonos.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\puesto.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\paqconcepto.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\paqcompensaciondet.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\paqcompensacion.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\nivelpuesto.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\municipio.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\curso.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\tipopago.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\tipoempl.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\tipocurso.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\tipocontrato.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\sexo.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\segmento.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\plazas.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\periosidad.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\nacionalidad.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\lugartrabajo.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\grupopago.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\grupoemp.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\grado.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\familiapuesto.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\estado.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\estadocivil.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\dga.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\departamento.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\deduccion.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\estructuras.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\concepto.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\turno.js" />
+    <Content Include="Modulos\Estructuras\EstructurasUI\js\empleados.js" />
+    <Content Include="Recursos\jqueryui\images\ui-bg_flat_45_5F96CC_40x100.png" />
+    <Content Include="Recursos\jqueryui\images\ui-bg_flat_55_999999_40x100.png" />
+    <Content Include="Recursos\jqueryui\images\ui-bg_flat_75_5F96CC_40x100.png" />
+    <Content Include="Recursos\jqueryui\images\ui-bg_flat_75_aaaaaa_40x100.png" />
+    <Content Include="Recursos\jqueryui\images\ui-bg_glass_55_f8da4e_1x400.png" />
+    <Content Include="Recursos\jqueryui\images\ui-bg_gloss-wave_45_e14f1c_500x100.png" />
+    <Content Include="Recursos\jqueryui\images\ui-bg_highlight-soft_50_7892C2_1x100.png" />
+    <Content Include="Recursos\jqueryui\images\ui-bg_highlight-soft_75_5F96CC_1x100.png" />
+    <Content Include="Recursos\jqueryui\images\ui-bg_inset-hard_100_fcfdfd_1x100.png" />
+    <Content Include="Recursos\jqueryui\images\ui-icons_0078ae_256x240.png" />
+    <Content Include="Recursos\jqueryui\images\ui-icons_056b93_256x240.png" />
+    <Content Include="Recursos\jqueryui\images\ui-icons_d8e7f3_256x240.png" />
+    <Content Include="Recursos\jqueryui\images\ui-icons_e0fdff_256x240.png" />
+    <Content Include="Recursos\jqueryui\images\ui-icons_f5e175_256x240.png" />
+    <Content Include="Recursos\jqueryui\images\ui-icons_f7a50d_256x240.png" />
+    <Content Include="Recursos\jqueryui\images\ui-icons_fcd113_256x240.png" />
+    <Content Include="Recursos\jqueryui\jquery-ui.min.css" />
+    <Content Include="Recursos\jqueryui\jquery-ui.min.js" />
+    <Content Include="Modulos\Vacaciones\VacacionesNegocio\NVacaciones.aspx" />
+    <Content Include="pie_redireccion.ascx" />
+    <Content Include="Recursos\css\blur.svg" />
+    <Content Include="inicio.aspx" />
+    <Content Include="Recursos\js\index.js" />
+    <Content Include="Recursos\js\inicio.js" />
+    <Content Include="Recursos\js\jquery-2.1.3.min.js" />
+    <Content Include="Recursos\js\jquery.paginate.js" />
+    <Content Include="Recursos\js\jquery.tablesorter.js" />
+    <Content Include="Recursos\js\menu.arbol.js" />
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NConfiguracionPerfiles.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NImagenes.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NMenus.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NPerfiles.aspx" />
+    <Content Include="Modulos\Seguridad\SeguridadNegocio\NSeguridad.aspx" />
+    <Content Include="Recursos\CatalogoPlantillasPDF\ListaPlantillas.aspx" />
+    <Content Include="Recursos\js\simpletreemenu.js" />
+    <Content Include="Recursos\treeview\icon-more-min.png" />
+    <Content Include="Recursos\treeview\less-icon-min.png" />
+    <Content Include="Recursos\treeview\list.gif" />
+    <Content Include="Recursos\treeview\open.gif" />
+    <Content Include="Recursos\treeview\simpletree.css" />
+    <Content Include="Recursos\treeview\simpletreemenu.js" />
+    <Content Include="scripts_sql\script.txt" />
+    <Content Include="Properties\DataSources\System.Data.DataSet.datasource" />
+    <Content Include="Utilidades\UtilidadesUI\CalendarioObservaciones.aspx" />
+    <Content Include="Utilidades\UtilidadesUI\css\utilidades.css" />
+    <Content Include="Utilidades\UtilidadesUI\js\utilidades.js" />
+    <Content Include="Modulos\Vacaciones\VacacionesUI\css\politicavacacionesmaes.css" />
+    <Content Include="Modulos\Vacaciones\VacacionesUI\css\politicavacaciones.css" />
+    <Content Include="Modulos\Vacaciones\VacacionesUI\css\vacaciones.css" />
+    <Content Include="Modulos\Vacaciones\VacacionesUI\VacacionesDerecho.ascx" />
+    <Content Include="Modulos\Vacaciones\VacacionesUI\VAC_PeriodosVacaciones.aspx" />
+    <Content Include="Modulos\Vacaciones\VacacionesUI\VAC_PoliticaVacaciones.aspx" />
+    <Content Include="Modulos\Vacaciones\VacacionesUI\js\politicavacacionesmaes.js" />
+    <Content Include="Modulos\Vacaciones\VacacionesUI\js\solicitud.js" />
+    <Content Include="Modulos\Vacaciones\VacacionesUI\js\vacaciones.js" />
+    <Content Include="Modulos\Vacaciones\VacacionesUI\VAC_PoliticaVacacionesMaes.aspx" />
+    <Content Include="Modulos\Vacaciones\VacacionesUI\VAC_Vacaciones.aspx" />
+    <Content Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </Content>
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Archivos\Contrataciones\Examenes\" />
+    <Folder Include="Archivos\Contrataciones\Perfiles\Logos\" />
+    <Folder Include="Archivos\ControlAcceso\" />
+    <Folder Include="Archivos\Estructuras\" />
+    <Folder Include="Archivos\Vacaciones\" />
+    <Folder Include="Recursos\iconos-imagenes\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Expedientes\Empleados\solicitud_vacaciones_25072015.pdf" />
+    <Content Include="Expedientes\Empleados\solicitud_vacaciones_26072015.pdf" />
+    <Content Include="Expedientes\Empleados\solicitud_vacaciones_27072015.pdf" />
+    <None Include="Properties\PublishProfiles\Perfil1.pubxml" />
+    <Content Include="Recursos\Actualizacion\js\jquery-1.10.1.min.map" />
+    <Content Include="Recursos\Actualizacion\Outdated Browser Archivos\jquery-1.10.1.min.map" />
+    <Content Include="Recursos\Chart.js-master\.gitignore" />
+    <Content Include="Recursos\Chart.js-master\.travis.yml" />
+    <Content Include="Recursos\Chart.js-master\bower.json" />
+    <Content Include="Recursos\Chart.js-master\composer.json" />
+    <Content Include="Recursos\Chart.js-master\CONTRIBUTING.md" />
+    <Content Include="Recursos\Chart.js-master\docs\00-Getting-Started.md" />
+    <Content Include="Recursos\Chart.js-master\docs\01-Line-Chart.md" />
+    <Content Include="Recursos\Chart.js-master\docs\02-Bar-Chart.md" />
+    <Content Include="Recursos\Chart.js-master\docs\03-Radar-Chart.md" />
+    <Content Include="Recursos\Chart.js-master\docs\04-Polar-Area-Chart.md" />
+    <Content Include="Recursos\Chart.js-master\docs\05-Pie-Doughnut-Chart.md" />
+    <Content Include="Recursos\Chart.js-master\docs\06-Advanced.md" />
+    <Content Include="Recursos\Chart.js-master\docs\07-Notes.md" />
+    <Content Include="Recursos\Chart.js-master\LICENSE.md" />
+    <Content Include="Recursos\Chart.js-master\package.json" />
+    <Content Include="Recursos\Chart.js-master\README.md" />
+    <None Include="Recursos\fonts\HelveticaNeue-Light.woff" />
+    <None Include="Recursos\fonts\HelveticaNeue-Medium.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HumansoftServer\HumansoftServer.csproj">
+      <Project>{643F5C50-312F-4CB8-967F-D8FAF6677DF6}</Project>
+      <Name>HumansoftServer</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>3144</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>
+          </IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

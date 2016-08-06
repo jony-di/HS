@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+<Comunes>    
+    <ObtenerDiasSemana>
+        <sql>
+        <![CDATA[
+            BEGIN
+              SELECT cve_diasemana, descripcion FROM CTR_diassemana;
+            END
+        ]]>
+        </sql> 
+    </ObtenerDiasSemana>
+  <ObtenerCatFrecuenciaRotacion>
+    <sql>
+      <![CDATA[
+            BEGIN
+              SELECT cve_frecuenciarota, descripcion FROM CTR_frecuenciarota;
+            END
+        ]]>
+    </sql>
+  </ObtenerCatFrecuenciaRotacion>
+  <ObtenerCatTipoRotacion>
+    <sql>
+      <![CDATA[
+            BEGIN
+              SELECT cve_rotacion, descripcion FROM CTR_tiporotacion;
+            END
+        ]]>
+    </sql>
+  </ObtenerCatTipoRotacion>
+  <ObtenerCatTipoJustificacion>
+    <sql>
+      <![CDATA[
+            BEGIN
+              SELECT cve_tipojustificacion, descripcion FROM CTR_tipojustificacion;
+            END
+        ]]>
+    </sql>
+  </ObtenerCatTipoJustificacion>
+  <ObtenerCatUnidadesTiempo>
+    <sql>
+      <![CDATA[
+            BEGIN
+              SELECT cve_dado, descripcion FROM SIS_dadoen;
+            END
+        ]]>
+    </sql>
+  </ObtenerCatUnidadesTiempo>
+  <ObtenerNumeroSiguienteProceso>
+    <sql>
+      <![CDATA[
+            BEGIN              
+              SET LANGUAGE Español;
+              SET DATEFORMAT dmy;              
+              
+              DECLARE @intervalo AS VARCHAR(30);
+              DECLARE @diaInicio AS SMALLINT;
+              DECLARE @diaFin AS SMALLINT;
+              DECLARE @diaSig AS SMALLINT;
+              DECLARE @diaFin2 AS SMALLINT;
+              DECLARE @diasOffset AS SMALLINT;
+              SELECT TOP(1) @intervalo=descripcion FROM SIS_dadoen WHERE cve_dado=(SELECT cve_dado FROM CTR_politicas WHERE cve_politica=5 AND indice=5 );
+              SELECT TOP(1) @diaInicio=aux1,@diaFin=aux2,@diaSig=aux3,@diaFin2=aux4 FROM CTR_politicas WHERE cve_politica=5 AND indice=5;
+              SELECT TOP(1) @diasOffset=cantidad FROM CTR_politicas WHERE cve_politica=6 AND indice=6 ;
+              DECLARE @fechaFinN AS DATE;
+              DECLARE @fechaInicioN AS DATE;
+              SET @fechaInicioN=(SELECT TOP(1) CASE WHEN DATEPART(DD,getDate())>@diaInicio AND DATEPART(DD,getDate())<@diaFin 
+				          THEN CONVERT(VARCHAR(3),@diaInicio) + '/' + CONVERT(VARCHAR(10),MONTH(GETDATE())) + '/' + CONVERT(VARCHAR(10),YEAR(GETDATE())) 
+				          ELSE CONVERT(VARCHAR(3),@diaSig) + '/' + CONVERT(VARCHAR(10),MONTH(GETDATE())) + '/' + CONVERT(VARCHAR(10),YEAR(GETDATE())) 
+				          END );
+			          SET @fechaFinN=(SELECT TOP(1) CASE WHEN DATEPART(DD,getDate())>@diaInicio AND DATEPART(DD,getDate())<@diaFin
+				          THEN CONVERT(VARCHAR(3),@diaFin) + '/' + CONVERT(VARCHAR(10),MONTH(GETDATE())) + '/' + CONVERT(VARCHAR(10),YEAR(GETDATE())) 
+				          ELSE DATEADD(DAY, -1, DATEADD(MONTH, 1, DATEADD(DAY, 1 - DAY(GETDATE()), GETDATE()))) 
+				          END);						
+			          PRINT 'FI:' + CONVERT(VARCHAR(20),ISNULL(@fechaInicioN,''));
+			          IF @intervalo like 'quincena' BEGIN
+				          SELECT  
+				          ISNULL(MAX(num_proceso),0) + 1 num_proceso
+	                     ,REPLACE(CONVERT(VARCHAR(20),DATEADD(DD,-@diasOffset,@fechaInicioN),106),' ','/') fechaInicio
+	                     ,REPLACE(CONVERT(VARCHAR(20),DATEADD(DD,-@diasOffset,@fechaFinN),106),' ','/') fechaFin
+	                     ,REPLACE(CONVERT(VARCHAR(20),getDate(),106),' ','/') fecha
+				          FROM CTR_DiasProcesados
+			          END			
+           END
+        ]]>
+    </sql>
+  </ObtenerNumeroSiguienteProceso>
+
+  <ConsultarProcesosDescuento>
+    <campo leyenda="Fecha inicio" db_nombre="fechaInicial" form_nombre="fechaInicial" requerido="false" charsize="20" tipo="string"/>
+    <campo leyenda="Fecha fin" db_nombre="fechaFinal" form_nombre="fechaFinal" requerido="false" charsize="20" tipo="string"/>
+    <campo leyenda="Cuantos" db_nombre="cuantos" form_nombre="cuantos" requerido="false" charsize="20" tipo="int"/>
+    <campo leyenda="Departamento" db_nombre="cve_departamento" form_nombre="departamento" requerido="false" charsize="0" tipo="int"/>
+    <sql>
+      <![CDATA[
+        BEGIN
+          SET DATEFORMAT dmy;
+          SET LANGUAGE Español;
+          
+	        --Empleados visibles--------------------------------
+            DECLARE @tEmpleadosVisibles AS TABLE(
+                num_empleado VARCHAR(30)
+            )
+            INSERT INTO @tEmpleadosVisibles
+            EXEC PA_SG_CObtenerEmpleadosVisibles @cve_usuario
+	        ----------------------------------------------------
+          
+          DECLARE @fechaInicio DATETIME;SET @fechaInicio=@fechaInicial;
+          DECLARE @fechaFin DATETIME;SET @fechaFin=@fechaFinal;
+          SET @fechaFin=(CASE WHEN @fechaFin > GETDATE() THEN GETDATE() ELSE @fechaFin END);
+          SET @cuantos=(CASE WHEN @cuantos IS NULL THEN 1000 ELSE @cuantos END);
+          SELECT TOP(@cuantos)
+            num_proceso
+            ,REPLACE(CONVERT(VARCHAR(20),[fechaInicio],106),' ','/')[fechaInicio]
+            ,REPLACE(CONVERT(VARCHAR(20),[fechaFin],106),' ','/')[fechaFin]
+            ,COUNT(*) empleadosProcesados
+            ,REPLACE(CONVERT(VARCHAR(20),fechaProceso,106),' ','/')[fechaProceso]
+            ,SUM(diasDescontar)[diasDescontar]
+          FROM CTR_DiasProcesados
+          WHERE cve_departamento=@cve_departamento AND cve_departamento IS NULL OR (@cuantos < 10 OR fechaInicio>=@fechaInicio AND fechaFin<=@fechaFin AND nombrecompleto IS NOT NULL
+          AND num_empleado IN (SELECT num_empleado FROM @tEmpleadosVisibles))
+          GROUP BY num_proceso,[fechaInicio],[fechaFin],fechaProceso
+          ORDER BY num_proceso DESC
+         END
+        ]]>
+    </sql>
+  </ConsultarProcesosDescuento>
+
+  <ObtenerDesglosePeriodo>
+    <sql>
+      <![CDATA[
+         BEGIN
+            SET DATEFORMAT dmy;
+            SET LANGUAGE Español;
+            DECLARE @fechaInicio DATE;
+            DECLARE @fechaFin DATE;
+            SELECT @fechaInicio=fechaInicio, @fechaFin=fechaFin FROM CTR_DiasProcesados WHERE num_proceso=@num_proceso;
+            EXEC PA_CTR_CDesgloseEventosPeriodo @cve_usuario,@fechaInicio,@fechaFin
+         END
+        ]]>
+    </sql>
+  </ObtenerDesglosePeriodo>
+  
+</Comunes>
+</Secciones>

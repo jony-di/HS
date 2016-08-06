@@ -1,0 +1,17 @@
+﻿.btnLeftPer{float:left;margin-right:20px;}
+.btnRightPer{float:right;}
+.divWrapPeriodos button{border:0px solid;height:40px;color:#9FB4F2;font-weight:bolder;}
+.divWrapPeriodos button:hover{cursor:pointer;}
+.divWrapPeriodos{height:40px;overflow:hidden;float:left;border:1px solid #9FB4F2;}
+.divPeriodos{height:40px;overflow:hidden;float:left;}
+.divPeriodos .divriel{width:5000px;}
+.divPeriodos .divriel span{font-size:14px;padding-top:4px;height:40px;border:0px solid;display:block;float:left;text-align:center;color:#fff;border-left:1px solid #c1d0eb;border-right:1px solid #40619d;}
+
+
+.divPeriodos .divriel span:nth-child(even) {
+        background:#7892C2;
+    }
+.divPeriodos .divriel span:nth-child(odd){
+        background: #557ec8;
+    }
+.divPeriodos .divriel span:hover{cursor:pointer;background-color:#ff6a00;}

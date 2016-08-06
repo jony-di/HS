@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+  <PaqExamenes>
+    <obtenerSiguienteClave>
+        <sql>
+          <![CDATA[
+            SELECT ISNULL(MAX(cve_paqexamen),0) + 1 cve_paqexamen FROM EXA_paqexamen;
+          ]]>
+        </sql>
+    </obtenerSiguienteClave>
+    <Nuevo>
+      <campo leyenda="Clave" db_nombre="cve_paqexamen" form_nombre="cve_paqexamen" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Descripción" db_nombre="descripcion" form_nombre="descripcion" requerido="true" charsize="1024" tipo="string" default=""/>
+      <sql>
+        <![CDATA[
+          SET NOCOUNT ON;
+          BEGIN TRY
+              INSERT INTO EXA_paqexamen(cve_paqexamen,descripcion)
+              VALUES(@cve_paqexamen,@descripcion)
+              SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+          END TRY BEGIN CATCH
+              SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+          END CATCH
+        ]]>
+      </sql>
+    </Nuevo>
+
+    <ObtenerDetalle>
+      <campo leyenda="Clave" db_nombre="cve_paqexamen" form_nombre="cve_paqexamen"  requerido="false"  charsize="0" tipo="int"  default=""/>
+      <sql>
+        <![CDATA[
+          SELECT cve_paqexamen,descripcion FROM EXA_paqexamen WHERE cve_paqexamen=@cve_paqexamen;
+        ]]>
+      </sql>
+    </ObtenerDetalle>
+    
+    <ObtenerExamenesPaquete>
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+      <campo leyenda="Clave" db_nombre="cve_paqexamen" form_nombre="cve_paqexamen"  requerido="false"  charsize="0" tipo="int"  default=""/>
+      <sql>
+          <![CDATA[
+              SET NOCOUNT ON;
+              DECLARE @inicio INT;
+              SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+              DECLARE @TablaAuxiliarPaginacion AS TABLE(
+                indiceRegistro INT,
+                [cve_examen] [int],
+	              [nombre] [nvarchar](255),
+	              [cantidad] [smallint],
+	              [objetivo] [nvarchar](512),
+	              [tiemporespuesta] [smallint],
+	              [aleatorio] [bit],
+	              [puntaje] [smallint],
+	              [cve_paqexamen] [int]
+              )
+
+              INSERT INTO @TablaAuxiliarPaginacion
+              SELECT
+              ROW_NUMBER() OVER(ORDER BY CONVERT(INT,EXA_examen.cve_examen ) DESC) AS indiceRegistro,
+                EXA_examen.cve_examen,nombre,cantidad,objetivo,tiemporespuesta,aleatorio,puntaje,EXA_paqexamendet.cve_paqexamen
+              FROM
+              EXA_examen LEFT OUTER JOIN EXA_paqexamendet ON EXA_examen.cve_examen=EXA_paqexamendet.cve_examen AND EXA_paqexamendet.cve_paqexamen=@cve_paqexamen
+              WHERE (CONVERT(VARCHAR(20),EXA_examen.cve_examen) like '%' + @criterio + '%') OR (EXA_examen.nombre like '%' + @criterio + '%')
+              --Paginacion
+              SELECT TOP(@longitudPagina)
+                indiceRegistro,
+                @@ROWCOUNT as totalRegistros,
+                a.cve_examen,a.nombre,a.cantidad,a.objetivo,a.tiemporespuesta,a.aleatorio,a.puntaje,a.cve_paqexamen
+              FROM @TablaAuxiliarPaginacion a
+              WHERE indiceRegistro > @inicio
+              ORDER BY a.cve_paqexamen DESC,indiceRegistro ASC
+          ]]>      
+      </sql>      
+    </ObtenerExamenesPaquete>
+    
+    <ObtenerCatalogo>
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+      <campo leyenda="Clave" db_nombre="cve_paqexamen" form_nombre="cve_paqexamen"  requerido="false"  charsize="0" tipo="int"  default=""/>
+      <sql>
+        <![CDATA[
+        SET NOCOUNT ON;
+        DECLARE @inicio INT;
+        SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+        DECLARE @TablaAuxiliarPaginacion AS TABLE(
+          indiceRegistro INT,
+          [cve_paqexamen] [int],
+	        [descripcion] [nvarchar](255)
+        )
+
+        INSERT INTO @TablaAuxiliarPaginacion
+        SELECT
+        ROW_NUMBER() OVER(ORDER BY CONVERT(INT,cve_paqexamen ) DESC) AS indiceRegistro,
+          cve_paqexamen,descripcion
+        FROM
+        EXA_paqexamen 
+        WHERE  ( ((CONVERT(VARCHAR(20),cve_paqexamen) like '%' + @criterio + '%') OR (descripcion like '%' + @criterio + '%')) AND @cve_paqexamen=0)
+        OR ((cve_paqexamen=@cve_paqexamen) AND (@cve_paqexamen != 0));
+          
+        --Paginacion
+        SELECT TOP(@longitudPagina)
+          indiceRegistro,
+          @@ROWCOUNT as totalRegistros,
+          a.cve_paqexamen,a.descripcion
+        FROM @TablaAuxiliarPaginacion a
+        WHERE indiceRegistro > @inicio
+        ORDER BY indiceRegistro ASC
+        ]]>
+      </sql>
+    </ObtenerCatalogo>
+    <Editar>
+      <campo leyenda="Clave" db_nombre="cve_paqexamen" form_nombre="cve_paqexamen" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Descripción" db_nombre="descripcion" form_nombre="descripcion" requerido="true" charsize="1024" tipo="string" default=""/>
+      <sql>
+        <![CDATA[
+            SET NOCOUNT ON;
+            BEGIN TRY
+              UPDATE EXA_paqexamen
+              SET
+              cve_paqexamen=@cve_paqexamen
+              ,descripcion=@descripcion             
+              WHERE cve_paqexamen= @cve_paqexamen
+              SELECT 1  estatus, 'Registro actualizado correctamente' mensaje;
+            END TRY BEGIN CATCH
+              SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+            END CATCH
+        ]]>
+      </sql>
+    </Editar>
+
+    <AgregarExamenAlPaquete>
+      <campo leyenda="Clave del paquéte" db_nombre="cve_paqexamen" form_nombre="cve_paqexamen" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Clave de exámen" db_nombre="cve_examen" form_nombre="cve_examen" requerido="true" charsize="0" tipo="int"/>
+      <sql>
+        <![CDATA[
+              SET NOCOUNT ON;
+              BEGIN TRY
+                INSERT INTO EXA_paqexamendet VALUES(@cve_paqexamen,@cve_examen)
+                SELECT 1  estatus, 'Registro asignado correctamente' mensaje;
+              END TRY BEGIN CATCH
+                SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+              END CATCH
+          ]]>
+      </sql>
+    </AgregarExamenAlPaquete>
+
+    <EliminarExamenDelPaquete>
+      <campo leyenda="Clave del paquéte" db_nombre="cve_paqexamen" form_nombre="cve_paqexamen" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Clave de exámen" db_nombre="cve_examen" form_nombre="cve_examen" requerido="true" charsize="0" tipo="int"/>
+      <sql>
+        <![CDATA[
+              SET NOCOUNT ON;
+              BEGIN TRY
+                DELETE FROM EXA_paqexamendet WHERE cve_paqexamen=@cve_paqexamen AND cve_examen=@cve_examen;
+                SELECT 1  estatus, 'Registro eliminado correctamente.' mensaje;
+              END TRY BEGIN CATCH
+                SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+              END CATCH
+          ]]>
+      </sql>
+    </EliminarExamenDelPaquete>
+    
+    
+</PaqExamenes>
+</Secciones>

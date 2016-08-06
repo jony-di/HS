@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+  <DiasFeriados>
+    <obtenerSiguienteClave>
+        <sql>
+            BEGIN
+                SELECT ISNULL(MAX(cve_dia),0) + 1 clave FROM VAC_diasferiados;
+            END
+        </sql>   
+    </obtenerSiguienteClave>
+    <ObtenerAplicaFeriado>
+      <sql>
+        BEGIN
+          SELECT cve_aplica, descripcion FROM VAC_cataplicaferiado;
+        END
+      </sql>
+    </ObtenerAplicaFeriado>
+    <Nuevo>
+        <campo leyenda="Clave" db_nombre="cve_dia" form_nombre="clave" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Fecha" db_nombre="fecha" form_nombre="fecha" requerido="false"  charsize="200" tipo="string"  default=""/>
+        <campo leyenda="Descripcion" db_nombre="descripcion" form_nombre="descripcion" requerido="false"  charsize="200" tipo="string"  default=""/>
+        <campo leyenda="Medio día" db_nombre="mediodia" form_nombre="mediodia" requerido="true"  charsize="0" tipo="bool" default="false"/>
+        <campo leyenda="Aplica para" db_nombre="cve_aplica" form_nombre="cve_aplica" requerido="true"  charsize="0" tipo="int"/>
+        <sql>
+            BEGIN
+                SET NOCOUNT ON;
+                set dateformat dmy;
+                BEGIN TRY
+                    INSERT INTO VAC_diasferiados(
+                        cve_dia,
+                        fecha,
+                        descripcion,
+                        mediodia,
+                        cve_aplica
+                    )
+                    VALUES(
+                        @cve_dia,
+                        @fecha,
+                        @descripcion,
+                        @mediodia,
+                        @cve_aplica
+                    )
+                    SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+                END TRY BEGIN CATCH
+                    SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+                END CATCH
+            END
+        </sql>
+   </Nuevo>
+
+    <obtenerCatalogo>
+        <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+        <campo leyenda="Clave" db_nombre="cve_dia" form_nombre="cve_dia"  requerido="false"  charsize="0" tipo="int"  default=""/>      
+        <sql>
+          BEGIN
+          SET NOCOUNT ON;
+          set dateformat dmy;
+          DECLARE @inicio INT;
+          SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+          DECLARE @TablaAuxiliarPaginacion AS TABLE(
+          indiceRegistro INT,
+          cve_dia INT,
+          fecha date,
+          descripcion varchar(200),
+          mediodia BIT,
+          cve_aplica SMALLINT
+          )
+          INSERT INTO @TablaAuxiliarPaginacion
+          SELECT
+          ROW_NUMBER() OVER(ORDER BY CONVERT(INT,cve_dia) DESC) AS indiceRegistro,
+          cve_dia,
+          fecha,
+          descripcion,
+          mediodia,
+          cve_aplica
+          FROM
+          VAC_diasferiados
+          WHERE (((CONVERT(VARCHAR(20),cve_dia) like '%' + @criterio + '%') OR (descripcion like '%' + @criterio + '%')) AND @cve_dia=0)
+          OR ((cve_dia=@cve_dia) AND (@cve_dia != 0));
+
+
+          --Paginacion
+          SELECT TOP(@longitudPagina)
+          indiceRegistro,
+          @@ROWCOUNT as totalRegistros,
+          cve_dia,
+          convert (char,fecha,103) fecha,
+          A.descripcion,
+          mediodia,
+          A.cve_aplica,
+          B.descripcion aplicaPara
+          FROM @TablaAuxiliarPaginacion A
+          INNER JOIN VAC_cataplicaferiado B ON A.cve_aplica=B.cve_aplica
+          WHERE indiceRegistro > @inicio
+          ORDER BY indiceRegistro ASC
+          END
+        </sql>        
+    </obtenerCatalogo>
+    <Editar>
+        <campo leyenda="Clave" db_nombre="cve_dia" form_nombre="clave" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Fecha" db_nombre="fecha" form_nombre="fecha" requerido="false"  charsize="200" tipo="string"  default=""/>
+        <campo leyenda="Descripcion" db_nombre="descripcion" form_nombre="descripcion" requerido="false"  charsize="200" tipo="string"  default=""/>
+        <campo leyenda="Medio día" db_nombre="mediodia" form_nombre="mediodia" requerido="false"  charsize="10" tipo="string" default="false"/>
+        <campo leyenda="Aplica para" db_nombre="cve_aplica" form_nombre="cve_aplica" requerido="true"  charsize="0" tipo="int"/>
+        <sql> 
+            BEGIN
+	            SET NOCOUNT ON;	
+                set dateformat dmy;
+	            BEGIN TRY
+		            UPDATE VAC_diasferiados
+		            SET	
+		            cve_dia= @cve_dia,
+		            fecha=@fecha,
+		            descripcion=@descripcion,
+                mediodia= @mediodia,
+                cve_aplica=@cve_aplica
+		            WHERE cve_dia= @cve_dia
+		            SELECT 1  estatus, 'Registro actualizado correctamente' mensaje;
+	            END TRY BEGIN CATCH	
+		            SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+	            END CATCH	
+            END
+        </sql>
+    </Editar>
+</DiasFeriados>
+
+</Secciones>

@@ -1,0 +1,25 @@
+﻿div.mascara div.principal div.catalogo table.lista tr.columnas1 {border:0px; border-bottom:1px dashed #aaaaaa;}
+div.mascara div.principal div.catalogo table.lista tr.columnas th label{padding:10px;border-top-left-radius:5px;border-top-right-radius:5px;color:White; font-weight:bold;}
+div.mascara div.principal div.formulario div.alinear {height:430px; min-height:430px;}
+div.mascara div.principal div.formulario h2.dga {clear:both;}
+div.mascara div.principal div.catalogo table.lista  tr.columnas th label.editar{display:block; width:55px;float:left; background-color:#5F96CC;margin-left:5px; }
+div.mascara div.principal div.catalogo table.lista  tr.columnas th label.tipocontrato {display:block; width:110px;float:left; background-color:#77AFE7;margin-left:5px;}
+div.mascara div.principal div.catalogo table.lista  tr.columnas th label.descripcion{display:block; width:340px;float:left; background-color:#5F96CC;margin-left:5px;}
+div.mascara div.principal div.catalogo table.lista  tr.columnas th label.estatus{display:block; width:120px;float:left; background-color:#77AFE7;margin-left:5px;}
+div.mascara div.principal div.catalogo button.editar {background-position:center center;padding:13px;clear:left; float:left;background-image:url(/Recursos/imagenes/editar.png);background-repeat:no-repeat; border:0px; background-color:transparent; cursor:pointer;}
+div.mascara div.principal div.catalogo table.lista tr.columnas .editar{display:block; width:75px;float:left; }
+div.mascara div.principal div.catalogo table.lista tr.columnas .tipocontrato {display:block; width:141px;float:left;}
+div.mascara div.principal div.catalogo table.lista tr.columnas .descripcion{display:block; width:371px;float:left;}
+div.mascara div.principal div.catalogo table.lista tr.columnas .estatus{display:block; width:151px;float:left;}
+div.mascara div.principal div.formulario label.tipocontrato {float:left;clear:left;margin-bottom:20px;width:110px;}
+div.mascara div.principal div.formulario input.tipocontrato {float:left;margin-bottom:20px;width:50px;}
+div.mascara div.principal div.formulario label.descripcion {float:left;clear:left;margin-bottom:20px;width:90px;}
+div.mascara div.principal div.formulario input.descripcion {float:left;margin-bottom:20px;width:200px;}
+div.mascara div.principal div.formulario div.alinear label.estatus { float:left;clear:left;width:60px;}
+div.mascara div.principal div.formulario div.alinear select.estatus {width:70px; float:left;float:left;}
+div.mascara div.principal div.formulario button.guardar {float:left; cursor:pointer; }        
+div.mascara div.principal div.formulario button.cancelar {float:right; cursor:pointer;}  
+div.barra-botones span{width:290px;} 
+div.mascara div.principal div.formulario div.barra-botones {margin-top:120px;} 
+.ocultar{visibility:hidden;}
+.mostrar{visibility:visible;}

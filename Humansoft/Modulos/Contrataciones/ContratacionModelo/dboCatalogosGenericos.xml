@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Secciones>
+  <CatalogosGenericos>
+    <obtenerSiguienteClave>
+      <sql>
+      <![CDATA[
+        SELECT MAX(cve_catalogo)+1 AS 'clave' FROM ES_catpermae
+      ]]>
+      </sql>
+    </obtenerSiguienteClave>
+    <Nuevo>
+        <campo leyenda="Clave" db_nombre="clave" form_nombre="clave" requerido="true" charsize="10" tipo="int" default=""/>
+        <campo leyenda="Nombre" db_nombre="descripcion" form_nombre="descripcion"  requerido="true" charsize="2000" tipo="string" default=""/>
+        <campo leyenda="Etiqueta Principal" db_nombre="Etiqueta1" form_nombre="Etiqueta1"  requerido="false" charsize="2000" tipo="string" default=""/>
+        <campo leyenda="Etiqueta Secundaria" db_nombre="Etiqueta2" form_nombre="Etiqueta2"  requerido="false" charsize="2000" tipo="string" default=""/>
+        <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="false"  charsize="10" tipo="bool"  default="true"/>
+         
+        <sql>
+            <![CDATA[BEGIN
+            SET NOCOUNT ON;
+          BEGIN TRY
+            INSERT INTO ES_catpermae(cve_catalogo,descripcion,label1,label2,activo)
+            VALUES(@clave,@descripcion,@Etiqueta1,@Etiqueta2,@activo)
+            SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+          END TRY BEGIN CATCH
+            SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+          END CATCH
+          END]]>
+        </sql>
+    </Nuevo>
+    <obtenerCatalogos>
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+      <campo leyenda="Clave" db_nombre="cve_catalogo" form_nombre="cve_catalogo"  requerido="false"  charsize="0" tipo="int"  default=""/>
+      <sql>
+        <![CDATA[
+          SET NOCOUNT ON;
+          DECLARE @inicio INT;
+          SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+          DECLARE @TablaAuxiliarPaginacion AS TABLE(
+          indiceRegistro INT,
+          cve_catalogo INT,
+          descripcion VARCHAR(50),
+          activo bit
+          )
+
+          INSERT INTO @TablaAuxiliarPaginacion
+          SELECT
+          ROW_NUMBER() OVER(ORDER BY CONVERT(INT,cve_catalogo ) DESC) AS indiceRegistro,
+          cve_catalogo,
+          descripcion,
+          activo
+          FROM
+          ES_catpermae
+          WHERE  ( ((CONVERT(VARCHAR(20),cve_catalogo) like '%' + @criterio + '%') OR (descripcion like '%' + @criterio + '%')) AND @cve_catalogo=0)
+          OR ((cve_catalogo=@cve_catalogo) AND (@cve_catalogo != 0));
+
+          --Paginacion
+          SELECT TOP(@longitudPagina)
+          indiceRegistro,
+          @@ROWCOUNT as totalRegistros,
+          a.cve_catalogo,
+          a.descripcion,
+          a.activo
+          FROM @TablaAuxiliarPaginacion a
+          WHERE indiceRegistro > @inicio
+          ORDER BY indiceRegistro ASC
+        ]]>
+      </sql>
+    </obtenerCatalogos>
+  </CatalogosGenericos>
+
+  <CatalogoGenerico>
+    <obtenerCatalogo>
+      <campo leyenda="Clave" db_nombre="clave" form_nombre="cve_catalogo" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+          Select * FROM ES_catpermae where cve_catalogo=@clave;
+        ]]>
+      </sql>
+    </obtenerCatalogo>
+    <Editar>
+      <campo leyenda="Clave" db_nombre="clave" form_nombre="clave" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Nombre" db_nombre="descripcion" form_nombre="descripcion"  requerido="true" charsize="2000" tipo="string" default=""/>
+      <campo leyenda="Etiqueta Principal" db_nombre="Etiqueta1" form_nombre="Etiqueta1"  requerido="false" charsize="2000" tipo="string" default=""/>
+      <campo leyenda="Etiqueta Secundaria" db_nombre="Etiqueta2" form_nombre="Etiqueta2"  requerido="false" charsize="2000" tipo="string" default=""/>
+      <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="true"  charsize="10" tipo="bool"  default=""/>
+      <sql>
+        <![CDATA[
+          SET NOCOUNT ON;
+        BEGIN TRY
+          UPDATE ES_catpermae
+          SET
+          descripcion=@descripcion,
+          label1=@Etiqueta1,
+          label2=@Etiqueta2,
+          activo=@activo
+          WHERE 
+          cve_catalogo=@clave
+          SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+        END TRY BEGIN CATCH
+          SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+        END CATCH
+        ]]>
+      </sql>
+    </Editar>
+  </CatalogoGenerico>
+</Secciones>

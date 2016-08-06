@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+<EtapasFlujo>
+    
+    <obtenerSiguienteClave>
+        <sql>
+          <![CDATA[
+            BEGIN
+                SELECT ISNULL(MAX(cve_etapa),0) + 1 clave FROM CON_F_EtapasContratacion;
+            END
+             ]]>
+        </sql>   
+    </obtenerSiguienteClave>
+    
+    <Nuevo>
+        <campo leyenda="Clave" db_nombre="cve_etapa" form_nombre="clave" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Descripción" db_nombre="descripcion" form_nombre="descripcion"  requerido="true" charsize="200" tipo="string" default=""/>
+        <campo leyenda="Resolucion Automatica" db_nombre="resolucionautomatica" form_nombre="resolucionautomatica" requerido="false"  charsize="10" tipo="bool"  default="false"/>
+        <sql>
+          <![CDATA[
+            BEGIN
+                SET NOCOUNT ON;
+                BEGIN TRY
+                    INSERT INTO CON_F_EtapasContratacion(
+                        cve_etapa,
+                        descripcion,
+                        resolucionautomatica
+                    )
+                    VALUES(
+                        @cve_etapa,
+                        @descripcion,
+                        @resolucionautomatica
+                    )
+                    SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+                END TRY BEGIN CATCH
+                    SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+                END CATCH
+            END
+             ]]>
+        </sql>
+   </Nuevo>
+
+    <obtenerCatalogo>
+        <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+        <campo leyenda="Clave" db_nombre="cve_etapa" form_nombre="cve_etapa"  requerido="false"  charsize="0" tipo="int"  default=""/>
+        <sql>          
+        <![CDATA[
+            BEGIN
+	            SET NOCOUNT ON;
+	            DECLARE @inicio INT;
+	            SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+	            DECLARE @TablaAuxiliarPaginacion AS TABLE(
+		            indiceRegistro INT,
+		            cve_etapa INT,
+		            descripcion VARCHAR(200),
+		            resolucionAutomatica BIT
+	            )		
+	            INSERT INTO @TablaAuxiliarPaginacion		
+	            SELECT 
+		            ROW_NUMBER() OVER(ORDER BY CONVERT(INT,cve_etapa) DESC) AS indiceRegistro,
+                        cve_etapa,
+                        descripcion,
+                        resolucionAutomatica
+	            FROM 
+		            CON_F_EtapasContratacion
+	            WHERE  ( ((CONVERT(VARCHAR(20),cve_etapa) like '%' + @criterio + '%') OR (descripcion like '%' + @criterio + '%')) AND @cve_etapa=0) 
+		            OR ((cve_etapa=@cve_etapa) AND (@cve_etapa != 0));
+
+	            --Paginacion	
+	            SELECT TOP(@longitudPagina)
+		            indiceRegistro,
+		            @@ROWCOUNT as totalRegistros,
+		            cve_etapa,
+		            descripcion,
+                resolucionAutomatica
+	            FROM @TablaAuxiliarPaginacion
+	            WHERE indiceRegistro > @inicio	 
+	            ORDER BY indiceRegistro ASC
+            END 
+        ]]>
+        </sql>        
+    </obtenerCatalogo>
+    <Editar>
+      <campo leyenda="Clave" db_nombre="cve_etapa" form_nombre="clave" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Descripción" db_nombre="descripcion" form_nombre="descripcion"  requerido="true" charsize="200" tipo="string" default=""/>
+      <campo leyenda="Resolucion Automatica" db_nombre="resolucionautomatica" form_nombre="resolucionautomatica" requerido="false"  charsize="10" tipo="bool"  default="false"/>
+        <sql>    
+        <![CDATA[
+            BEGIN
+                SET NOCOUNT ON;
+                BEGIN TRY
+                    UPDATE CON_F_EtapasContratacion
+                    SET
+                        descripcion=@descripcion,
+                        resolucionautomatica=@resolucionautomatica
+                    WHERE cve_etapa= @cve_etapa
+                        SELECT 1  estatus, 'Registro actualizado correctamente' mensaje;
+                    END TRY BEGIN CATCH
+                    SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+                END CATCH
+            END
+        ]]>
+        </sql>
+    </Editar>
+</EtapasFlujo>
+
+<FlujoSubetapas>
+    <obtenerSiguienteClave>
+      <campo leyenda="Clave" db_nombre="cve_etapa" form_nombre="cve_etapa"  requerido="false"  charsize="0" tipo="int"  default=""/>
+        <sql>
+        <![CDATA[
+            BEGIN
+                SELECT ISNULL(MAX(cve_subetapa),0) + 1 clave FROM CON_F_SubEtapaContratacion WHERE cve_etapa=@cve_etapa;
+            END
+        ]]>
+        </sql>   
+    </obtenerSiguienteClave>    
+    <Nuevo>
+        <campo leyenda="Clave de etapa" db_nombre="cve_etapa" form_nombre="cve_etapa" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Clave de subetapa" db_nombre="cve_subetapa" form_nombre="cve_subetapa" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Descripción" db_nombre="descripcion" form_nombre="descripcion" requerido="true" charsize="200" tipo="string" default=""/>
+        <campo leyenda="Url de página" db_nombre="pantalla" form_nombre="pantalla"  requerido="true" charsize="2000" tipo="string" default=""/>
+        <sql>
+        <![CDATA[
+            BEGIN
+                SET NOCOUNT ON;
+                BEGIN TRY
+                    INSERT INTO CON_F_SubEtapaContratacion(
+                        cve_etapa,
+                        cve_subetapa,
+                        descripcion,
+                        pantalla
+                    )
+                    VALUES(
+                        @cve_etapa,
+                        @cve_subetapa,
+                        @descripcion,
+                        @pantalla
+                    )
+                    SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+                END TRY BEGIN CATCH
+                    SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+                END CATCH
+            END
+        ]]>
+        </sql>
+   </Nuevo>
+
+    <obtenerCatalogo>
+        <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default="1"/>
+        <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default="10"/>
+        <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+      <campo leyenda="Clave de etapa" db_nombre="cve_etapa" form_nombre="cve_etapa"  requerido="false"  charsize="0" tipo="int"  default="0"/>
+      <campo leyenda="Clave de subetapa" db_nombre="cve_subetapa" form_nombre="cve_subetapa"  requerido="false"  charsize="0" tipo="int"  default="0"/>
+        <sql>
+        <![CDATA[
+             BEGIN
+	            SET NOCOUNT ON;
+	            DECLARE @inicio INT;
+	            SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+	            DECLARE @TablaAuxiliarPaginacion AS TABLE(
+		                indiceRegistro INT,
+                    cve_etapa INT,
+		                cve_subetapa INT,
+		                descripcion VARCHAR(MAX),
+                    pantalla VARCHAR(2000)
+	            )		
+	            INSERT INTO @TablaAuxiliarPaginacion		
+	            SELECT 
+		            ROW_NUMBER() OVER(ORDER BY descripcion ASC) AS indiceRegistro,		
+                        cve_etapa,
+                        cve_subetapa,
+                        descripcion,
+                        pantalla
+	            FROM 
+		            CON_F_SubEtapaContratacion
+	            WHERE (
+                        ( ((CONVERT(VARCHAR(20),cve_subetapa) like '%' + @criterio + '%') OR (descripcion like '%' + @criterio + '%')) AND @cve_subetapa=0) 
+		                OR ((cve_subetapa=@cve_subetapa) AND (@cve_subetapa != 0)) 
+                    )AND cve_etapa=@cve_etapa;
+		
+	            --Paginacion
+	            SELECT TOP(@longitudPagina)
+		                indiceRegistro,
+		                @@ROWCOUNT as totalRegistros,
+                    cve_etapa,
+                    cve_subetapa,
+                    descripcion,
+                    pantalla
+	            FROM @TablaAuxiliarPaginacion
+	            WHERE indiceRegistro > @inicio
+	            ORDER BY indiceRegistro ASC
+            END  
+        ]]>
+        </sql>        
+    </obtenerCatalogo>
+    <Editar>
+      <campo leyenda="Clave de etapa" db_nombre="cve_etapa" form_nombre="cve_etapa" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Clave de subetapa" db_nombre="cve_subetapa" form_nombre="cve_subetapa" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Descripción" db_nombre="descripcion" form_nombre="descripcion" requerido="true" charsize="200" tipo="string" default=""/>
+      <campo leyenda="Url de página" db_nombre="pantalla" form_nombre="pantalla"  requerido="true" charsize="2000" tipo="string" default=""/>
+        <sql> 
+        <![CDATA[
+            BEGIN
+	            SET NOCOUNT ON;	
+	            BEGIN TRY
+		            UPDATE CON_F_SubEtapaContratacion
+		            SET	
+		            descripcion= @descripcion,
+		            pantalla=@pantalla		           
+		            WHERE cve_etapa= @cve_etapa AND cve_subetapa= @cve_subetapa
+		            SELECT 1  estatus, 'Registro actualizado correctamente' mensaje;
+	            END TRY BEGIN CATCH	
+		            SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+	            END CATCH	
+            END
+        ]]>
+        </sql>
+    </Editar>
+</FlujoSubetapas>
+
+</Secciones>

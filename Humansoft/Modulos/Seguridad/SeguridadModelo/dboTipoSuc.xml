@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+    <TipoSuc>
+    <obtenerSiguienteClave>
+        <sql>
+BEGIN
+	SET NOCOUNT ON;	
+	DECLARE @siguiente AS INT;
+	SELECT ISNULL(MAX(cve_tipo),0) + 1 clave FROM SG_TipoSuc;
+END
+        </sql>   
+    </obtenerSiguienteClave>
+    
+    <Nuevo>
+        <campo leyenda="Clave" db_nombre="cve_tipo" form_nombre="cve_tipo" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Nombre" db_nombre="nombre" form_nombre="nombre"  requerido="true" charsize="150" tipo="string" default=""/>
+        <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="true" charsize="50" tipo="bool" default="true"/>
+        
+        <sql>
+BEGIN
+	SET NOCOUNT ON;	
+	BEGIN TRY
+		INSERT INTO SG_TipoSuc(
+			cve_tipo,
+			nombre,
+			activo
+		)
+		VALUES(
+			@cve_tipo,
+			@nombre,
+			@activo
+		)
+		SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+	END TRY BEGIN CATCH	
+		SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+	END CATCH	
+END
+
+
+
+        </sql>
+   </Nuevo>
+
+    <obtenerCatalogo>
+        <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+        <campo leyenda="Clave" db_nombre="cve_tipo" form_nombre="cve_tipo"  requerido="false"  charsize="0" tipo="int"  default=""/>
+        <sql>
+BEGIN
+	SET NOCOUNT ON;
+	DECLARE @inicio INT;
+	SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+	DECLARE @TablaAuxiliarPaginacion AS TABLE(
+		indiceRegistro INT,		
+		cve_tipo SMALLINT,
+		nombre VARCHAR(80),
+		activo BIT
+	)		
+	INSERT INTO @TablaAuxiliarPaginacion		
+	SELECT
+		ROW_NUMBER() OVER(ORDER BY CONVERT(INT,cve_tipo) DESC) AS indiceRegistro,		
+		cve_tipo,
+		nombre,
+		activo
+	FROM 
+		SG_TipoSuc	
+	WHERE ( ((CONVERT(VARCHAR(20),cve_tipo) like '%' + @criterio + '%') OR (nombre like '%' + @criterio + '%')) AND @cve_tipo=0) 
+		OR ((cve_tipo=@cve_tipo) AND (@cve_tipo !=0));	
+	--Paginacion	
+	SELECT TOP(@longitudPagina)
+		indiceRegistro,
+		@@ROWCOUNT as totalRegistros,
+		cve_tipo,
+		nombre,
+		activo
+	FROM @TablaAuxiliarPaginacion
+	WHERE indiceRegistro > @inicio	 
+	ORDER BY indiceRegistro ASC
+END
+
+
+        </sql>        
+    </obtenerCatalogo>
+
+     <Editar>
+         <campo leyenda="Clave" db_nombre="cve_tipo" form_nombre="cve_tipo" requerido="true" charsize="0" tipo="int" default=""/>
+         <campo leyenda="Nombre" db_nombre="nombre" form_nombre="nombre"  requerido="true" charsize="150" tipo="string" default=""/>
+         <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="true" charsize="50" tipo="bool" default="true"/>
+        <sql>
+BEGIN
+	SET NOCOUNT ON;	
+	BEGIN TRY
+		UPDATE SG_TipoSuc 
+		SET			
+			cve_tipo=@cve_tipo,
+			nombre=@nombre,
+			activo=@activo
+		WHERE cve_tipo= @cve_tipo
+		SELECT 1  estatus, 'Registro actualizado correctamente' mensaje;
+	END TRY BEGIN CATCH	
+		SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+	END CATCH	
+END
+
+        </sql>
+    </Editar>
+</TipoSuc>  
+</Secciones>  
+    
+    
+    
+    
+

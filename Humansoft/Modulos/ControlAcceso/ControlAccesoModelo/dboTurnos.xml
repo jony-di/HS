@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+<Turnos>    
+    <ObtenerSiguienteClave>
+        <sql>
+        <![CDATA[
+            BEGIN
+              SELECT ISNULL(MAX(cve_turno),0) + 1 cve_turno FROM CTR_turnomae;
+            END
+        ]]>
+        </sql>   
+    </ObtenerSiguienteClave>
+    
+    <Nuevo>
+      <campo leyenda="Clave" db_nombre="cve_turno" form_nombre="cve_turno" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Descripción" db_nombre="nombre" form_nombre="nombre" requerido="true" charsize="100" tipo="string"/>
+      <campo leyenda="Cadena de jornada hora de entrada" db_nombre="s_jor_horaentrada" form_nombre="s_jor_horaentrada" requerido="false" charsize="250" tipo="string"/>
+      <campo leyenda="Cadena de jornada hora de salida" db_nombre="s_jor_horasalida" form_nombre="s_jor_horasalida" requerido="false" charsize="250" tipo="string"/>
+      <campo leyenda="Cadena de comida hora de entrada" db_nombre="s_com_horaentrada" form_nombre="s_com_horaentrada" requerido="false" charsize="250" tipo="string"/>
+      <campo leyenda="Cadena de comida hora de entrada" db_nombre="s_com_horasalida" form_nombre="s_com_horasalida" requerido="false" charsize="250" tipo="string"/>
+        <sql>          
+          <![CDATA[
+              BEGIN
+                  SET NOCOUNT ON;
+                  INSERT INTO CTR_turnomae(
+                      cve_turno,
+                      nombre
+                  )
+                  VALUES(
+                      @cve_turno,
+                      @nombre
+                  );
+                  IF(@@ROWCOUNT =1)BEGIN                  
+                    INSERT INTO CTR_turnodet
+                    SELECT @cve_turno, A.spliter1,A.spliter2,B.spliter2,C.spliter2,D.spliter2
+                    FROM dbo.Split2(@s_jor_horaentrada,',','|') A INNER JOIN dbo.Split2(@s_jor_horasalida,',','|')B ON A.spliter1=B.spliter1
+                    INNER JOIN dbo.Split2(@s_com_horaentrada,',','|') C ON B.spliter1=C.spliter1 INNER JOIN dbo.Split2(@s_com_horasalida,',','|')D ON C.spliter1=D.spliter1;
+                    SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+                  END ELSE BEGIN
+                      SELECT -1 AS estatus,  'Error: No se guardo el registro.' mensaje;
+                  END 
+              END
+          ]]>
+        </sql>
+   </Nuevo>
+
+    <ObtenerCatalogo>
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+      <sql>
+        <![CDATA[
+            BEGIN
+	            SET NOCOUNT ON;
+	            DECLARE @inicio INT;
+	            SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+	            DECLARE @TablaAuxiliarPaginacion AS TABLE(
+		            indiceRegistro INT,
+		            cve_turno INT,
+		            nombre VARCHAR(200)
+	            )
+	            INSERT INTO @TablaAuxiliarPaginacion
+	            SELECT 
+		            ROW_NUMBER() OVER(ORDER BY CONVERT(INT,cve_turno) DESC) AS indiceRegistro
+                ,cve_turno
+                ,nombre
+	            FROM 
+		            CTR_turnomae
+	            WHERE  CONVERT(VARCHAR(20),cve_turno) like @criterio OR nombre like '%' + @criterio + '%';
+		
+	            --Paginacion	
+	            SELECT TOP(@longitudPagina)
+		            indiceRegistro,
+		            @@ROWCOUNT as totalRegistros,
+		            cve_turno,
+		            nombre
+	            FROM @TablaAuxiliarPaginacion
+	            WHERE indiceRegistro > @inicio	 
+	            ORDER BY indiceRegistro ASC
+            END
+        ]]>
+      </sql>
+    </ObtenerCatalogo>
+
+    <ObtenerDetalleTurno>
+      <campo leyenda="Clave" db_nombre="cve_turno" form_nombre="cve_turno" requerido="true" charsize="0" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+                BEGIN
+	                SET NOCOUNT ON;	                
+                  SELECT 
+                    @cve_turno cve_turno
+                    ,B.cve_diasemana
+                    ,B.descripcion sdia
+                    ,C.nombre sturno
+                    ,SUBSTRING(CONVERT(VARCHAR(10),ISNULL(horaentrada,'01/01/1900 00:00'),108),1,5) horaentrada
+                    ,SUBSTRING(CONVERT(VARCHAR(10),ISNULL(horasalida,'01/01/1900 00:00'),108),1,5) horasalida
+                    ,SUBSTRING(CONVERT(VARCHAR(10),ISNULL(horasalcomi,'01/01/1900 00:00'),108),1,5) horasalcomi
+                    ,SUBSTRING(CONVERT(VARCHAR(10),ISNULL(horaregcomi,'01/01/1900 00:00'),108),1,5) horaregcomi
+                  FROM CTR_diassemana B
+                    LEFT OUTER JOIN CTR_turnodet ON CTR_turnodet.cve_diasemana=B.cve_diasemana AND CTR_turnodet.cve_turno=@cve_turno
+                    LEFT OUTER JOIN CTR_turnomae C ON C.cve_turno=@cve_turno
+                  ORDER BY B.cve_diasemana ASC
+                END
+            ]]>
+      </sql>
+    </ObtenerDetalleTurno>
+
+  <Editar>
+      <campo leyenda="Clave" db_nombre="cve_turno" form_nombre="cve_turno" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Descripción" db_nombre="nombre" form_nombre="nombre" requerido="true" charsize="100" tipo="string"/>
+      <campo leyenda="Cadena de jornada hora de entrada" db_nombre="s_jor_horaentrada" form_nombre="s_jor_horaentrada" requerido="false" charsize="250" tipo="string"/>
+      <campo leyenda="Cadena de jornada hora de salida" db_nombre="s_jor_horasalida" form_nombre="s_jor_horasalida" requerido="false" charsize="250" tipo="string"/>
+      <campo leyenda="Cadena de comida hora de entrada" db_nombre="s_com_horaentrada" form_nombre="s_com_horaentrada" requerido="false" charsize="250" tipo="string"/>
+      <campo leyenda="Cadena de comida hora de entrada" db_nombre="s_com_horasalida" form_nombre="s_com_horasalida" requerido="false" charsize="250" tipo="string"/>
+      <sql>
+        <![CDATA[
+              BEGIN
+                  SET NOCOUNT ON;
+                  
+                  UPDATE CTR_turnomae SET nombre=@nombre WHERE cve_turno=@cve_turno;
+                  IF(@@ROWCOUNT =1)BEGIN
+                    BEGIN TRANSACTION T;
+                    DELETE FROM CTR_turnodet WHERE cve_turno=@cve_turno;
+                    INSERT INTO CTR_turnodet
+                    SELECT @cve_turno, A.spliter1,A.spliter2,B.spliter2,C.spliter2,D.spliter2
+                    FROM dbo.Split2(@s_jor_horaentrada,',','|') A INNER JOIN dbo.Split2(@s_jor_horasalida,',','|')B ON A.spliter1=B.spliter1
+                    INNER JOIN dbo.Split2(@s_com_horaentrada,',','|') C ON B.spliter1=C.spliter1 INNER JOIN dbo.Split2(@s_com_horasalida,',','|')D ON C.spliter1=D.spliter1;
+                    IF @@ERROR <>0 BEGIN
+                      ROLLBACK TRANSACTION T;
+                      SELECT -1 AS estatus,  'Error: No se guardó el registro.' mensaje;
+                     END ELSE BEGIN
+                      COMMIT TRANSACTION T;
+                      SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+                     END
+                  END ELSE BEGIN
+                      SELECT -1 AS estatus,  'Error: No se guardó el registro.' mensaje;
+                  END 
+              END
+          ]]>
+      </sql>
+    </Editar>
+
+    <ObtenerHorarios>
+      <sql>
+        <![CDATA[
+              BEGIN
+	              SELECT * FROM CTR_horario;
+              END
+              ]]>
+      </sql>
+    </ObtenerHorarios>
+
+  <ObtenerTurnosHorario>
+    <campo leyenda="Clave de horario" db_nombre="cve_horario" form_nombre="cve_horario" requerido="true" charsize="0" tipo="int" default=""/>
+    <sql>
+      <![CDATA[
+              BEGIN              
+                  SELECT A.cve_horario,A.cve_turno, B.nombre FROM CTR_horarioturno A INNER JOIN CTR_turnomae B ON A.cve_turno=B.cve_turno WHERE cve_horario=@cve_horario;
+              END
+              ]]>
+    </sql>
+  </ObtenerTurnosHorario>
+  
+    <ObtenerHorarioTurno>
+      <campo leyenda="Clave de turno" db_nombre="cve_turno" form_nombre="cve_turno" requerido="true" charsize="0" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+              BEGIN
+	              SELECT 
+	                B.descripcion dia, 
+	                CONVERT(VARCHAR(20),DATEPART(HH,horaentrada)) + ':' + CONVERT(VARCHAR(20),DATEPART(MI,horaentrada)) + ' - ' + CONVERT(VARCHAR(20),DATEPART(HH,horasalida)) + ':' +  CONVERT(VARCHAR(20),DATEPART(MI,horasalida)) jornada,
+	                CONVERT(VARCHAR(20),DATEPART(HH,horasalcomi)) + ':' + CONVERT(VARCHAR(20),DATEPART(MI,horasalcomi)) + ' - ' + CONVERT(VARCHAR(20),DATEPART(HH,horaregcomi)) + ':' +  CONVERT(VARCHAR(20),DATEPART(MI,horaregcomi)) comida
+                FROM CTR_turnodet A INNER JOIN CTR_diassemana B ON A.cve_diasemana=B.cve_diasemana WHERE cve_turno=@cve_turno;
+              END
+              ]]>
+      </sql>
+    </ObtenerHorarioTurno>
+  
+</Turnos>
+</Secciones>

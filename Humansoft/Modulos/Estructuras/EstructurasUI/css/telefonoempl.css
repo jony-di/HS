@@ -1,0 +1,63 @@
+﻿div.mascara {width:900px; height:685px;border:0px; overflow:hidden;display:block; margin:0px auto; }
+div.mascara div.principal {width:1800px; height:900px; border:0px; position:relative;}
+div.mascara div.principal div.catalogo {width:900px; height:684px; float:left; background-color:transparent}
+div.mascara div.principal div.catalogo table.lista {list-style:none; width:700px; height:360px;margin:0px auto;padding-top:0px;padding-bottom:25px;padding-left:0px; display:block;}
+div.mascara div.principal div.catalogo table.lista tr { width:100%; margin-bottom:15px; float:left; margin-left:0px;text-align:center;}
+div.mascara div.principal div.formulario {width:900px; height:684px; float:left;background-color:transparent}
+div.mascara div.principal div.catalogo a.nombreEmpleado {font-size:18px; padding-top:13px; float:left; min-width:157px;margin-left: 155px;}
+button.agregar {width:90px; /*height:30px;*/ float:right; cursor:pointer;padding:5px;margin-bottom:5px;margin-top:10px;}
+button.regresar{width:90px; height:30px; float:right; cursor:pointer;padding:5px;margin-bottom:5px;margin-top:-3px; margin-right:50px;}
+div.mascara div.principal div.formulario div.alinear {height:430px; min-height:430px;}
+div.mascara div.principal div.formulario .clave {display:block; width:60px;float:left;margin-bottom:20px;width:90px;}
+div.mascara div.principal div.formulario h2.direccion {clear:both;}
+div.mascara div.principal div.catalogo button.editar {background-position:center center;padding:13px;clear:left; float:left;background-image:url(/Recursos/imagenes/editar.png);background-repeat:no-repeat; border:0px; background-color:transparent; cursor:pointer;}
+div.mascara div.principal div.catalogo button.eliminar {width:30px; height:30px;padding-top:25px; float:right;background-image:url(/Recursos/imagenes/eliminar.png);background-repeat:no-repeat; border:0px; background-color:transparent; cursor:pointer;}
+div.mascara div.principal div.catalogo table.lista tr.columnas1 {border:0px; border-bottom:1px dashed #aaaaaa;}
+div.mascara div.principal div.catalogo table.lista  tr.columnas th label{padding:10px;border-top-left-radius:5px;border-top-right-radius:5px;color:White; font-weight:bold;}
+div.mascara div.principal div.catalogo table.lista  tr.columnas th label.editar{display:block; width:55px;float:left; background-color:#5F96CC;margin-left:5px; }
+div.mascara div.principal div.catalogo table.lista  tr.columnas th label.telefonoempl {display:block; width:70px;float:left; background-color:#77AFE7;margin-left:5px;}
+div.mascara div.principal div.catalogo table.lista  tr.columnas th label.empleado {display:block; width:80px;float:left; background-color:#5F96CC;margin-left:5px;}
+div.mascara div.principal div.catalogo table.lista tr.columnas th label.area{display:block; width:50px;float:left; background-color:#77AFE7;margin-left:5px;}
+div.mascara div.principal div.catalogo table.lista tr.columnas th label.ntelefono{display:block; width:80px;float:left; background-color:#5F96CC;margin-left:5px;}
+div.mascara div.principal div.catalogo table.lista tr.columnas th label.tipollamada{display:block; width:80px;float:left; background-color:#77AFE7;margin-left:5px;}
+div.mascara div.principal div.catalogo table.lista tr.columnas th label.estatus{display:block; width:90px;float:left; background-color:#5F96CC;margin-left:5px;}
+div.mascara div.principal div.catalogo table.lista tr.columnas .editar{display:block; width:75px;float:left; }
+div.mascara div.principal div.catalogo table.lista tr.columnas .telefonoempl{display:block; width:96px;float:left;}
+div.mascara div.principal div.catalogo table.lista tr.columnas .empleado{display:block; width:111px;float:left;}
+div.mascara div.principal div.catalogo table.lista tr.columnas .area{display:block; width:81px;float:left;}
+div.mascara div.principal div.catalogo table.lista tr.columnas .ntelefono{display:block; width:111px;float:left;}
+div.mascara div.principal div.catalogo table.lista tr.columnas .tipollamada{display:block; width:111px;float:left;}
+div.mascara div.principal div.catalogo table.lista tr.columnas .estatus{display:block; width:121px;float:left;}
+div.mascara div.principal div.formulario button.salir {float:right; cursor:pointer;}  
+div.mascara div.principal div.formulario label.telefonoempl {float:left;clear:left;margin-bottom:20px;width:90px;}
+div.mascara div.principal div.formulario input.telefonoempl {float:left;margin-bottom:20px;width:190px;clear:right;}
+div.mascara div.principal div.formulario label.empleado {float:left;clear:left;margin-bottom:20px;width:90px;}
+div.mascara div.principal div.formulario input.empleado {float:left;margin-bottom:20px;width:190px;clear:right;}
+div.mascara div.principal div.formulario label.area {float:left;clear:left;margin-bottom:20px;width:90px;}
+div.mascara div.principal div.formulario input.area {float:left;margin-bottom:20px;width:190px;}
+div.mascara div.principal div.formulario label.ntelefono {float:left;clear:left;margin-bottom:20px;width:90px;}
+div.mascara div.principal div.formulario input.ntelefono {float:left;margin-bottom:20px;width:190px;clear:right;}
+div.mascara div.principal div.formulario label.fecha {float:left;clear:left;margin-bottom:20px;width:90px;}
+div.mascara div.principal div.formulario input.fecha {float:left;margin-bottom:20px;width:190px;clear:right;}
+div.mascara div.principal div.formulario label.tipored {float:left;clear:left;margin-bottom:20px;width:90px;}
+div.mascara div.principal div.formulario select.tipored {float:left;margin-bottom:20px;width:190px;clear:right;}
+div.mascara div.principal div.formulario label.tipollamada {float:left;clear:left;margin-bottom:20px;width:90px;}
+div.mascara div.principal div.formulario select.tipollamada {float:left;margin-bottom:20px;width:190px;clear:right;}
+div.mascara div.principal div.formulario label.extension {float:left;clear:left;margin-bottom:20px;width:90px;}
+div.mascara div.principal div.formulario input.extension {float:left;margin-bottom:20px;width:190px;clear:right;}
+div.mascara div.principal div.formulario div.alinear label.estatus { float:left;clear:left;width:90px;}
+div.mascara div.principal div.formulario div.alinear select.estatus {width:190px; float:left;}
+div.mascara div.principal div.formulario div.auxiliar {height:500px; overflow:auto; }
+div.mascara div.principal div.formulario div.columnaI {float:left;width:48%; border-right:1px solid #ccc}
+div.mascara div.principal div.formulario div.columnaD {float:right;width:48%;}
+div.mascara div.principal div.formulario button.guardar {float:left; cursor:pointer; }        
+div.mascara div.principal div.formulario button.cancelar {float:right; cursor:pointer;}  
+div.barra-botones span{width:290px;} 
+div.mascara div.principal div.formulario div.barra-botones {margin-top:-250px;} 
+.ocultar{visibility:hidden;}
+.mostrar{visibility:visible;}
+body{font-size:11px;}
+h3.nombreEmpleado{display:block;clear:both;margin:10px 0px;}
+body div.mascara div.principal div.catalogo div.busqueda{margin-bottom:10px;}
+fieldset.info-empleado{width:60%;}
+body button.agregar{margin-top:30px;}

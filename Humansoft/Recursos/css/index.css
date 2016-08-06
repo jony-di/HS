@@ -1,0 +1,9 @@
+﻿body {width:100%; background:#d3cdc4;margin:0px;font-family:"HelveticaN"; }
+div.contenedor-sesion {width:100%; height:860px;background:#4C5B77 url(/Recursos/imagenes/smile-people.jpg) no-repeat center fixed;background-size: cover;-moz-background-size: cover;-webkit-background-size: cover;-o-background-size: cover;background-size:100%;}
+div.contenedor-sesion img {width:18%;  margin-top:20px; margin-left:25px; box-shadow:5px 5px 3px #888888; }
+div.contenedor-sesion p {font-size: 25px;font-weight: bold;color:#FFFFFF; text-shadow: white 0.1em 0.1em 0.2em; margin-top:500px;line-height:40px;margin-left:750px;}
+div.opciones {width:33%; height:200px; background:#6495ED;float:left; border:1px solid;}
+div.privacidad {width:150%; height:150px; background:#87CEFA ;clear:both;}
+div.contenedor-sesion button.boton-iniciar-sesion{float:right; font-size:15px; margin-top:25px;margin-right:50px;}
+div.contenedor-sesion button.btn1{margin-left:100px;}
+iframe.login {position:absolute; left:0px; top:0px; width:100%; height:800px;background-color:transparent}

@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>    
+<PuestoGenerico>
+    
+    <obtenerSiguienteClave>
+        <sql>
+            BEGIN
+                SELECT ISNULL(MAX(cve_puesto),0) + 1 clave FROM ES_puestosgenericos;
+            END
+        </sql>   
+    </obtenerSiguienteClave>
+  <ConfirmarEscaneo>
+    <campo leyenda="Clave" db_nombre="cve_puesto" form_nombre="puesto" requerido="true" charsize="0" tipo="int" default=""/>
+    <sql>
+      <![CDATA[
+      UPDATE ES_puestosgenericos 
+      SET 
+        perfilescaneado=1
+      WHERE 
+      cve_puesto=@cve_puesto
+      ]]>
+    </sql>
+  </ConfirmarEscaneo>
+  <EliminarEscaneo>
+    <campo leyenda="Clave" db_nombre="cve_puesto" form_nombre="puesto" requerido="true" charsize="0" tipo="int" default=""/>
+    <sql>
+      <![CDATA[
+      UPDATE ES_puestosgenericos 
+      SET 
+        perfilescaneado=0
+      WHERE 
+      cve_puesto=@cve_puesto
+      SELECT 1 AS 'estatus'
+      ]]>
+    </sql>
+  </EliminarEscaneo>
+    <Nuevo>
+        <campo leyenda="Clave" db_nombre="cve_puesto" form_nombre="cve_puesto" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Puntos" db_nombre="puntos" form_nombre="puntos"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Nivel" db_nombre="Nivelmercer" form_nombre="Nivelmercer"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Tabulador" db_nombre="tabulador" form_nombre="tabulador"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Nivel Tabulador" db_nombre="niveltabular" form_nombre="niveltabular"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Nombre" db_nombre="nombre_puesto" form_nombre="nombre_puesto"  requerido="true" charsize="200" tipo="string" default=""/>
+        <campo leyenda="Extra" db_nombre="cve_extra" form_nombre="cve_extra"  requerido="true" charsize="200" tipo="string" default=""/>
+      <campo leyenda="Clave de exámen" db_nombre="cve_paqexamen" form_nombre="cve_paqexamen" requerido="false" charsize="0" tipo="int"/>
+        <sql>
+            BEGIN
+                SET NOCOUNT ON;
+                BEGIN TRY
+                    INSERT INTO ES_puestosgenericos(
+                        cve_puesto,
+                        puntos,
+                        nivelmercer,
+                        tabulador,
+                        niveltabular,
+                        nombre_puesto,
+                        cve_extra,
+                        cve_paqexamen
+                    )
+                    VALUES(
+                        @cve_puesto,
+                        @puntos,
+                        @nivelmercer,
+                        @tabulador,
+                        @niveltabular,
+                        @nombre_puesto,
+                        @cve_extra,
+                        @cve_paqexamen
+                    )
+                    SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+                END TRY BEGIN CATCH
+                    SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+                END CATCH
+            END
+        </sql>
+   </Nuevo>
+
+    <obtenerCatalogo>
+        <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+      <campo leyenda="Clave de departamento" db_nombre="cve_departamento" form_nombre="cve_departamento"  requerido="false"  charsize="0" tipo="int"/>
+      <campo leyenda="Clave" db_nombre="cve_puesto" form_nombre="cve_puesto"  requerido="false"  charsize="0" tipo="int"  default=""/>
+        <sql>
+          BEGIN
+          SET NOCOUNT ON;
+          DECLARE @inicio INT;
+          SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+          DECLARE @TablaAuxiliarPaginacion AS TABLE(
+            indiceRegistro INT,
+            cve_puesto INT,
+            cve_departamento INT,
+            puntos INT,
+            nivelmercer INT,
+            tabulador INT,
+            niveltabular INT,
+            nombre_puesto VARCHAR(200),
+            cve_extra VARCHAR(200),
+            tienePerfil BIT,
+            perfilescaneado BIT,
+            cve_paqexamen INT
+          )
+          INSERT INTO @TablaAuxiliarPaginacion
+          SELECT
+            ROW_NUMBER() OVER(ORDER BY nombre_puesto ASC) AS indiceRegistro,
+            ES_puestosgenericos.cve_puesto,
+            B.cve_departamento cve_departamento,
+            puntos,
+            nivelmercer,
+            tabulador,
+            niveltabular,
+            nombre_puesto,
+            cve_extra,
+            CASE WHEN EXISTS(select * from Es_PstPerfilValor where num_platilla=@cve_puesto) THEN 1 ELSE 0 END AS tienePerfil,
+            perfilescaneado,
+            cve_paqexamen
+            FROM
+            ES_puestosgenericos LEFT OUTER JOIN ES_puestosdepartamento B ON ES_puestosgenericos.cve_puesto=B.cve_puesto AND B.cve_departamento=@cve_departamento
+
+            WHERE  ( ((CONVERT(VARCHAR(20),ES_puestosgenericos.cve_puesto) like '%' + @criterio + '%') OR (nombre_puesto like '%' + @criterio + '%')) AND @cve_puesto=0)
+            OR ((ES_puestosgenericos.cve_puesto=@cve_puesto) AND (@cve_puesto != 0));
+
+            --Paginacion
+            SELECT TOP(@longitudPagina)
+            indiceRegistro,
+            @@ROWCOUNT as totalRegistros,
+            a.cve_puesto,
+            a.cve_departamento,
+            a.puntos,
+            a.nivelmercer,
+            a.tabulador,
+            a.niveltabular,
+            a.nombre_puesto,
+            a.cve_extra,
+            a.tienePerfil,
+            a.perfilescaneado,
+            b.descripcion as nombretabulador,
+            a.cve_paqexamen
+            FROM @TablaAuxiliarPaginacion a
+            left outer join ES_TabuladorDescripciones b on a.tabulador=b.cve_tabulador
+          WHERE indiceRegistro > @inicio
+          ORDER BY  a.cve_departamento DESC,indiceRegistro ASC
+          END
+
+        </sql>        
+    </obtenerCatalogo>
+    <Editar>
+        <campo leyenda="Clave" db_nombre="cve_puesto" form_nombre="cve_puesto" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Puntos" db_nombre="puntos" form_nombre="puntos"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Nivel" db_nombre="Nivelmercer" form_nombre="Nivelmercer"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Tabulador" db_nombre="tabulador" form_nombre="tabulador"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Nivel Tabulador" db_nombre="niveltabular" form_nombre="niveltabular"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Nombre" db_nombre="nombre_puesto" form_nombre="nombre_puesto"  requerido="true" charsize="200" tipo="string" default=""/>
+        <campo leyenda="Extra" db_nombre="cve_extra" form_nombre="cve_extra"  requerido="true" charsize="200" tipo="string" default=""/>
+      <campo leyenda="Clave de exámen" db_nombre="cve_paqexamen" form_nombre="cve_paqexamen" requerido="false" charsize="0" tipo="int"/>
+        <sql>
+
+            BEGIN
+            SET NOCOUNT ON;
+            BEGIN TRY
+            UPDATE ES_puestosgenericos
+            SET
+            cve_puesto= @cve_puesto,
+            puntos=@puntos,
+            nivelmercer=@nivelmercer,
+            tabulador=@tabulador,
+            niveltabular=@niveltabular,
+            nombre_puesto=@nombre_puesto,
+            cve_extra=@cve_extra,
+            cve_paqexamen=@cve_paqexamen
+            WHERE cve_puesto= @cve_puesto
+            SELECT 1  estatus, 'Registro actualizado correctamente' mensaje;
+            END TRY BEGIN CATCH
+            SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+            END CATCH
+            END
+        </sql>
+    </Editar>
+</PuestoGenerico>
+
+    <PuestosDepartamentos>
+
+        <obtenerCatalogo>
+            <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+            <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+            <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+            <campo leyenda="Clave de departamento" db_nombre="cve_departamento" form_nombre="cve_departamento"  requerido="false"  charsize="0" tipo="int"  default=""/>
+            <sql>
+                BEGIN
+                    SELECT a.cve_puesto, a.nombre_puesto, a.niveltabular nivel, a.tabulador, c.descripcion stabulador FROM ES_puestosgenericos a
+                        INNER JOIN ES_puestosdepartamento b
+                        ON a.cve_puesto=b.cve_puesto
+                        LEFT OUTER JOIN ES_TabuladorDescripciones c
+                        ON a.tabulador=c.cve_tabulador
+                    WHERE b.cve_departamento= @cve_departamento
+                    ORDER BY a.nombre_puesto ASC
+                END
+            </sql>
+        </obtenerCatalogo>
+        
+        <GuardarPuestosDepartamento>
+            <campo leyenda="Clave de departamento" db_nombre="cve_departamento" form_nombre="cve_departamento"  requerido="true"  charsize="0" tipo="int"  default=""/>
+            <campo leyenda="Claves de puesto" db_nombre="cves_puestos" form_nombre="cves_puestos"  requerido="true"  charsize="2000" tipo="string"  default=""/>
+            <sql>
+                BEGIN
+                
+                    DECLARE @estatus INT;SET @estatus=0;
+	                DECLARE @mensaje VARCHAR(200);SET @mensaje='No se ejecuto la instrucción';
+                    
+                    BEGIN TRANSACTION T1
+                        DELETE FROM ES_puestosdepartamento WHERE cve_departamento=@cve_departamento;
+                        INSERT INTO ES_puestosdepartamento(cve_departamento,cve_puesto, nombrepuesto) SELECT @cve_departamento,spliter,'' cve_puesto FROM split(@cves_puestos,',');
+                    IF @@TRANCOUNT=1 BEGIN
+				        COMMIT TRANSACTION T1
+				        SET @estatus= '1';
+				        SET @mensaje= 'Se agregaron correctamente los puestos al departamento.';
+			        END ELSE BEGIN
+				        ROLLBACK TRANSACTION T1
+				        SET @estatus= '-1';
+				        SET @mensaje= 'No se realizó la operación.';
+			        END
+                    
+		            SELECT @estatus estatus, @mensaje mensaje;                    
+                END
+            </sql>
+        </GuardarPuestosDepartamento>
+      
+      <AgregarPuestoDepartamento>
+        <campo leyenda="Clave de departamento" db_nombre="cve_departamento" form_nombre="cve_departamento"  requerido="true"  charsize="0" tipo="int"/>
+        <campo leyenda="Clave de puesto" db_nombre="cve_puesto" form_nombre="cve_puesto"  requerido="true"  charsize="0" tipo="int"/>
+        <sql>
+          <![CDATA[
+            BEGIN TRY
+                 INSERT INTO ES_puestosdepartamento(cve_departamento,cve_puesto) VALUES(@cve_departamento,@cve_puesto);
+                  SELECT 1  estatus, 'Puesto agregado al departamento correctamente' mensaje;
+              END TRY BEGIN CATCH
+                  SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+              END CATCH
+          ]]>
+        </sql>
+      </AgregarPuestoDepartamento>
+
+      <EliminarPuestoDepartamento>
+        <campo leyenda="Clave de departamento" db_nombre="cve_departamento" form_nombre="cve_departamento"  requerido="true"  charsize="0" tipo="int"/>
+        <campo leyenda="Clave de puesto" db_nombre="cve_puesto" form_nombre="cve_puesto"  requerido="true"  charsize="0" tipo="int"/>
+        <sql>
+        <![CDATA[
+            BEGIN TRY
+                DELETE FROM ES_puestosdepartamento WHERE cve_departamento=@cve_departamento AND cve_puesto=@cve_puesto;
+                SELECT 1  estatus, 'Puesto eliminado del departamento correctamente' mensaje;
+            END TRY BEGIN CATCH
+                SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+            END CATCH
+        ]]>
+        </sql>
+      </EliminarPuestoDepartamento>
+        
+    </PuestosDepartamentos>
+    
+
+    
+</Secciones>  
+    
+    
+    
+    
+

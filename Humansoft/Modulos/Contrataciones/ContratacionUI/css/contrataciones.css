@@ -1,0 +1,12 @@
+﻿body {font-family:HelveticaN;margin:0px;letter-spacing:1px;overflow:hidden;}
+.encabezadoformulario {color:#79bcff; text-shadow:#87CEFA 0.1em 0.1em 0.2em}
+hr.cleaner {display:block; clear:both; border:0px; padding:10px;}
+div.mascara {padding-bottom: 10px !important;}
+div.mascara div.principal {width:10000px;border:0px; position:relative;}
+div.mascara div.principal div.catalogo {width:900px; float:left; background-color:transparent}
+div.mascara div.principal div.catalogo table.lista {list-style:none; width:700px;margin:0px auto;padding-top:15px;padding-bottom:25px;padding-left:0px; display:block;}
+div.mascara div.principal div.catalogo table.lista tr { width:100%; margin-bottom:15px; float:left; margin-left:0px;text-align:center;}
+div.mascara div.principal div.formulario {width:900px;float:left;background-color:transparent}
+button.agregar {width:90px; /*height:30px;*/ float:right; cursor:pointer;padding:5px;margin-bottom:5px;margin-top:10px;}
+.ocultar { visibility:hidden;}
+.mostrar{visibility:visible;}

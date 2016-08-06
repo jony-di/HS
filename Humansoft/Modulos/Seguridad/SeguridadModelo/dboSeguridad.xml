@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+  <Comunes>
+    <ObtenerNotificacionesUsuario>
+      <sql>
+        <![CDATA[
+              BEGIN
+	              SELECT CONVERT(VARCHAR(30),fecha,13) fecha, nota,pagina FROM Notificaciones WHERE num_usuario=@cve_usuario;
+              END
+				 ]]>
+      </sql>
+    </ObtenerNotificacionesUsuario>
+
+    <EliminarNotificacionUsuario>
+      <campo leyenda="Fecha de Notificacion" db_nombre="fechaNotificacion" form_nombre="fechaNotificacion" requerido="true" charsize="40" tipo="string"/>
+      <sql>
+        <![CDATA[
+              BEGIN
+	              DELETE FROM Notificaciones WHERE num_usuario=@cve_usuario AND fecha=@fechaNotificacion;                
+                SELECT 'Filas afectadas: ' + CONVERT(VARCHAR(20),@@ROWCOUNT) filasAfectadas;
+              END
+				 ]]>
+      </sql>
+    </EliminarNotificacionUsuario>
+
+    <EliminarNotificacionPorReferencia>
+      <campo leyenda="Referencia" db_nombre="referencia" form_nombre="referencia" requerido="true" charsize="40" tipo="string"/>
+      <sql>
+        <![CDATA[
+              BEGIN
+	              DELETE FROM Notificaciones WHERE referencia=@referencia;
+              END
+				 ]]>
+      </sql>
+    </EliminarNotificacionPorReferencia>
+
+    <ObtenerTiposEstructura>
+      <sql>
+        <![CDATA[
+            SELECT cve_tipoestructura, descripcion FROM SG_TiposAccesoEstructura;
+				 ]]>
+      </sql>
+    </ObtenerTiposEstructura>
+
+    <ObtenerEncabezadoEmpleado>
+      <campo leyenda="Número de empleado" db_nombre="num_empleado" form_nombre="num_empleado" requerido="true" charsize="30" tipo="string"/>
+      <sql>
+        <![CDATA[
+            SELECT
+              @num_empleado num_empleado
+              ,A.nombreCompleto nombre
+              , C.nombredep departamento
+              , REPLACE(CONVERT(VARCHAR(20),A.fechaing,106),' ', '/') fechaIngreso
+              , D.Nombre_Puesto puesto
+              , E.Descripcion lugarTrabajo
+            FROM
+              ES_emplplantilla A
+              LEFT OUTER JOIN ES_posiciones B ON A.num_posicion=B.num_plantilla
+              LEFT OUTER JOIN ES_departamentos C ON B.cve_departamento=C.cve_departamento
+              LEFT OUTER JOIN ES_puestosgenericos D ON B.cve_puesto=D.cve_puesto
+              LEFT OUTER JOIN ES_lugartrabajo E ON B.cve_lugartrabajo=E.cve_lugar
+            WHERE A.id_empleado=@num_empleado      
+				 ]]>
+      </sql>
+    </ObtenerEncabezadoEmpleado>
+    
+  </Comunes>
+
+  <Visibilidad>
+       <EsEmpleadoVisible>
+          <campo leyenda="Número de empleado" db_nombre="num_empleado" form_nombre="num_empleado" requerido="true" charsize="30" tipo="string"/>
+          <sql>
+              <![CDATA[
+              --DECLARE @cve_usuario INT=3;
+                DECLARE @tEmpleadosVisibles AS TABLE(
+                  num_empleado VARCHAR(30)
+                );
+                INSERT INTO @tEmpleadosVisibles
+                EXEC PA_SG_CObtenerEmpleadosVisibles @cve_usuario
+                SELECT COUNT(num_empleado) coincidencias FROM @tEmpleadosVisibles WHERE num_empleado=@num_empleado;
+              ]]>
+          </sql>
+        </EsEmpleadoVisible>
+
+        <EsPosicionVisible>
+          <campo leyenda="Número de posición" db_nombre="num_posicion" form_nombre="num_posicion" requerido="true" charsize="0" tipo="int"/>
+          <sql>
+            <![CDATA[
+                --DECLARE @cve_usuario INT=3;
+                  DECLARE @tPosicionesVisibles AS TABLE(
+                    num_posicion INT
+                  );
+                  INSERT INTO @tPosicionesVisibles
+                  EXEC PA_SG_CObtenerPosicionesVisibles @cve_usuario
+                  SELECT COUNT(num_posicion) coincidencias FROM @tPosicionesVisibles WHERE num_posicion=@num_posicion;
+                ]]>
+          </sql>
+        </EsPosicionVisible>
+    
+        <ObtenerNumerosEmpleadosVisibles>
+          <sql>
+              <![CDATA[
+                --DECLARE @cve_usuario INT=3;
+                EXEC PA_SG_CObtenerEmpleadosVisibles @cve_usuario
+              ]]>
+          </sql>
+        </ObtenerNumerosEmpleadosVisibles>
+  
+        <ObtenerEmpleados>
+          <campo leyenda="" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="100" tipo="int" default="1"/>
+          <campo leyenda="" db_nombre="longitudPagina" form_nombre="longitudPagina" requerido="true" charsize="0" tipo="int" default="100"/>
+          <campo leyenda="" db_nombre="id_empleado" form_nombre="id_empleado" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="nombrecompleto" form_nombre="nombrecompleto" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="nombre" form_nombre="nombre" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="apellidop" form_nombre="apellidop" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="apellidom" form_nombre="apellidom" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="sueldo" form_nombre="sueldo" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="fechaing" form_nombre="fechaing" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="cve_sexo" form_nombre="cve_sexo" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="cve_estatus" form_nombre="cve_estatus" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="cve_estadocivil" form_nombre="cve_estadocivil" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="cve_banco" form_nombre="cve_banco" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="numerocuenta" form_nombre="numerocuenta" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="Venci_contrato" form_nombre="Venci_contrato" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="email" form_nombre="email" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="estudios" form_nombre="estudios" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="escuela" form_nombre="escuela" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="imss" form_nombre="imss" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="curp" form_nombre="curp" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="rfc" form_nombre="rfc" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="fechanac" form_nombre="fechanac" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="cve_paisnaci" form_nombre="cve_paisnaci" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="lugarnacimiento" form_nombre="lugarnacimiento" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="nacionalidad" form_nombre="nacionalidad" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="cve_paistrabaja" form_nombre="cve_paistrabaja" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="cve_grado" form_nombre="cve_grado" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="cve_tipoemp" form_nombre="cve_tipoemp" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="num_posicion" form_nombre="num_posicion" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="nombreFoto" form_nombre="nombreFoto" requerido="false" charsize="100" tipo="string" default="%"/>
+          <campo leyenda="" db_nombre="activo" form_nombre="activo" requerido="false" charsize="100" tipo="string" default="%"/>
+            <sql>
+              <![CDATA[
+                  BEGIN
+                        SET NOCOUNT ON;
+                      --DECLARE @cve_usuario INT=3;
+                        DECLARE @tEmpleadosVisibles AS TABLE(
+	                        num_empleado VARCHAR(30)
+                        )
+                        INSERT INTO @tEmpleadosVisibles
+                        EXEC PA_SG_CObtenerEmpleadosVisibles @cve_usuario
+                        
+	                      DECLARE @inicio INT;
+	                      SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+	                      DECLARE @TablaAuxiliarPaginacion AS TABLE(
+		                      indiceRegistro INT, 
+		                      id_empleado NVARCHAR(150),
+		                      nombre NVARCHAR(50),
+		                      apellidop NVARCHAR(50),
+		                      apellidom NVARCHAR(50),
+		                      sueldo MONEY,
+		                      fechaing DATETIME,
+		                      cve_sexo NVARCHAR(2),
+		                      cve_estatus NVARCHAR(15),
+		                      cve_estadocivil NVARCHAR(15),
+		                      cve_banco NVARCHAR(15),
+		                      numerocuenta NVARCHAR(50),
+		                      Venci_contrato DATETIME,
+		                      email NVARCHAR(150),
+		                      estudios NVARCHAR(120),
+		                      escuela NVARCHAR(100),
+		                      imss NVARCHAR(50),
+		                      curp NVARCHAR(50),
+		                      rfc NVARCHAR(50),
+		                      fechanac DATETIME,
+		                      cve_paisnaci NVARCHAR(3),
+		                      lugarnacimiento NVARCHAR(50),
+		                      nacionalidad NVARCHAR(50),
+		                      cve_paistrabaja NVARCHAR(3),
+		                      cve_grado NVARCHAR(15),
+		                      cve_tipoemp NVARCHAR(10),
+		                      num_posicion NVARCHAR(150),
+		                      nombreFoto VARCHAR(50),
+		                      activo BIT
+	                      )
+	                      INSERT INTO @TablaAuxiliarPaginacion
+	                      SELECT 
+		                      ROW_NUMBER() OVER(ORDER BY CONVERT(INT,id_empleado) DESC) AS indiceRegistro,		
+			                      a.id_empleado,
+			                      a.nombre ,
+			                      a.apellidop ,
+			                      a.apellidom ,
+			                      a.sueldo ,
+			                      a.fechaing ,
+			                      a.cve_sexo ,
+			                      a.cve_estatus ,
+			                      a.cve_estadocivil ,
+			                      a.cve_banco ,
+			                      a.numerocuenta ,
+			                      a.Venci_contrato ,
+			                      a.email ,
+			                      a.estudios ,
+			                      a.escuela ,
+			                      a.imss,
+			                      a.curp ,
+			                      a.rfc ,
+			                      a.fechanac ,
+			                      a.cve_paisnaci,
+			                      a.lugarnacimiento,
+			                      a.nacionalidad ,
+			                      a.cve_paistrabaja ,
+			                      a.cve_grado ,
+			                      a.cve_tipoemp ,
+			                      a.num_posicion ,
+			                      a.nombreFoto,
+			                      a.activo
+	                      FROM
+                          ES_emplplantilla A
+                          WHERE A.id_empleado IN(
+                          ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                          SELECT num_empleado FROM @tEmpleadosVisibles
+                          --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                        ) AND
+                         ISNULL(id_empleado,'') like @id_empleado AND
+		                      ISNULL(nombre,'') like @nombre AND
+		                      ISNULL(apellidop,'') like @apellidop AND
+		                      ISNULL(apellidom,'') like @apellidom AND
+		                      CONVERT(VARCHAR(50),ISNULL(sueldo,'')) like @sueldo AND 
+		                      --ISNULL(fechaing,'') like @fechaing AND
+		                      ISNULL(cve_sexo,'') like @cve_sexo AND
+		                      ISNULL(cve_estatus,'') like @cve_estatus AND
+		                      ISNULL(cve_estadocivil,'') like @cve_estadocivil AND
+		                      ISNULL(cve_banco,'') like @cve_banco AND
+		                      ISNULL(numerocuenta,'') like @numerocuenta AND
+		                      --ISNULL(Venci_contrato,'') like @Venci_contrato AND
+		                      ISNULL(email,'') like @email AND
+		                      ISNULL(estudios,'') like @estudios AND
+		                      ISNULL(escuela,'') like @escuela AND
+		                      ISNULL(imss,'') like @imss AND
+		                      ISNULL(curp,'') like @curp AND
+		                      ISNULL(rfc,'') like @rfc AND
+		                      --ISNULL(fechanac,'') like @fechanac AND
+		                      ISNULL(cve_paisnaci,'') like @cve_paisnaci AND
+		                      ISNULL(lugarnacimiento,'') like @lugarnacimiento AND
+		                      ISNULL(nacionalidad,'') like @nacionalidad AND
+		                      ISNULL(cve_paistrabaja,'') like @cve_paistrabaja AND
+		                      ISNULL(cve_grado,'') like @cve_grado AND
+		                      ISNULL(cve_tipoemp,'') like @cve_tipoemp AND
+		                      ISNULL(num_posicion,'') like @num_posicion AND
+		                      CONVERT(VARCHAR(20),CASE WHEN activo IS NULL OR activo=0 THEN '0' ELSE '1' END) like CASE WHEN @activo IS NULL THEN '%' ELSE @activo END AND 
+		                      ISNULL(a.nombre + ' ' + a.apellidop + ' ' + apellidom,'') like '%' + @nombrecompleto + '%'
+	                      --Paginacion	
+	                      SELECT TOP(@longitudPagina)
+		                        A.indiceRegistro,
+		                        @@ROWCOUNT as totalRegistros,
+			                      a.id_empleado,
+			                      a.nombre + ' ' + a.apellidop + ' ' + apellidom as nombrecom,
+			                      a.nombre ,
+			                      a.apellidop ,
+			                      a.apellidom ,
+			                      CONVERT(DECIMAL(18,2),a.sueldo) sueldo,
+			                      CONVERT(VARCHAR(20),a.fechaing,103) fechaing,
+			                      a.cve_sexo ,
+			                      a.cve_estatus ,
+			                      a.cve_estadocivil ,
+			                      a.cve_banco ,
+			                      a.numerocuenta ,
+			                      CONVERT(VARCHAR(20),a.Venci_contrato,103) Venci_contrato,
+			                      a.email ,
+			                      a.estudios ,
+			                      a.escuela ,
+			                      a.imss ,
+			                      a.curp ,
+			                      a.rfc ,
+			                      CONVERT(VARCHAR(20),a.fechanac,103)fechanac,
+			                      a.cve_paisnaci,
+			                      a.lugarnacimiento ,
+			                      a.nacionalidad ,
+			                      a.cve_paistrabaja ,
+			                      a.cve_grado ,
+			                      a.cve_tipoemp ,
+			                      a.num_posicion ,
+			                      a.nombreFoto,
+			                      a.activo
+	                      FROM @TablaAuxiliarPaginacion A
+	                      WHERE indiceRegistro > @inicio
+	                      ORDER BY indiceRegistro ASC
+                  END
+              ]]>
+            </sql>
+        </ObtenerEmpleados>
+
+        <ObtenerEstructura>
+            <campo leyenda="" db_nombre="esDetalle" form_nombre="esDetalle" requerido="false" charsize="0" tipo="bool" default="false"/>
+            <campo leyenda="" db_nombre="num_plantilla" form_nombre="num_plantilla" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="num_plantilladep" form_nombre="num_plantilladep" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="id_empleado" form_nombre="id_empleado" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="contratacionInmediata" form_nombre="contratacionInmediata" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="area" form_nombre="area" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="division" form_nombre="division" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="plaza" form_nombre="plaza" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="cve_puesto" form_nombre="cve_puesto" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="Fampuesto" form_nombre="Fampuesto" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="cve_departamento" form_nombre="cve_departamento" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="c_costos" form_nombre="c_costos" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="cve_politica" form_nombre="cve_politica" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="nivel_politica" form_nombre="nivel_politica" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="Vigencia" form_nombre="Vigencia" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="VigenciaA" form_nombre="VigenciaA" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="VigenciaB" form_nombre="VigenciaB" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="tipoplantilla" form_nombre="tipoplantilla" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="dga_agru" form_nombre="dga_agru" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="ubn" form_nombre="ubn" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="cve_empresa" form_nombre="cve_empresa" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="nivel" form_nombre="nivel" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="tabulador" form_nombre="tabulador" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="niveltabular" form_nombre="niveltabular" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="puntoshay" form_nombre="puntoshay" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="segmento" form_nombre="segmento" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="headcount" form_nombre="headcount" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="headcountocup" form_nombre="headcountocup" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="zonacara" form_nombre="zonacara" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="telefono" form_nombre="telefono" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="ext" form_nombre="ext" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="q" form_nombre="q" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="actfuncional" form_nombre="actfuncional" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="turno" form_nombre="turno" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="consecutiv" form_nombre="consecutiv" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="cve_grupopago" form_nombre="cve_grupopago" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="Sindicalizado" form_nombre="Sindicalizado" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="Ejecutivo" form_nombre="Ejecutivo" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="direcplantilla" form_nombre="direcplantilla" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="estatus" form_nombre="estatus" requerido="false" charsize="40" tipo="string" default="%"/>
+            <campo leyenda="" db_nombre="s_estatus" form_nombre="s_estatus" requerido="false" charsize="40" tipo="string"/>
+            <sql>
+              <![CDATA[
+                  BEGIN
+                      --DECLARE @cve_usuario INT=3;
+                        DECLARE @num_plantilla_aux INT;
+                        SET @num_plantilla_aux=(CASE WHEN @num_plantilla = '%' THEN NULL ELSE CONVERT(INT,@num_plantilla) END);
+                        DECLARE @tPosicionesVisibles AS TABLE(
+	                        num_plantilla VARCHAR(30)
+                        )
+                        INSERT INTO @tPosicionesVisibles
+                        EXEC PA_SG_CObtenerPosicionesVisibles @cve_usuario
+                        --Hijos de usuario
+                        SELECT
+	                        a.sec_plantilla,
+	                        a.[num_plantilla],
+	                        a.[num_plantilladep],
+	                        pgj.Nombre_Puesto spuestojefe,
+	                        a.[id_empleado],
+	                        a.contratacionInmediata,
+	                        ISNULL(a.[id_empleado],'-1'),
+	                        a.[area],
+	                        a.[division],
+	                        a.[plaza],
+	                        a.[cve_puesto],
+                          a.cve_lugartrabajo,
+                          a.cve_horario,
+                          hr.nombre scve_horario,
+	                        pg.Nombre_Puesto puesto,
+	                        a.cve_fampuesto Fampuesto,
+	                        a.[cve_departamento],
+	                        a.[cve_politica],
+	                        a.[nivel_politica],
+	                        CONVERT(VARCHAR(20),a.[Vigencia],103) Vigencia,
+	                        a.cve_estatusplan [estatus],
+	                        b.descripcion AS s_estatus,
+	                        a.cve_tipoplantilla [tipoplantilla],
+	                        a.[dga_agrup] dga_agru,
+	                        a.[ubn],
+	                        a.[cve_empresa],
+	                        a.[nivel],
+	                        a.cve_tabulador tabulador,
+	                        a.[niveltabular],
+	                        a.[puntoshay],
+	                        a.cve_segmento [segmento],
+	                        a.[headcount],
+	                        a.[headcountocup],
+	                        a.[headcountVacantes],
+	                        a.[zonacara],
+	                        a.[telefono],
+	                        a.[ext],
+	                        a.[q],
+	                        a.[actfuncional],
+	                        a.[turno],
+	                        a.[consecutiv],
+	                        a.[cve_grupopago],
+	                        a.[Sindicalizado],
+	                        a.[Ejecutivo],
+	                        a.[direcplantilla],
+	                        a.nivel nivelOrden,
+	                        a.orden_posicion orden1,
+	                        c.nombredep,
+                          c.c_costos,
+	                        e.descripcion,
+	                        td.descripcion stabulador,
+	                        pv.nombre spoliticavacaciones,
+	                        ISNULL(em.nombrecompleto,'') nombrecompleto,
+	                        CASE WHEN CHARINDEX('.',A.orden_posicion)>0 THEN (SUBSTRING(A.orden_posicion,0,  LEN(A.orden_posicion) - CHARINDEX('.',REVERSE(A.orden_posicion)) + 1) + '.0.') ELSE '0.' END orden
+                        FROM (SELECT * FROM ES_posiciones WHERE num_plantilla IN(
+                          SELECT num_plantilla FROM @tPosicionesVisibles WHERE (@esDetalle=1 AND num_plantilla= @num_plantilla_aux) OR @esDetalle<>1)
+                        )A
+                        LEFT OUTER JOIN ES_estatusplan b ON A.cve_estatusplan=b.cve_estatusplan
+                        LEFT OUTER JOIN ES_departamentos c ON A.cve_departamento =c.cve_departamento
+                        LEFT OUTER JOIN ES_tipoplantilla e ON A.cve_tipoplantilla=e.cve_tipoplantilla
+                        LEFT OUTER JOIN ES_emplplantilla em ON A.id_empleado=em.id_empleado
+                        LEFT OUTER JOIN ES_puestosgenericos pg ON A.cve_puesto=pg.Cve_puesto 
+                        LEFT OUTER JOIN ES_TabuladorDescripciones td ON A.cve_tabulador= td.cve_tabulador
+                        LEFT OUTER JOIN VAC_PoliVacMaes pv ON A.cve_politica= pv.cve_politica
+                        LEFT OUTER JOIN ES_posiciones ps ON A.num_plantilladep= ps.num_plantilla
+                        LEFT OUTER JOIN ES_puestosgenericos pgj ON pgj.cve_puesto= ps.cve_puesto
+                        LEFT OUTER JOIN CTR_horario hr ON a.cve_horario=hr.cve_horario
+                        WHERE
+                            (@esDetalle=1 AND A.num_plantilla= @num_plantilla_aux) OR @esDetalle<>1 AND (
+                            CONVERT(VARCHAR(20),A.num_plantilla) like @num_plantilla AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.num_plantilladep,'')) like @num_plantilladep AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.id_empleado,'')) like @id_empleado AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.contratacionInmediata,'')) like @contratacionInmediata AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.area,'')) like @area AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.division,'')) like @division AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.plaza,'')) like @plaza AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.cve_puesto,'')) like @cve_puesto AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.cve_Fampuesto,'')) like @Fampuesto AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.cve_departamento,'')) like @cve_departamento AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.c_costos,'')) like @c_costos AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.cve_politica,'')) like @c_costos AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.nivel_politica,'')) like @c_costos AND 
+			                      --CONVERT(DATE,A.Vigencia) = CONVERT(DATE,@Vigencia) AND --DATETIME
+			                      CONVERT(VARCHAR(20),ISNULL(A.cve_estatusplan,'')) like @estatus AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.cve_tipoplantilla,'')) like @tipoplantilla AND 
+			                      ISNULL(A.dga_agrup,'') like @dga_agru AND 
+			                      ISNULL(A.ubn,'') like @ubn AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.cve_empresa,'')) like @cve_empresa AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.nivel,'')) like @nivel AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.cve_tabulador,'')) like @tabulador AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.niveltabular,'')) like @niveltabular AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.puntoshay,'')) like @puntoshay AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.cve_segmento,'')) like @segmento AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.headcount,'')) like @headcount AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.headcountocup,'')) like @headcountocup AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.zonacara,'')) like @zonacara AND 
+			                      ISNULL(A.telefono,'') like @telefono AND 
+			                      ISNULL(A.ext,'') like @ext AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.q,'')) like @q AND 
+			                      ISNULL(A.actfuncional,'') like @actfuncional AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.turno,'')) like @turno AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.consecutiv,'')) like @consecutiv AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.cve_grupopago,'')) like @cve_grupopago AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.Sindicalizado,'')) like @Sindicalizado AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.Ejecutivo,'')) like @Ejecutivo AND 
+			                      CONVERT(VARCHAR(20),ISNULL(A.direcplantilla,'')) like @direcplantilla                        
+                         )
+                        ORDER BY orden1
+                  END
+              ]]>
+            </sql>
+        </ObtenerEstructura>
+    
+</Visibilidad>
+  
+</Secciones>  
+    
+    
+    
+    
+

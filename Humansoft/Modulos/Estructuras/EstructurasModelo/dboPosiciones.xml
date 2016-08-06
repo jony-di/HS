@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Secciones>
+  <filtros>
+    <obtenerRegion>
+      <sql>
+        <![CDATA[
+          SELECT cve_region ,nombre
+          FROM SG_region
+          WHERE activo=1
+        ]]>
+      </sql>
+    </obtenerRegion>
+  </filtros>
+</Secciones>

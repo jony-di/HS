@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+<Politicas>    
+    <ObtenerSiguienteClave>
+        <sql>
+        <![CDATA[
+            BEGIN
+              SELECT ISNULL(MAX(indice),0) + 1 indice FROM CTR_politicas;
+            END
+        ]]>
+        </sql>   
+    </ObtenerSiguienteClave>
+    
+    <Nuevo>
+      <campo leyenda="Clave" db_nombre="indice" form_nombre="indice" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Clave política" db_nombre="cve_politica" form_nombre="cve_politica" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Cantidad" db_nombre="cantidad" form_nombre="cantidad" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Frecuencia" db_nombre="frecuencia" form_nombre="frecuencia" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Clave unidad" db_nombre="cve_dado" form_nombre="cve_dado" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Auxiliar 1" db_nombre="aux1" form_nombre="aux1" requerido="false" charsize="0" tipo="int"/>
+      <campo leyenda="Auxiliar 2" db_nombre="aux2" form_nombre="aux2" requerido="false" charsize="0" tipo="int"/>
+      <campo leyenda="Auxiliar 3" db_nombre="aux3" form_nombre="aux3" requerido="false" charsize="0" tipo="int"/>
+      <campo leyenda="Auxiliar 4" db_nombre="aux4" form_nombre="aux4" requerido="false" charsize="0" tipo="int"/>
+      
+        <sql>          
+          <![CDATA[
+              BEGIN
+                 BEGIN TRY
+                  SET NOCOUNT ON;
+                  INSERT INTO CTR_politicas(
+                      indice,
+                      cve_politica,
+                      cantidad,
+                      frecuencia,
+                      cve_dado,
+                      aux1,
+                      aux2,
+                      aux3,
+                      aux4,
+                  )
+                  VALUES(
+                      @indice,
+                      @cve_politica,
+                      @Cantidad,
+                      @frecuencia,
+                      @cve_dado,
+                      @aux1,
+                      @aux2,
+                      @aux3,
+                      @aux4
+                  );                  
+                  SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+                 END TRY BEGIN CATCH                 
+                      SELECT -1  estatus, 'Error:' + ERROR_MESSAGE() mensaje;
+                 END CATCH
+              END
+          ]]>
+        </sql>
+   </Nuevo>
+
+    <ObtenerCatalogo>
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+      <sql>
+        <![CDATA[
+            BEGIN
+	            SET NOCOUNT ON;
+	            DECLARE @inicio INT;
+	            SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+	            DECLARE @TablaAuxiliarPaginacion AS TABLE(
+		            indiceRegistro INT,
+                indice INT,
+		            cve_politica INT,
+		            descripcion VARCHAR(200),
+                cantidad int,
+                periodo VARCHAR(200),
+                activo BIT
+	            )
+	            INSERT INTO @TablaAuxiliarPaginacion
+	            SELECT
+		            ROW_NUMBER() OVER(ORDER BY CONVERT(INT,A.indice) DESC) AS indiceRegistro
+                ,A.indice
+                ,A.cve_politica
+                ,B.descripcion
+                ,A.cantidad
+                ,CONVERT(VARCHAR(100),A.frecuencia) + ' ' + C.descripcion + (CASE WHEN A.frecuencia > 1 THEN 's' ELSE '' END) periodo
+                ,B.activo
+	            FROM
+		            CTR_politicas A INNER JOIN CTR_catPoliticas B ON  A.cve_politica=B.cve_politica INNER JOIN SIS_dadoen C ON A.cve_dado=C.cve_dado
+	            WHERE  CONVERT(VARCHAR(20),A.cve_politica) like @criterio OR B.descripcion like '%' + @criterio + '%';
+		
+	            --Paginacion	
+	            SELECT TOP(@longitudPagina)
+		            indiceRegistro,
+		            @@ROWCOUNT as totalRegistros,
+                indice,
+		            cve_politica,
+		            descripcion,
+                cantidad,
+                periodo,
+                activo
+	            FROM @TablaAuxiliarPaginacion
+	            WHERE indiceRegistro > @inicio
+	            ORDER BY indiceRegistro ASC
+            END
+        ]]>
+      </sql>
+    </ObtenerCatalogo>
+
+    <ObtenerDetallePolitica>
+      <campo leyenda="Indice" db_nombre="indice" form_nombre="indice" requerido="true" charsize="0" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+                BEGIN
+	                SET NOCOUNT ON;
+                  SELECT 
+                     indice
+                    ,cve_politica
+                    ,cantidad
+                    ,frecuencia
+                    ,cve_dado
+                    ,aux1
+                    ,aux2
+                    ,aux3
+                    ,aux4
+                  FROM CTR_politicas
+                  WHERE indice=@indice
+                END
+            ]]>
+      </sql>
+    </ObtenerDetallePolitica>
+
+
+  <ObtenerCatPoliticas>
+    <sql>
+      <![CDATA[
+                BEGIN
+	                SET NOCOUNT ON;
+                  SELECT 
+                     cve_politica                    
+                    ,descripcion
+                    ,activo
+                  FROM CTR_catpoliticas
+                END
+            ]]>
+    </sql>
+  </ObtenerCatPoliticas>
+
+  <Editar>
+      <campo leyenda="Clave" db_nombre="indice" form_nombre="indice" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Clave política" db_nombre="cve_politica" form_nombre="cve_politica" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Cantidad" db_nombre="cantidad" form_nombre="cantidad" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Frecuencia" db_nombre="frecuencia" form_nombre="frecuencia" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Clave unidad" db_nombre="cve_dado" form_nombre="cve_dado" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Auxiliar 1" db_nombre="aux1" form_nombre="aux1" requerido="false" charsize="0" tipo="int"/>
+      <campo leyenda="Auxiliar 2" db_nombre="aux2" form_nombre="aux2" requerido="false" charsize="0" tipo="int"/>
+      <campo leyenda="Auxiliar 3" db_nombre="aux3" form_nombre="aux3" requerido="false" charsize="0" tipo="int"/>
+      <campo leyenda="Auxiliar 4" db_nombre="aux4" form_nombre="aux4" requerido="false" charsize="0" tipo="int"/>
+    
+      <sql>
+        <![CDATA[
+              BEGIN
+                   SET NOCOUNT ON;                  
+                   DECLARE @estatus INT;
+                   DECLARE @mensaje VARCHAR(200);
+                   SET @mensaje='Registro guardado correctamente.';
+                  IF @cve_politica=5 BEGIN
+                    IF (CONVERT(INT,@aux1)=CONVERT(INT,@aux4) + 1) AND (CONVERT(INT,@aux2) + 1=CONVERT(INT,@aux3)) OR 
+                      (CONVERT(INT,@aux1)=1) AND (@aux4 IS NULL)
+                     BEGIN
+                        SET @estatus=1;
+                     END ELSE BEGIN
+                        SET @estatus=-1;
+                        SET @mensaje='Inconsistencia en los intervalos de tiempo. No se guardó el registro.';
+                     END
+                  END ELSE BEGIN 
+                      SET @estatus=1;
+                  END
+                  IF @estatus=1 BEGIN
+                    UPDATE CTR_politicas 
+                    SET 
+                      cve_politica=@cve_politica,
+                      cantidad=@cantidad,
+                      frecuencia=@frecuencia,
+                      cve_dado=@cve_dado,
+                      aux1=LTRIM(RTRIM(@aux1)),
+                      aux2=LTRIM(RTRIM(@aux2)),
+                      aux3=LTRIM(RTRIM(@aux3)),
+                      aux4=LTRIM(RTRIM(@aux4))
+                    WHERE 
+                      indice=@indice
+                  END
+                    
+                    SELECT @estatus estatus, @mensaje mensaje;
+                    IF @@ERROR <>0 BEGIN
+                        SELECT -1 AS estatus,  'Error:' + ERROR_MESSAGE() mensaje;
+                    END 
+              END
+          ]]>
+      </sql>
+    </Editar>
+
+</Politicas>
+</Secciones>

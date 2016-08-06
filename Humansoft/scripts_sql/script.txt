@@ -1,0 +1,183 @@
+﻿--LIMPIAR TABLAS VACACIONES----------------------------------
+
+delete from VAC_VacacionesDerecho;
+delete from VAC_ProgVacFecha;
+delete from VAC_ProgVacaciones;
+delete from VAC_HistorialSolicitudesVac;
+delete from Notificaciones;
+exec PA_VAC_CalculoDiasDerecho;
+
+DECLARE @num_empleado VARCHAR(20)='5168'
+delete from VAC_VacacionesDerecho WHERE num_empleado=@num_empleado;
+delete from VAC_HistorialSolicitudesVac WHERE num_solicitud IN(SELECT num_solicitud FROM VAC_ProgVacaciones A INNER JOIN VAC_ProgVacaciones B ON A.num_empleado= @num_empleado);
+delete from VAC_ProgVacFecha WHERE num_empleado=@num_empleado;
+delete from VAC_ProgVacaciones WHERE num_empleado=@num_empleado;
+exec PA_VAC_CalculoDiasDerecho;
+
+---Rol para VoBo RH-------------------------------------------
+INSERT INTO SG_roles(cve_role,nombrerole,[cve_modulo],activo) VALUES(1,'VoBo RH Vacaciones',3,1);
+
+------Tipo de Estructura: Global, Directa en SG_Perfiles----------------------------
+INSERT INTO SG_TiposAccesoEstructura VALUES(1,'Estructura Global');
+INSERT INTO SG_TiposAccesoEstructura VALUES(2,'Línea Directa');
+
+---------------Actualización de tabla posiciones---------------------------------------------------------------
+USE [HSW]
+GO
+/****** Object:  Trigger [dbo].[TG_ES_UID_ActualizarPropiedadesJerarquicas]    Script Date: 08/18/2015 08:40:01 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+/*************************************************************************************************
+Autor: Emmanuel Hernández López
+Fecha: 18/08/2015
+Descripción: Trigger que se encarga de actualizar las propiedades: 
+	1. Secuencia de plantilla,
+	2. Número de dependientes,
+	3. Número de dependientes con estatus OCUPADA=2
+	4. Número de dependientes con estatus VACANTE=3
+	5. Orden indexado en arbol para busquedas.
+	6. Nivel de profundidad del arbol.
+
+**************************************************************************************************/
+
+ALTER TRIGGER [dbo].[TG_ES_UID_ActualizarPropiedadesJerarquicas] 
+ON [dbo].[ES_posiciones]
+AFTER INSERT, UPDATE, DELETE
+AS
+DECLARE @tDependientes AS TABLE(
+	num_plantilla INT,
+	dependientes INT
+);
+WITH    q AS
+        (
+        SELECT  num_plantilla, num_plantilladep
+        FROM    ES_posiciones
+        UNION ALL
+        SELECT  p.num_plantilla, p.num_plantilladep
+        FROM    q
+        JOIN    ES_posiciones p
+        ON      p.num_plantilla = q.num_plantilladep
+        )        
+INSERT INTO @tDependientes
+SELECT q.num_plantilla, COUNT(*) FROM q
+GROUP BY q.num_plantilla;
+
+DECLARE @tDependientesOcupadas AS TABLE(
+	num_plantilla INT,
+	dependientes INT
+);
+WITH    q AS
+        (
+        SELECT  num_plantilla, num_plantilladep, cve_estatusplan
+        FROM    ES_posiciones
+        WHERE cve_estatusplan=2--ESTATUS OCUPADAS
+        UNION ALL
+        SELECT  p.num_plantilla, p.num_plantilladep, p.cve_estatusplan
+        FROM    q
+        JOIN    ES_posiciones p
+        ON      p.num_plantilla = q.num_plantilladep
+        )        
+INSERT INTO @tDependientesOcupadas
+SELECT q.num_plantilla, COUNT(*) 
+FROM q
+GROUP BY q.num_plantilla
+ORDER BY num_plantilla asc;
+
+
+DECLARE @tDependientesVacantes AS TABLE(
+	num_plantilla INT,
+	dependientes INT
+);
+WITH q AS
+        (
+        SELECT  num_plantilla, num_plantilladep, cve_estatusplan
+        FROM    ES_posiciones
+        WHERE cve_estatusplan=3--ESTATUS VACANTES
+        UNION ALL
+        SELECT  p.num_plantilla, p.num_plantilladep, p.cve_estatusplan
+        FROM    q
+        JOIN    ES_posiciones p
+        ON      p.num_plantilla = q.num_plantilladep
+        )        
+INSERT INTO @tDependientesVacantes
+SELECT q.num_plantilla, COUNT(*) 
+FROM q
+GROUP BY q.num_plantilla
+ORDER BY num_plantilla asc;
+
+        
+WITH cte_posicion( 
+	[num_plantilla],
+	[num_plantilladep],		
+	nivelOrden,
+	orden		
+)AS (
+	SELECT
+		s.[num_plantilla],
+		s.[num_plantilladep],			
+		0,
+		CONVERT(VARCHAR(255),s.num_plantilla)
+	FROM dbo.ES_posiciones AS s
+	WHERE s.num_plantilladep = 0
+	UNION ALL
+	SELECT 
+		d.[num_plantilla],
+		d.[num_plantilladep],	
+		nivelOrden + 1,
+	   (CONVERT(VARCHAR(255), RTRIM(orden) + '.' + CONVERT(VARCHAR(255), d.num_plantilla)) )
+	FROM dbo.ES_posiciones AS d --Mostramos solo padres e hijos de las coincidencias.
+	JOIN cte_posicion AS a ON d.num_plantilladep = a.num_plantilla
+)
+UPDATE ES_posiciones 
+SET 
+	ES_posiciones.sec_plantilla=M.consecutivo,
+	ES_posiciones.nivel=M.nivelOrden,	
+	ES_posiciones.orden_posicion=M.orden,
+	ES_posiciones.headcount=(H.dependientes-1),
+	ES_posiciones.headcountocup=CASE WHEN ES_posiciones.cve_estatusplan=2 THEN ISNULL(J.dependientes-1,0) ELSE ISNULL(J.dependientes,0) END,
+	ES_posiciones.headcountVacantes=CASE WHEN ES_posiciones.cve_estatusplan=3 THEN ISNULL(K.dependientes-1,0) ELSE ISNULL(K.dependientes,0) END
+FROM(
+	SELECT ROW_NUMBER() OVER(ORDER BY orden) consecutivo, R.* FROM cte_posicion R
+)M 
+INNER JOIN ES_posiciones ON M.num_plantilla=ES_posiciones.num_plantilla
+INNER JOIN @tDependientes H ON H.num_plantilla=ES_posiciones.num_plantilla
+LEFT OUTER JOIN @tDependientesOcupadas J ON J.num_plantilla=ES_posiciones.num_plantilla
+LEFT OUTER JOIN @tDependientesVacantes K ON K.num_plantilla=ES_posiciones.num_plantilla
+
+--SELECT ROW_NUMBER() OVER(ORDER BY orden) consecutivo, R.* FROM cte_posicion R
+--SELECT * FROM ES_posiciones ORDER BY sec_plantilla
+---------------------------------------------------------------------------------------
+
+LIMPIAR FLUJOS
+
+DELETE FROM CTR_flujoestatusaccion;
+DELETE FROM CTR_flujoestatusorden;
+DELETE FROM CTR_flujoestatusrole;
+DELETE FROM CTR_flujoestatusroleempleados;
+DELETE FROM CTR_flujos;
+
+-----------------------------------------------------------------------------------------------------------
+-- Función para intervalos de tiempo
+
+  ALTER FUNCTION [dbo].[dynamic_date_diff] 
+(
+@unit varchar(5),
+@fechaInicio datetime,
+@fechaFin datetime
+)
+RETURNS INT
+AS
+BEGIN
+    declare @result INT
+    if (@unit='YY') BEGIN SET @result=(select DATEDIFF(YY,@fechaInicio,@fechaFin)) END
+    else if (@unit='MM') BEGIN SET @result=(select DATEDIFF(MM,@fechaInicio,@fechaFin)) END
+    else if (@unit='WW') BEGIN SET @result=(select DATEDIFF(WW,@fechaInicio,@fechaFin)) END
+    else if (@unit='DD') BEGIN SET @result=(select DATEDIFF(DD,@fechaInicio,@fechaFin)) END
+    else if (@unit='HH') BEGIN SET @result=(select DATEDIFF(HH,@fechaInicio,@fechaFin)) END
+    else if (@unit='MI') BEGIN SET @result=(select DATEDIFF(MI,@fechaInicio,@fechaFin)) END
+    else if (@unit='S') BEGIN SET @result=(select DATEDIFF(S,@fechaInicio,@fechaFin)) END
+    else SET @result=NULL
+    return(@result)
+END

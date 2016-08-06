@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+<Horarios>    
+    <ObtenerSiguienteClave>
+        <sql>
+        <![CDATA[
+            BEGIN
+              SELECT ISNULL(MAX(cve_horario),0) + 1 cve_horario FROM CTR_Horario;
+            END
+        ]]>
+        </sql>   
+    </ObtenerSiguienteClave>
+    
+    <Nuevo>
+      <campo leyenda="Clave" db_nombre="cve_horario" form_nombre="cve_horario" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Descripción" db_nombre="nombre" form_nombre="nombre" requerido="true" charsize="100" tipo="string"/>
+      <campo leyenda="Rotación" db_nombre="cve_rotacion" form_nombre="cve_rotacion" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Fecha de inicio" db_nombre="fechaInicio" form_nombre="fechaInicio" requerido="true" charsize="20" tipo="string"/>
+      <campo leyenda="Frecuencia de rotación" db_nombre="cve_frecuenciarota" form_nombre="cve_frecuenciarota" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Tolerancia de entrada" db_nombre="toleranciaEntrada" form_nombre="toleranciaEntrada" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Tolerancia de comida" db_nombre="toleranciaComida" form_nombre="toleranciaComida" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Turno" db_nombre="cve_turno" form_nombre="cve_turno" requerido="true" charsize="1024" tipo="string" />
+        <sql>          
+          <![CDATA[
+              BEGIN
+                  SET NOCOUNT ON;
+                  SET DATEFORMAT dmy;
+                  INSERT INTO CTR_Horario(
+                      cve_horario,
+	                    nombre,
+	                    cve_rotacion,
+	                    fechainicio,
+	                    toleranciaEntrada,
+	                    toleranciaComida,
+	                    cve_frecuenciarota
+                  )
+                  VALUES(                      
+                      @cve_horario,
+	                    @nombre,
+	                    @cve_rotacion,
+	                    @fechainicio,
+	                    @toleranciaEntrada,
+	                    @toleranciaComida,
+	                    @cve_frecuenciarota
+                  );
+                  IF(@@ROWCOUNT =1)BEGIN                  
+                    DELETE FROM CTR_horarioturno WHERE cve_horario=@cve_horario;
+                    INSERT INTO CTR_horarioturno SELECT @cve_horario, spliter FROM dbo.Split(@cve_turno,',');
+                    SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+                  END ELSE BEGIN
+                      SELECT -1 AS estatus,  'Error: No se guardo el registro.' mensaje;
+                  END 
+              END
+          ]]>
+        </sql>
+   </Nuevo>
+
+    <ObtenerCatalogo>
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+      <sql>
+        <![CDATA[
+            BEGIN
+	            SET NOCOUNT ON;
+	            DECLARE @inicio INT;
+	            SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+	            DECLARE @TablaAuxiliarPaginacion AS TABLE(
+		            indiceRegistro INT,
+		            cve_horario INT,
+	              nombre VARCHAR(100),
+	              cve_rotacion INT,
+	              fechainicio DATETIME,
+	              toleranciaEntrada INT,
+	              toleranciaComida INT,
+	              cve_frecuenciarota INT
+	            )
+	            INSERT INTO @TablaAuxiliarPaginacion
+	            SELECT 
+		            ROW_NUMBER() OVER(ORDER BY CONVERT(INT,CTR_Horario.cve_horario) DESC) AS indiceRegistro
+                ,CTR_Horario.cve_horario,
+	              nombre,
+	              cve_rotacion,
+	              fechainicio,
+	              toleranciaEntrada,
+	              toleranciaComida,
+	              cve_frecuenciarota
+	            FROM 
+		            CTR_Horario 
+	            WHERE  CONVERT(VARCHAR(20), CTR_Horario.cve_horario) like @criterio OR nombre like '%' + @criterio + '%';
+		
+	            --Paginacion
+	            SELECT TOP(@longitudPagina)
+		            indiceRegistro,
+		            @@ROWCOUNT as totalRegistros,
+		            cve_horario,
+	              nombre,
+	              cve_rotacion,
+	              fechainicio,
+	              toleranciaEntrada,
+	              toleranciaComida,
+	              cve_frecuenciarota
+	            FROM @TablaAuxiliarPaginacion
+	            WHERE indiceRegistro > @inicio	 
+	            ORDER BY indiceRegistro ASC
+            END
+        ]]>
+      </sql>
+    </ObtenerCatalogo>
+
+    <ObtenerDetalleHorario>
+      <campo leyenda="Clave" db_nombre="cve_horario" form_nombre="cve_horario" requerido="true" charsize="0" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+                BEGIN
+	                SET NOCOUNT ON;	                
+                  SELECT 
+                    A.cve_horario,
+	                  nombre,
+	                  cve_rotacion,
+	                  CONVERT(VARCHAR(20),fechainicio,103) fechainicio,
+	                  toleranciaEntrada,
+	                  toleranciaComida,
+	                  cve_frecuenciarota,
+                    (SELECT CONVERT(VARCHAR(10),cve_turno) + ', ' FROM CTR_horarioturno WHERE cve_horario=@cve_horario FOR XML PATH('') ) cve_turno
+                  FROM CTR_Horario A LEFT OUTER JOIN CTR_horarioturno B ON A.cve_horario=B.cve_horario                  
+                  WHERE B.cve_horario=@cve_horario
+                  GROUP BY 
+                  A.cve_horario,
+                  nombre,
+                  cve_rotacion,
+                  CONVERT(VARCHAR(20),fechainicio,103),
+                  toleranciaEntrada,
+                  toleranciaComida,
+                  cve_frecuenciarota,
+                  B.cve_horario
+                END
+            ]]>
+      </sql>
+    </ObtenerDetalleHorario>
+
+  <Editar>
+      <campo leyenda="Clave" db_nombre="cve_horario" form_nombre="cve_horario" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Descripción" db_nombre="nombre" form_nombre="nombre" requerido="true" charsize="100" tipo="string"/>
+      <campo leyenda="Rotación" db_nombre="cve_rotacion" form_nombre="cve_rotacion" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Fecha de inicio" db_nombre="fechaInicio" form_nombre="fechaInicio" requerido="true" charsize="20" tipo="string"/>
+      <campo leyenda="Frecuencia de rotación" db_nombre="cve_frecuenciarota" form_nombre="cve_frecuenciarota" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Tolerancia de entrada" db_nombre="toleranciaEntrada" form_nombre="toleranciaEntrada" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Tolerancia de comida" db_nombre="toleranciaComida" form_nombre="toleranciaComida" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Turno" db_nombre="cve_turno" form_nombre="cve_turno" requerido="true" charsize="1024" tipo="string" />
+        <sql>          
+          <![CDATA[
+              BEGIN
+                  SET NOCOUNT ON;
+                  SET DATEFORMAT dmy;
+                  UPDATE CTR_Horario SET
+	                    nombre=@nombre,
+	                    cve_rotacion=@cve_rotacion,
+	                    fechainicio=@fechainicio,
+	                    toleranciaEntrada=@toleranciaEntrada,
+	                    toleranciaComida=@toleranciaComida,
+	                    cve_frecuenciarota=@cve_frecuenciarota
+                  WHERE cve_horario=@cve_horario;
+                  IF(@@ROWCOUNT =1)BEGIN                  
+                    DELETE FROM CTR_horarioturno WHERE cve_horario=@cve_horario;
+                    INSERT INTO CTR_horarioturno SELECT @cve_horario, spliter FROM dbo.Split(@cve_turno,',');
+                    SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+                  END ELSE BEGIN
+                      SELECT -1 AS estatus,  'Error: No se guardo el registro.' mensaje;
+                  END 
+              END
+          ]]>
+        </sql>
+    </Editar>
+</Horarios>
+</Secciones>

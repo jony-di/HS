@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+<Motivos>    
+    <ObtenerSiguienteClave>
+        <sql>
+        <![CDATA[
+            BEGIN
+              SELECT ISNULL(MAX(cve_motivo),0) + 1 cve_motivo FROM CTR_motivojustifi;
+            END
+        ]]>
+        </sql>   
+    </ObtenerSiguienteClave>
+    
+    <Nuevo>
+      <campo leyenda="Clave" db_nombre="cve_motivo" form_nombre="cve_motivo" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Tipo de justificación" db_nombre="cve_tipojustificacion" form_nombre="cve_tipojustificacion" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Descripción" db_nombre="descripcion" form_nombre="descripcion" requerido="true" charsize="200" tipo="string"/>
+      <campo leyenda="Activo" db_nombre="activo" form_nombre="activo" requerido="false" charsize="0" tipo="bool" default="true"/>
+      <campo leyenda="Tolerancia" db_nombre="tolerancia" form_nombre="tolerancia" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Unidad de tolerancia" db_nombre="cve_dadotolerancia" form_nombre="cve_dadotolerancia" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="permitejustifica" db_nombre="permitejustifica" form_nombre="permitejustifica" requerido="false" charsize="0" tipo="bool" default="false"/>
+      <campo leyenda="Permite reponer día" db_nombre="permitereponerdia" form_nombre="permitereponerdia" requerido="false" charsize="0" tipo="bool" default="false"/>
+      <campo leyenda="aplicaparapolitica" db_nombre="aplicaparapolitica" form_nombre="aplicaparapolitica" requerido="false" charsize="0" tipo="bool" default="false"/>
+      <campo leyenda="Requiere justificante escaneado" db_nombre="escaneo" form_nombre="escaneo" requerido="false" charsize="0" tipo="bool" default="false"/>
+      <campo leyenda="Con goce de sueldo" db_nombre="congose" form_nombre="congose" requerido="false" charsize="0" tipo="bool" default="false"/>
+      <campo leyenda="Plazo" db_nombre="plazo" form_nombre="plazo" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Unidad de plazo" db_nombre="cve_dadoplazo" form_nombre="cve_dadoplazo" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Flujo" db_nombre="cve_flujo" form_nombre="cve_flujo" requerido="true" charsize="0" tipo="int"/>
+        <sql>          
+          <![CDATA[
+              BEGIN
+                  SET NOCOUNT ON;
+                  SET DATEFORMAT dmy;
+                  BEGIN TRY
+                    INSERT INTO CTR_motivojustifi(
+                        cve_tipojustificacion,
+	                      cve_motivo,
+	                      descripcion,
+	                      activo,
+	                      tolerancia,
+	                      cve_dadotolerancia,
+	                      permitejustifica,
+                        aplicaparapolitica,
+                        permitereponerdia,
+	                      escaneo,
+	                      congose,
+	                      plazo,
+	                      cve_dadoplazo,
+                        cve_flujo
+                    )
+                    VALUES(                      
+                        @cve_tipojustificacion,
+	                      @cve_motivo,
+	                      @descripcion,
+	                      @activo,
+	                      @tolerancia,
+	                      @cve_dadotolerancia,
+	                      @permitejustifica,
+                        @aplicaparapolitica,
+                        @permitereponerdia,
+	                      @escaneo,
+	                      @congose,
+	                      @plazo,
+	                      @cve_dadoplazo,
+                        @cve_flujo
+                    );
+                    SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+                  END TRY BEGIN CATCH
+                      SELECT -1 AS estatus,  'Error: No se guardo el registro. Detalle:' + ERROR_MESSAGE() mensaje;
+                  END CATCH
+              END
+          ]]>
+        </sql>
+   </Nuevo>
+
+    <ObtenerCatalogo>
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+      <sql>
+        <![CDATA[
+            BEGIN
+	            SET NOCOUNT ON;
+	            DECLARE @inicio INT;
+	            SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+	            DECLARE @TablaAuxiliarPaginacion AS TABLE(
+		            indiceRegistro INT,
+		            cve_tipojustificacion INT,
+		            sTipoJustificacion VARCHAR(200),
+	              cve_motivo INT,
+	              descripcion VARCHAR(200),
+	              activo BIT,
+	              tolerancia INT,
+	              cve_dadotolerancia INT,
+	              permitejustifica BIT,
+                permitereponerdia BIT,
+                aplicaparapolitica BIT,
+	              escaneo BIT,
+	              congose BIT,
+	              plazo INT,
+	              cve_dadoplazo INT,
+                cve_flujo INT
+	            )
+	            INSERT INTO @TablaAuxiliarPaginacion
+	            SELECT 
+		            ROW_NUMBER() OVER(ORDER BY B.descripcion, CTR_motivojustifi.descripcion) AS indiceRegistro,
+                B.cve_tipojustificacion,
+                B.descripcion,
+	              cve_motivo,
+	              CTR_motivojustifi.descripcion,
+	              activo,
+	              tolerancia,
+	              cve_dadotolerancia,
+	              permitejustifica,
+                permitereponerdia,
+                aplicaparapolitica,
+	              escaneo,
+	              congose,
+	              plazo,
+	              cve_dadoplazo,
+                cve_flujo
+	            FROM 
+		            CTR_motivojustifi INNER JOIN CTR_tipojustificacion B ON CTR_motivojustifi.cve_tipojustificacion = B.cve_tipojustificacion
+	              WHERE  CONVERT(VARCHAR(20), cve_motivo) like @criterio OR CTR_motivojustifi.descripcion like '%' + @criterio + '%' OR B.descripcion like '%' + @criterio + '%' ;
+		
+	            --Paginacion
+	            SELECT TOP(@longitudPagina)
+		            indiceRegistro,
+		            @@ROWCOUNT as totalRegistros,
+		            cve_tipojustificacion,
+                sTipoJustificacion,
+	              cve_motivo,
+	              descripcion,
+	              activo,
+	              tolerancia,
+	              cve_dadotolerancia,
+	              permitejustifica,
+	              escaneo,
+	              congose,
+	              plazo,
+	              cve_dadoplazo,
+                cve_flujo
+	            FROM @TablaAuxiliarPaginacion
+	            WHERE indiceRegistro > @inicio	 
+	            ORDER BY indiceRegistro ASC
+            END
+        ]]>
+      </sql>
+    </ObtenerCatalogo>
+
+    <ObtenerDetalleMotivo>
+      <campo leyenda="Clave" db_nombre="cve_motivo" form_nombre="cve_motivo" requerido="true" charsize="0" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+                BEGIN
+	                SET NOCOUNT ON;
+                  SELECT 
+                    cve_tipojustificacion,
+	                  cve_motivo,
+	                  descripcion,
+	                  activo,
+	                  tolerancia,
+	                  cve_dadotolerancia,
+	                  permitejustifica,
+                    aplicaparapolitica,
+                    permitereponerdia,
+	                  escaneo,
+	                  congose,
+	                  plazo,
+	                  RTRIM(LTRIM(cve_dadoplazo)) cve_dadoplazo,
+                    cve_flujo
+                  FROM CTR_motivojustifi 
+                  WHERE cve_motivo=@cve_motivo
+                END
+            ]]>
+      </sql>
+    </ObtenerDetalleMotivo>
+
+  <ObtenerMotivosTipoJustificacion>
+    <campo leyenda="Tipo de justificación" db_nombre="cve_tipojustificacion" form_nombre="cve_tipojustificacion" requerido="true" charsize="0" tipo="int"/>
+    <sql>
+      <![CDATA[
+                BEGIN
+	                SET NOCOUNT ON;
+                  SELECT 
+                    cve_tipojustificacion,
+	                  cve_motivo,
+	                  descripcion,
+	                  activo,
+	                  tolerancia,
+	                  cve_dadotolerancia,
+	                  permitejustifica,
+                    permitereponerdia,
+                    aplicaparapolitica,
+	                  escaneo,
+	                  congose,
+	                  plazo,
+	                  RTRIM(LTRIM(cve_dadoplazo)) cve_dadoplazo,
+                    cve_flujo
+                  FROM CTR_motivojustifi 
+                  WHERE cve_tipojustificacion=@cve_tipojustificacion
+                END
+            ]]>
+    </sql>
+  </ObtenerMotivosTipoJustificacion>
+  
+    <Editar>
+      <campo leyenda="Clave" db_nombre="cve_motivo" form_nombre="cve_motivo" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Tipo de justificación" db_nombre="cve_tipojustificacion" form_nombre="cve_tipojustificacion" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Descripción" db_nombre="descripcion" form_nombre="descripcion" requerido="true" charsize="200" tipo="string"/>
+      <campo leyenda="Activo" db_nombre="activo" form_nombre="activo" requerido="true" charsize="0" tipo="bool" default="false"/>
+      <campo leyenda="Tolerancia" db_nombre="tolerancia" form_nombre="tolerancia" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Unidad de tolerancia" db_nombre="cve_dadotolerancia" form_nombre="cve_dadotolerancia" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="permitejustifica" db_nombre="permitejustifica" form_nombre="permitejustifica" requerido="false" charsize="0" tipo="bool" default="false"/>
+      <campo leyenda="Permite reponer día" db_nombre="permitereponerdia" form_nombre="permitereponerdia" requerido="false" charsize="0" tipo="bool" default="false"/>
+      <campo leyenda="Aplica para política" db_nombre="aplicaparapolitica" form_nombre="aplicaparapolitica" requerido="false" charsize="0" tipo="bool" default="false"/>
+      <campo leyenda="Requiere justificante escaneado" db_nombre="escaneo" form_nombre="escaneo" requerido="false" charsize="0" tipo="bool" default="false"/>
+      <campo leyenda="Con goce de sueldo" db_nombre="congose" form_nombre="congose" requerido="false" charsize="0" tipo="bool" default="false"/>
+      <campo leyenda="Plazo" db_nombre="plazo" form_nombre="plazo" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Unidad de plazo" db_nombre="cve_dadoplazo" form_nombre="cve_dadoplazo" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Flujo" db_nombre="cve_flujo" form_nombre="cve_flujo" requerido="true" charsize="0" tipo="int"/>
+      <sql>
+        <![CDATA[
+                BEGIN
+                    SET NOCOUNT ON;
+                    BEGIN TRY
+                      UPDATE CTR_motivojustifi 
+                      SET
+	                        descripcion=@descripcion,
+	                        activo=@activo,
+	                        tolerancia=@tolerancia,
+	                        cve_dadotolerancia=@cve_dadotolerancia,
+	                        permitejustifica=@permitejustifica,
+                          permitereponerdia=@permitereponerdia,
+                          aplicaparapolitica=@aplicaparapolitica,
+	                        escaneo=@escaneo,
+	                        congose=@congose,
+	                        plazo=@plazo,
+	                        cve_dadoplazo=@cve_dadoplazo,
+                          cve_flujo=@cve_flujo
+                       WHERE cve_motivo=@cve_motivo
+                      SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+                    END TRY BEGIN CATCH
+                        SELECT -1 AS estatus,  'Error: No se guardo el registro. Detalle:' + ERROR_MESSAGE() mensaje;
+                    END CATCH
+                END
+            ]]>
+      </sql>
+    </Editar>
+</Motivos>
+</Secciones>

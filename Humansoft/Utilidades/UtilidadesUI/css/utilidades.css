@@ -1,0 +1,15 @@
+﻿/**UTILIDADES JS*/
+
+/*Calendario y observaciones*/
+body{font-size:20px;}
+.calendario-observaciones fieldset{width:37%;margin-top:30px;height:360px;padding-top:30px;}
+.calendario-observaciones fieldset label.preview-fecha{padding:15px;width:80%;display:block;margin:auto;border:1px solid #e3e3e3;font-family:HelveticaN;margin-top:20px;text-align:center;color:#333;}
+.calendario-observaciones fieldset.left{float:left;margin-left:5%;}
+.calendario-observaciones fieldset.right{float:right;margin-right:5%;}
+.calendario-observaciones div.calendario{margin:auto;width:290px;}
+.calendario-observaciones textarea{width:80%;height:300px;margin:auto;border:1px solid #e3e3e3;display:block;font-family:HelveticaN;font-size:13px;padding:5%;}
+.calendario-observaciones div.barra-botones{margin-top:60px;}
+.calendario-observaciones div.barra-botones span{width:250px;}
+body .smart-green {min-height:570px;height:585px;}
+
+/*************************************************************/

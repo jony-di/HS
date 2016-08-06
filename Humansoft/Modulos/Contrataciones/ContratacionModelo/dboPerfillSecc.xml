@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Secciones>
+  <PerfilSecciones>
+    <obtenerSiguienteClave>
+      <sql>
+          <![CDATA[
+            SELECT ISNULL(MAX(cve_seccion),0) + 1 as 'clave', ISNULL(MAX(secuencia),0) + 1 as 'secuencia' FROM ES_pstperfilseccion;
+          ]]>
+      </sql>
+    </obtenerSiguienteClave>
+    <Nuevo>
+      <campo leyenda="Clave" db_nombre="clave" form_nombre="clave" requerido="true" charsize="10" tipo="int" default=""/>      
+      <campo leyenda="Nombre" db_nombre="descripcion" form_nombre="descripcion"  requerido="true" charsize="2000" tipo="string" default=""/>
+      <campo leyenda="Secuencia" db_nombre="secuencia" form_nombre="secuencia" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="false"  charsize="10" tipo="bool"  default="true"/>
+      <sql>
+        <![CDATA[
+          SET NOCOUNT ON;
+          BEGIN TRY
+            INSERT INTO ES_pstperfilseccion(cve_seccion,descripcion,secuencia,activo)
+            VALUES(@clave,@descripcion,@secuencia,@activo)
+            SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+          END TRY BEGIN CATCH
+            SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+          END CATCH
+        ]]>
+      </sql>
+    </Nuevo>
+    <obtenerSecciones>
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+      <sql>
+        <![CDATA[
+          SET NOCOUNT ON;
+          DECLARE @inicio INT;
+          SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+          DECLARE @TablaAuxiliarPaginacion AS TABLE(
+          indiceRegistro INT,
+          cve_seccion int,
+          descripcion varchar(80),
+          secuencia int,
+          activo bit)
+
+          INSERT INTO @TablaAuxiliarPaginacion
+          SELECT
+          ROW_NUMBER() OVER(ORDER BY CONVERT(INT,cve_seccion) DESC) AS indiceRegistro,
+          *
+          FROM
+          ES_pstperfilseccion
+          WHERE  ( ((CONVERT(VARCHAR(20),cve_seccion) like '%' + @criterio + '%') OR (descripcion like '%' + @criterio + '%')))
+
+          --Paginacion
+          SELECT TOP(@longitudPagina)
+          @@ROWCOUNT as totalRegistros,
+          *
+          FROM @TablaAuxiliarPaginacion a
+          WHERE indiceRegistro > @inicio
+          ORDER BY indiceRegistro ASC
+        ]]>
+      </sql>
+    </obtenerSecciones>
+    <obtenerActivas>
+      <sql>
+        <![CDATA[
+          select *
+          FROM
+          ES_pstperfilseccion
+          WHERE
+          activo=1
+          order by secuencia
+        ]]>
+      </sql>
+    </obtenerActivas>
+    <obtenerSeccion>
+      <campo leyenda="Clave" db_nombre="clave" form_nombre="cve_secc" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+          Select * FROM ES_pstperfilseccion where cve_seccion=@clave;
+        ]]>
+      </sql>
+    </obtenerSeccion>
+    <Editar>
+      <campo leyenda="Clave" db_nombre="clave" form_nombre="clave" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Nombre" db_nombre="descripcion" form_nombre="descripcion"  requerido="true" charsize="2000" tipo="string" default=""/>
+      <campo leyenda="Secuencia" db_nombre="secuencia" form_nombre="secuencia" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="true"  charsize="10" tipo="bool"  default=""/>
+      <sql>
+        <![CDATA[
+          SET NOCOUNT ON;
+          BEGIN TRY
+          UPDATE ES_pstperfilseccion
+          SET
+          descripcion=@descripcion,
+          secuencia=@secuencia,
+          activo=@activo
+          WHERE
+          cve_seccion=@clave
+
+          SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+          END TRY BEGIN CATCH
+          SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+          END CATCH
+        ]]>
+      </sql>
+    </Editar>
+  </PerfilSecciones>
+</Secciones>

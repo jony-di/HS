@@ -1,0 +1,14 @@
+﻿body{font-size:11px}
+div.mascara div.principal div.catalogo table.lista tr.columnas1 {border:0px; border-bottom:1px dashed #aaaaaa;}
+div.mascara div.principal div.catalogo table.lista tr.columnas td label{margin:auto; float:none !important;}
+div.mascara div.principal div.catalogo table.lista tr.columnas th label{padding:10px 17px 10px 10px !important;border-top-left-radius:5px;border-top-right-radius:5px;color:White; font-weight:bold;white-space:nowrap; }
+div.mascara div.principal div.catalogo button.editar {margin:auto;float:none !important;}
+div.mascara div.principal div.formulario h2.dga {clear:both;}
+div.mascara div.principal div.formulario label {float:left;clear:left;margin-bottom:20px;width:150px;}
+div.mascara div.principal div.formulario input {float:left;margin-bottom:20px;width:200px;}
+div.mascara div.principal div.formulario input[type="checkbox"]{float:left;width:auto;}
+div.mascara div.principal div.formulario textarea {float:left;margin-bottom:20px;width:200px;}
+div.mascara div.principal div.formulario select {float:left;margin-bottom:20px;width:200px;}
+div.barra-botones span{width:290px;}
+.ocultar{visibility:hidden;}
+.mostrar{visibility:visible;}

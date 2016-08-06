@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Secciones>
+  <filtros>
+    <obtenerControles>
+      <sql>
+        <![CDATA[
+        SELECT * FROM ES_catcontroles --WHERE activo = 1
+        ]]>
+      </sql>
+    </obtenerControles>
+    <obtenerCatalogos>
+      <sql>
+        <![CDATA[
+        SELECT cve_catalogo,descripcion FROM ES_catpermae WHERE activo = 1
+        ]]>
+      </sql>
+    </obtenerCatalogos>
+    <obtenertipocatalogo>
+      <sql>
+        <![CDATA[
+        SELECT * FROM ES_tipocatalogo --WHERE activo = 1
+        ]]>
+      </sql>
+    </obtenertipocatalogo>
+    </filtros>
+  
+  <apartados>
+    <obtenerSiguienteClave>
+      <campo leyenda="Clave Seccion" db_nombre="cve_seccion" form_nombre="cve_seccion" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+        BEGIN
+          SELECT ISNULL(MAX(cve_subseccion),0) + 1 as 'clave', ISNULL(MAX(secuencia),0) + 1 as 'secuencia'
+          FROM ES_pstperfilsubseccion
+          WHERE cve_seccion=@cve_seccion;
+        END
+        ]]>
+      </sql>
+    </obtenerSiguienteClave>
+    <obtenerActivas>
+      <campo leyenda="Clave Seccion" db_nombre="cve_seccion" form_nombre="cve_seccion" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+        select *
+        FROM
+        ES_pstperfilsubseccion
+        WHERE
+        cve_seccion=@cve_seccion
+        AND activo=1
+        order by secuencia
+        ]]>
+      </sql>
+    </obtenerActivas>
+    <Nuevo>
+      <campo leyenda="Clave Seccion" db_nombre="cve_seccion" form_nombre="cve_seccion" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Clave" db_nombre="cve_subseccion" form_nombre="clave" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Nombre" db_nombre="descripcion" form_nombre="descripcion"  requerido="true" charsize="2000" tipo="string" default=""/>
+      <campo leyenda="Secuencia" db_nombre="secuencia" form_nombre="secuencia" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Tipo Control" db_nombre="cve_tipocontrol" form_nombre="tipocontrol" requerido="false" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Catalogo" db_nombre="cve_catalogo" form_nombre="lstcatalogos" requerido="false" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Tipo de dato" db_nombre="multivalores" form_nombre="multivalor"  requerido="false"  charsize="10" tipo="bool"  default="false"/>
+      <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="false"  charsize="10" tipo="bool"  default="true"/>
+      <campo leyenda="Tipo de Catalogo" db_nombre="tipocatalogo" form_nombre="tipocatalogo" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Valor" db_nombre="valor" form_nombre="detalle"  requerido="false"  charsize="2000" tipo="string"  default=""/>
+      
+      <sql>
+        <![CDATA[
+        BEGIN
+        SET NOCOUNT ON;
+        BEGIN TRY
+        INSERT INTO ES_pstperfilsubseccion(cve_seccion,cve_subseccion,descripcion,secuencia,activo,multivalores,cve_tipocontrol,cve_catalogo,cve_tipocatalogo,valor)
+        VALUES(@cve_seccion,@cve_subseccion,@descripcion,@secuencia,@activo,@multivalores,@cve_tipocontrol,@cve_catalogo,@tipocatalogo,@valor)
+        SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+        END TRY BEGIN CATCH
+        SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+        END CATCH
+        END
+        ]]>
+      </sql>
+    </Nuevo>
+    <Editar>
+      <campo leyenda="Clave Seccion" db_nombre="cve_seccion" form_nombre="cve_seccion" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Clave" db_nombre="cve_subseccion" form_nombre="clave" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Nombre" db_nombre="descripcion" form_nombre="descripcion"  requerido="true" charsize="2000" tipo="string" default=""/>
+      <campo leyenda="Secuencia" db_nombre="secuencia" form_nombre="secuencia" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Tipo Control" db_nombre="cve_tipocontrol" form_nombre="tipocontrol" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Catalogo" db_nombre="cve_catalogo" form_nombre="lstcatalogos" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Tipo de dato" db_nombre="multivalores" form_nombre="multivalor"  requerido="false"  charsize="10" tipo="bool"  default="false"/>
+      <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="false"  charsize="10" tipo="bool"  default="true"/>
+      <campo leyenda="Tipo de Catalogo" db_nombre="tipocatalogo" form_nombre="tipocatalogo" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Valor" db_nombre="valor" form_nombre="detalle"  requerido="false"  charsize="2000" tipo="string"  default=""/>
+      <sql>
+        <![CDATA[
+        BEGIN
+        SET NOCOUNT ON;
+        BEGIN TRY
+
+        UPDATE ES_pstperfilsubseccion
+        SET
+        descripcion=@descripcion,
+        secuencia=@secuencia,
+        activo=@activo,
+        multivalores=@multivalores,
+        cve_tipocontrol=@cve_tipocontrol,
+        cve_catalogo=@cve_catalogo,
+        cve_tipocatalogo=@tipocatalogo,
+        valor=@valor
+        WHERE
+        cve_seccion=@cve_seccion
+        AND cve_subseccion=@cve_subseccion
+        SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+
+        END TRY BEGIN CATCH
+        SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+        END CATCH
+        END
+        ]]>
+      </sql>
+    </Editar>
+    <obtenerApartados>
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+      <campo leyenda="Clave" db_nombre="cve_seccion" form_nombre="cve_seccion"  requerido="true"  charsize="0" tipo="int"  default=""/>
+      <sql>
+        <![CDATA[
+        SET NOCOUNT ON;
+          DECLARE @inicio INT;
+          SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+          DECLARE @TablaAuxiliarPaginacion AS TABLE(
+          indiceRegistro INT,
+          cve_subseccion smallint,
+          descripcion nvarchar(80),
+          secuencia smallint,
+          activo bit,
+          multivalores nvarchar(50),
+          cve_tipocontrol smallint ,
+          cve_catalogo smallint ,
+          cve_tipocatalogo smallint)
+
+          INSERT INTO @TablaAuxiliarPaginacion
+          SELECT
+          ROW_NUMBER() OVER(ORDER by secuencia ) AS indiceRegistro,
+          cve_subseccion,
+          descripcion,
+          secuencia,
+          activo,
+          multivalores,
+          cve_tipocontrol,
+          cve_catalogo,
+          cve_tipocatalogo
+          FROM
+          ES_pstperfilsubseccion
+          WHERE  ( ((CONVERT(VARCHAR(20),cve_subseccion) like '%' + @criterio + '%') OR (descripcion like '%' + @criterio + '%')))
+          AND cve_seccion=@cve_seccion;
+
+          --Paginacion
+          SELECT TOP(@longitudPagina)
+          indiceRegistro,
+          @@ROWCOUNT as totalRegistros,
+          a.cve_subseccion,
+          a.descripcion,
+          a.secuencia,
+          a.activo,
+          a.multivalores,
+          B.descripcion AS 'tipocontrol',
+          C.descripcion AS 'catalogo',
+          D.descripcion AS 'tipocatalogo'
+          FROM @TablaAuxiliarPaginacion a
+          LEFT JOIN ES_catcontroles B
+          ON A.cve_tipocontrol=B.cve_tipocontrol
+          LEFT JOIN ES_catpermae C
+          ON A.cve_catalogo=C.cve_catalogo
+          LEFT JOIN ES_tipocatalogo D
+          ON A.cve_tipocatalogo=D.cve_tipocatalogo
+          WHERE indiceRegistro > @inicio
+          ORDER BY  a.secuencia ASC
+        ]]>
+      </sql>
+    </obtenerApartados>
+    <obtenerApartado>
+      <campo leyenda="cve_seccion" db_nombre="cve_seccion" form_nombre="cve_seccion"  requerido="true"  charsize="0" tipo="int"  default=""/>
+      <campo leyenda="Clave" db_nombre="clave" form_nombre="clave"  requerido="true"  charsize="0" tipo="int"  default=""/>
+      <sql>
+        <![CDATA[
+        select * from ES_pstperfilsubseccion where cve_seccion=@cve_seccion and  cve_subseccion=@Clave
+        ]]>
+      </sql>
+    </obtenerApartado>
+  </apartados>
+</Secciones>

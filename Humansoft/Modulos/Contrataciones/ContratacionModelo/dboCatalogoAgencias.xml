@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Secciones>
+  <Agencias>
+    <obtenerAgencias>
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+      <sql>
+        <![CDATA[
+          DECLARE @Inicio int;
+          SET @Inicio=(@pagina -1)*@longitudPagina;
+
+          DECLARE @TablaAux table(
+           indice int
+          ,cve_agencia int
+          ,nombre varchar(50)
+          ,destino varchar(150)
+          ,activa bit)
+
+          INSERT INTO @TablaAux 
+          SELECT
+          ROW_NUMBER() OVER(ORDER BY nombre)
+          ,cve_agencia
+          ,nombre
+          ,destino
+          ,activa
+          FROM CON_agencia
+          WHERE 
+          CONVERT(VARCHAR,cve_agencia) LIKE '%'+@Criterio+'%'
+          OR nombre LIKE '%'+@Criterio+'%'
+          OR destino LIKE '%'+@Criterio+'%'
+          
+          SELECT TOP(@longitudPagina)
+          indice
+          ,@@ROWCOUNT AS 'totalRegistros'
+          ,cve_agencia
+          ,nombre
+          ,RTRIM(destino) AS 'destino'
+          ,activa
+          FROM @TablaAux
+        ]]>
+      </sql>
+    </obtenerAgencias>
+    <obtenerSiguienteClave>
+      <sql>
+        <![CDATA[
+          SELECT MAX(cve_agencia)+1 AS 'clave' FROM CON_agencia
+        ]]>
+      </sql>
+    </obtenerSiguienteClave>
+    <obtenerAgencia>
+      <campo leyenda="Clave" db_nombre="clave" form_nombre="clave" requerido="true" charsize="0" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+           SELECT * FROM CON_agencia where cve_agencia=@clave
+        ]]>
+      </sql>
+    </obtenerAgencia>
+    <editarAgencia>
+      <campo leyenda="Cave" db_nombre="cve_agencia" form_nombre="cve_agencia" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Nombre" db_nombre="nombre" form_nombre="nombre" requerido="false" charsize="50" tipo="string" default=""/>
+      <campo leyenda="Estado" db_nombre="activa" form_nombre="activa" requerido="false" charsize="50" tipo="bool" default=""/>
+      <campo leyenda="Usuario" db_nombre="usuario" form_nombre="usuario" requerido="false" charsize="50" tipo="string" default=""/>
+      <campo leyenda="Contraseña" db_nombre="password" form_nombre="password" requerido="false" charsize="50" tipo="string" default=""/>
+      <campo leyenda="Pagina" db_nombre="destino" form_nombre="destino" requerido="false" charsize="50" tipo="string" default=""/>
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="destino" requerido="false" charsize="50" tipo="string" default=""/>
+      <sql>
+        <![CDATA[
+        SET NOCOUNT ON;
+        BEGIN TRY
+          UPDATE CON_agencia
+          SET
+           nombre = @nombre
+          ,activa = @activa
+          --,origen = @origen
+          ,usuario = @usuario
+          ,password =@password
+          ,destino = @destino
+          WHERE cve_agencia=@cve_agencia
+          SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+        END TRY BEGIN CATCH
+          SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+        END CATCH
+        ]]>
+      </sql>
+    </editarAgencia>
+    <nuevaAgencia>
+      <campo leyenda="Cave" db_nombre="cve_agencia" form_nombre="cve_agencia" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Nombre" db_nombre="nombre" form_nombre="nombre" requerido="true" charsize="50" tipo="string" />
+      <campo leyenda="Estado" db_nombre="activa" form_nombre="activa" requerido="false" charsize="50" tipo="bool" default="true"/>
+      <campo leyenda="Usuario" db_nombre="usuario" form_nombre="usuario" requerido="false" charsize="50" tipo="string" default=""/>
+      <campo leyenda="Contraseña" db_nombre="password" form_nombre="password" requerido="false" charsize="50" tipo="string" default=""/>
+      <campo leyenda="Página" db_nombre="destino" form_nombre="destino" requerido="false" charsize="150" tipo="string" default=""/>
+      <sql>
+        <![CDATA[
+         SET NOCOUNT ON;
+          BEGIN TRY
+            INSERT INTO 
+            CON_agencia(
+             cve_agencia
+            ,nombre
+            ,activa
+            ,usuario
+            ,password
+            ,destino
+            )
+            VALUES
+            (
+             @cve_agencia
+            ,@nombre
+            ,@activa
+            ,@usuario
+            ,@password
+            ,@destino
+            )
+            SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+          END TRY BEGIN CATCH
+            SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+          END CATCH
+        ]]>
+      </sql>
+    </nuevaAgencia>
+  </Agencias>
+</Secciones>

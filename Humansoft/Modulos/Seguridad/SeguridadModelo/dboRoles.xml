@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+    <Roles>
+    <obtenerSiguienteClave>
+        <campo leyenda="Clave módulo" db_nombre="cve_modulo" form_nombre="cve_modulo"  requerido="true" charsize="0" tipo="int" default=""/>
+        <sql>
+          BEGIN
+            SET NOCOUNT ON;		          
+            DECLARE @siguiente AS INT;
+            SELECT ISNULL(MAX(A.cve_role),0) + 1 clave FROM(SELECT MAX(cve_role) cve_role FROM SG_roles WHERE cve_modulo=@cve_modulo GROUP BY cve_modulo)A;
+          END
+        </sql>
+    </obtenerSiguienteClave>
+    
+    <Nuevo>
+        <campo leyenda="Clave" db_nombre="cve_role" form_nombre="cve_role" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Nombre" db_nombre="nombrerole" form_nombre="nombrerole"  requerido="true" charsize="150" tipo="string" default=""/>
+      <campo leyenda="Clave módulo" db_nombre="cve_modulo" form_nombre="cve_modulo"  requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="true" charsize="50" tipo="bool" default="true"/>        
+        <sql>
+          BEGIN
+	          SET NOCOUNT ON;	
+	          DECLARE @siguiente AS INT;
+	          BEGIN TRY
+		          INSERT INTO SG_roles(
+			          cve_role,
+			          nombrerole,
+                cve_modulo,
+			          activo
+		          )
+		          VALUES(
+			          @cve_role,
+			          @nombrerole,
+                @cve_modulo,
+			          @activo
+		          )
+		          SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+	          END TRY BEGIN CATCH	
+		          SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+	          END CATCH	
+          END
+        </sql>
+   </Nuevo>
+
+    <obtenerCatalogo>
+        <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+        <campo leyenda="Clave" db_nombre="cve_role" form_nombre="cve_role"  requerido="false"  charsize="0" tipo="int"  default=""/>
+        <campo leyenda="Clave del módulo" db_nombre="cve_modulo" form_nombre="cve_modulo"  requerido="false"  charsize="0" tipo="int"/>
+        <sql>
+          BEGIN
+          SET NOCOUNT ON;
+          DECLARE @inicio INT;
+          SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+          DECLARE @TablaAuxiliarPaginacion AS TABLE(
+          indiceRegistro INT,
+          cve_role SMALLINT,
+          nombrerole VARCHAR(50),
+          cve_modulo INT,
+          nombremodulo VARCHAR(100),
+          activo BIT
+          )
+          INSERT INTO @TablaAuxiliarPaginacion
+          SELECT
+          ROW_NUMBER() OVER(ORDER BY CONVERT(INT,cve_role) DESC) AS indiceRegistro,
+          cve_role,
+          nombrerole,
+          SG_modulo.cve_modulo,
+          SG_modulo.nombre nombremodulo,
+          SG_roles.activo
+          FROM
+          SG_roles LEFT OUTER JOIN SG_modulo ON SG_roles.cve_modulo=SG_modulo.cve_modulo
+          WHERE (@cve_modulo IS NOT NULL AND  @cve_role IS NOT NULL AND @cve_modulo=SG_roles.cve_modulo AND  @cve_role=SG_roles.cve_role) OR (@cve_modulo IS NULL OR  @cve_role IS NULL OR @cve_role=0) AND (
+          (@cve_modulo IS NOT NULL AND SG_roles.cve_modulo = @cve_modulo) OR (@cve_modulo IS NULL AND ( ( ((CONVERT(VARCHAR(20),cve_role) like '%' + @criterio + '%') OR (nombrerole like '%' + @criterio + '%') or (CASE WHEN(SG_roles.activo=1) THEN 'activo' ELSE 'inactivo' END like @criterio )) AND @cve_role=0)
+          OR ((cve_role=@cve_role) AND (@cve_role !=0))
+          )
+          )
+          )
+          ;
+          --Paginacion
+          SELECT TOP(@longitudPagina)
+          indiceRegistro,
+          @@ROWCOUNT as totalRegistros,
+          cve_role,
+          nombrerole,
+          cve_modulo,
+          nombremodulo,
+          activo
+          FROM @TablaAuxiliarPaginacion
+          WHERE indiceRegistro > @inicio
+          ORDER BY indiceRegistro ASC
+          END
+
+        </sql>        
+    </obtenerCatalogo>
+
+     <Editar>
+         <campo leyenda="Clave" db_nombre="cve_role" form_nombre="cve_role" requerido="true" charsize="0" tipo="int" default=""/>
+         <campo leyenda="Nombre" db_nombre="nombrerole" form_nombre="nombrerole"  requerido="true" charsize="150" tipo="string" default=""/>
+       <campo leyenda="Clave módulo" db_nombre="cve_modulo" form_nombre="cve_modulo"  requerido="true" charsize="0" tipo="int" default=""/>
+         <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="true" charsize="50" tipo="bool" default="true"/>
+        <sql>
+          BEGIN
+	          SET NOCOUNT ON;	
+	          BEGIN TRY
+		          UPDATE SG_roles 
+		          SET	
+		          cve_role= @cve_role,
+		          nombrerole=@nombrerole,
+              cve_modulo=@cve_modulo,
+		          activo=@activo  		
+		          WHERE cve_role= @cve_role AND cve_modulo=@cve_modulo
+		          SELECT 1  estatus, 'Registro actualizado correctamente' mensaje;
+	          END TRY BEGIN CATCH	
+		          SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+	          END CATCH	
+          END
+        </sql>
+    </Editar>
+</Roles>  
+</Secciones>  
+    
+    
+    
+    
+

@@ -1,0 +1,83 @@
+﻿div.mascara div.principal div.catalogo button.editar {background-position:center center;padding:13px;clear:left; float:left;background-image:url(/Recursos/imagenes/editar.png);background-repeat:no-repeat; border:0px; background-color:transparent; cursor:pointer;}
+div.mascara div.principal div.catalogo button.eliminar {width:30px; height:30px;padding-top:25px; float:right;background-image:url(/Recursos/imagenes/eliminar.png);background-repeat:no-repeat; border:0px; background-color:transparent; cursor:pointer;}
+div.mascara div.principal div.catalogo table.lista tr.columnas1 {border:0px; border-bottom:1px dashed #aaaaaa;}
+div.mascara div.principal div.catalogo table.lista tr.columnas .editar{display:block; width:75px;float:left; }
+div.mascara div.principal div.catalogo table.lista tr.columnas .clave {display:block; width:96px;float:left;}
+div.mascara div.principal div.catalogo table.lista tr.columnas .nombre{display:block; width:181px;float:left;}
+div.mascara div.principal div.catalogo table.lista tr.columnas .puedevertodo{display:block; width:131px;float:left;}
+div.mascara div.principal div.catalogo table.lista tr.columnas .estatus{display:block; width:120px;float:left;}
+div.mascara div.principal div.catalogo table.lista tr.columnas .eliminar{display:block; width:75px;float:left;background-position:center center;}
+div.mascara div.principal div.catalogo table.lista  tr.columnas th label{padding:10px;border-top-left-radius:5px;border-top-right-radius:5px;color:White; font-weight:bold;}
+div.mascara div.principal div.catalogo table.lista  tr.columnas th label.editar{display:block; width:55px;float:left; background-color:#5F96CC;margin-left:5px; }
+div.mascara div.principal div.catalogo table.lista  tr.columnas th label.clave {display:block; width:65px;float:left; background-color:#77AFE7;margin-left:5px;}
+div.mascara div.principal div.catalogo table.lista tr.columnas th label.nombre{display:block; width:150px;float:left; background-color:#5F96CC;margin-left:5px;}
+div.mascara div.principal div.catalogo table.lista tr.columnas th label.puedevertodo{display:block; width:90px;float:left; background-color:#77AFE7;margin-left:5px;}
+div.mascara div.principal div.catalogo table.lista tr.columnas th label.estatus{display:block; width:75px;float:left; background-color:#5F96CC;margin-left:5px;}
+div.mascara div.principal div.catalogo table.lista tr.columnas th label.eliminar{display:block; width:55px;float:left;background-position:center center; background-color:#77AFE7;margin-left:5px;}
+div.mascara div.principal div.formulario{}
+div.mascara div.principal div.formulario div.alinear {height:600px;}
+div.mascara div.principal div.formulario .clave {display:block; width:60px;float:left;margin-bottom:20px;width:60px;}
+div.mascara div.principal div.formulario h2.perfiles {clear:both;}
+div.mascara div.principal div.formulario input.clave {float:left;margin-bottom:20px;}
+div.mascara div.principal div.formulario label.nombre {float:left;clear:left;margin-bottom:20px;width:60px;}
+div.mascara div.principal div.formulario input.nombre {float:left;margin-bottom:20px;width:250px;}
+div.mascara div.principal div.formulario label.puedevertodo {float:left;clear:left;margin-bottom:20px;width:95px;}
+div.mascara div.principal div.formulario select.puedevertodo {float:left;margin-bottom:20px;width:100px;}
+div.mascara div.principal div.formulario div.alinear label.estatus { float:left;clear:left;width:60px;}
+div.mascara div.principal div.formulario div.alinear select.estatus {width:70px; float:left;float:left;}
+div.mascara div.principal div.formulario button.guardar {float:left; cursor:pointer; }        
+div.mascara div.principal div.formulario button.cancelar {float:right; cursor:pointer;}  
+div.barra-botones span{width:390px;} 
+div.mascara div.principal div.formulario div.barra-botones {margin-top:225px;} 
+div.mascara div.principal div.formulario div.barra-botones .configurar{margin-left:55px;} 
+
+/*---------------------------------------------------------------------------------------------------------------------------*/
+
+a:link, a:visited,a{text-decoration:none;color:inherit;}
+div.alinear-derecha{}
+div.alinear-derecha div.tabs-conf{font-size:12px;clear:both;border:0px;background:transparent;}
+
+.perfilseleccionado{margin:0px auto;padding:10px;margin-bottom:20px;width:96%;float:left;clear:left;border:1px solid #ddd;line-height:6px;}
+.perfilseleccionado label{display:block;clear:both;margin-bottom:0px;font-size:1.1em;}
+.perfilseleccionado b{color:#555;font-weight:bolder;display:block;clear:both;padding:10px;padding-left:20px;}
+
+table.__tablaDinamica{width:80%;}
+div.__seccion div.alinear-izquierda{float:left;width:22%;}
+div.__seccion div.alinear-izquierda .listaCatalogo{height:260px;}
+div.__seccion div.alinear-derecha{float:right;width:74%;}
+
+ul.eme_treeview{list-style:none;margin:0px;}
+ul.eme_treeview li a{display:block;cursor:pointer;padding:2px;}
+ul.eme_treeview li a:hover{display:block;cursor:pointer;background:none repeat scroll 0% 0% #BEEBFF;}
+
+img.indicadorDerecha{float:right;width:15%;margin-top:70px;}
+div.busqueda {float:none;width:74%;margin-bottom:10px;clear:both;}
+
+div.asignar-a-perfil{min-width:300px;color:#666;}
+div.asignar-a-perfil ol{float:left;min-height:60px !important;overflow:auto;float:right;padding-left:0px;list-style:none;margin:auto;padding:10px;display:block;width:90%;margin-bottom:15px;}
+div.asignar-a-perfil .lista-cp{float:left;}
+div.asignar-a-perfil .lista-cp li{padding-left:20px;padding-right:10px;border-bottom:1px dashed #ccc;padding-top:7px;padding-bottom:7px;}
+div.asignar-a-perfil .lista-cp li:hover{cursor:pointer;}
+div.asignar-a-perfil .lista-cp li i{color:#258EC8;}
+div.asignar-a-perfil .lista-cp li:hover{background-color:#ddd;}
+div.asignar-a-perfil .lista-cp li button{background:transparent url(/Recursos/imagenes/flecha-opciones.png) no-repeat;border:0px;padding:12px;float:right;cursor:pointer;}
+body div.asignar-a-perfil ol.sinNavegacion li{background:none;}
+body div.asignar-a-perfil button.regresar{border:0px;background:#fff;float:right;clear:right;padding:7px;color:black;font-weight:bolder;}
+body div.asignar-a-perfil button.regresar:hover{color:#7892C2;cursor:pointer;}
+
+.lista-roles{float:right;overflow:auto;}
+div.alinear-derecha button.btn{padding:5px;margin:10px auto;display:block;}
+div.alinear-derecha div.asignar-a-perfil ol{width:100%;min-height:200px;padding:0px;margin:0px;margin-bottom:15px;}
+div.alinear-derecha div.asignar-a-perfil div.izq {float:left;border-right:1px solid #ccc;width:48%;}
+div.alinear-derecha div.asignar-a-perfil div.der {float:right;width:48%;}
+div.__seccion{min-height:602px;max-height:602px;}
+div.botones-perfiles{margin-top:10px;}
+div.__seccion div.barra-botones span{width:90px;}
+div.__seccion{}
+div.arbol-editar, .sucursalesPerfil, .empresasPerfil, .modulosPerfil, .rolesPerfil{max-height:280px;overflow-x:hidden;overflow-y:auto;margin-bottom:15px;}
+
+div.configuracion-perfil{width:900px;float:left;}
+
+body div.botones-sucursales button{width:200px;}
+
+div.barra-botones-b{clear:both !important;margin-top:10px;}

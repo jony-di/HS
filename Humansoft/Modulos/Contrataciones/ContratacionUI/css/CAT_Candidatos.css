@@ -1,0 +1,600 @@
+﻿.smart-green
+{
+    height: 650px;
+}
+
+div.mascara
+{
+    padding: 10px 0px;
+}
+
+div.mascara div.principal div.formulario table.lista tr.columnas1
+{
+    border: 0px;
+    border-bottom: 1px dashed #aaaaaa;
+}
+
+div.mascara div.principal div.formulario table.lista tr.columnas th label
+{
+    padding: 10px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    color: White;
+    font-weight: bold;
+}
+
+div.mascara div.principal div.formulario table.lista tr.columnas th label.editar
+{
+    display: block;
+    width: 50px;
+    float: left;
+    background-color: #5F96CC;
+    margin-left: 5px;
+}
+
+div.mascara div.principal div.formulario table.lista tr.columnas th label.clave
+{
+    display: block;
+    width: 60px;
+    float: left;
+    background-color: #77AFE7;
+    margin-left: 5px;
+}
+
+div.mascara div.principal div.formulario table.lista tr.columnas th label.nivel
+{
+    display: block;
+    width: 100px;
+    float: left;
+    background-color: #5F96CC;
+    margin-left: 5px;
+}
+
+div.mascara div.principal div.formulario table.lista tr.columnas th label.minimo
+{
+    display: block;
+    width: 100px;
+    float: left;
+    background-color: #5F96CC;
+    margin-left: 5px;
+}
+
+div.mascara div.principal div.formulario table.lista tr.columnas th label.maximo
+{
+    display: block;
+    width: 120px;
+    float: left;
+    background-color: #77AFE7;
+    margin-left: 5px;
+}
+
+div.mascara div.principal div.formulario table.lista tr.columnas th label.estatus
+{
+    display: block;
+    width: 70px;
+    float: left;
+    background-color: #5F96CC;
+    margin-left: 5px;
+}
+
+div.mascara div.principal div.formulario button.editar
+{
+    background-position: center center;
+    padding: 13px;
+    clear: left;
+    float: left;
+    background-image: url(/Recursos/imagenes/editar.png);
+    background-repeat: no-repeat;
+    border: 0px;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+div.mascara div.principal div.formulario table.lista tr.columnas .editar
+{
+    display: block;
+    width: 70px;
+    float: left;
+}
+div.m
+ascara div.principal div.formulario table.lista tr.columnas .clave
+{
+    display: block;
+    width: 91px;
+    float: left;
+}
+
+div.mascara div.principal div.formulario table.lista tr.columnas .detalle
+{
+    display: block;
+    width: 145px;
+    float: left;
+}
+
+div.mascara div.principal div.formulario table.lista tr.columnas .valor
+{
+    display: block;
+    width: 125px;
+    float: left;
+}
+
+div.mascara div.principal div.formulario table.lista tr.columnas .estatus
+{
+    display: block;
+    width: 100px;
+    float: left;
+}
+
+.ocultar
+{
+    visibility: hidden;
+}
+
+.mostrar
+{
+    visibility: visible;
+}
+
+.fileUpload
+{
+    position: relative;
+    overflow: hidden;
+    margin: 5px 0px;
+    width: 50px;
+    float: left;
+    padding: 5px 20px;
+}
+
+.fileUpload input.upload
+{
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}
+
+.eliminar
+{
+    float: right;
+    cursor: pointer;
+}
+
+.updatebox
+{
+    background-color: #7892C2;
+    height: 300px;
+    width: 400px;
+    text-align: center;
+    color: #fff;
+    border-radius: 3px;
+    box-shadow: 5px 5px 5px #888;
+    z-index: 15;
+}
+
+.title
+{
+    padding-top: 3px;
+}
+
+.updatebox .internal
+{
+    background-color: #F8F8F8;
+    color: #5E5E5E;
+    height: 225px;
+    width: 390px;
+    margin: auto;
+    padding: 3px 0px;
+    position: relative;
+}
+
+.updatebox .internal 
+{
+    clear: both !important;
+    float: none !important;
+    margin: auto !important;
+    margin-top: 10px !important;
+}
+
+.warning2
+{
+    color: Red;
+    font-size: 8px;
+    background-color: #FFF8C4;
+    border: 1px solid #F2C779;
+}
+
+.updatebox-close
+{
+    position: absolute;
+    top: -18px;
+    right: -18px;
+    width: 16px;
+    height: 16px;
+    padding: 5px 5px;
+    cursor: pointer;
+    z-index: 8040;
+    color: #fff;
+    border-radius: 50px;
+    background-color: #444;
+    border: solid 2px #fff;
+    font-family: HelveticaN;
+    text-align: center;
+    font-weight: bolder;
+    box-shadow: 0px 0px 5px #000;
+}
+
+.book
+{
+    width: 100%;
+    height: 480px;
+    overflow: auto;
+    padding: 0px 10px;
+}
+
+.car
+{
+    background-color: #EEF3FA;
+    width: 45%;
+    height: 45%;
+    border: solid #E2E2E2 1px;
+    -webkit-box-shadow: 0px 0px 8px 2px rgba(194,194,194,1);
+    -moz-box-shadow: 0px 0px 8px 2px rgba(194,194,194,1);
+    box-shadow: 0px 0px 8px 2px rgba(194,194,194,1);
+    margin: 20px auto;
+    padding-left: 20px;
+    position: relative;
+}
+
+.car .cuerpo
+{
+    background-color: #fff;
+    width: 100%;
+    height: 100%;
+}
+
+.car .cabeza
+{
+    width: 100%;
+    height: 100px;
+}
+
+.car .cabeza img
+{
+    height: 90px;
+    width: 85px;
+    margin: 15px 0px 0px 10px;
+}
+
+.car .cabeza .datos
+{
+    width: 70%;
+    height: 100%;
+    float: right;
+    line-height: 15px;
+    color: #436B9F;
+}
+
+.car .cabeza .datos a
+{
+    margin: 0px;
+}
+
+.car .cabeza .datos h5
+{
+    padding: 10px 0px;
+    margin: 0px;
+}
+
+.car .cabeza .datos h4
+{
+    width: 90%;
+    margin: 10px 0px -10px 0px;
+    padding: 10px 0px;
+    font-weight: normal;
+    overflow: hidden; /* Escondemos la parte sobrante */
+    white-space: nowrap; /* Indicamos que no realice salto de linea si no cabe en la anchura indicada */
+    text-overflow: ellipsis;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.car .cabeza .datos h5
+{
+    color: #A19E9F;
+    font-weight: normal;
+    overflow: hidden; /* Escondemos la parte sobrante */
+    white-space: nowrap; /* Indicamos que no realice salto de linea si no cabe en la anchura indicada */
+    text-overflow: ellipsis;
+}
+
+.car .cabeza .datos label
+{
+    font-size: 10px;
+}
+
+.datos2
+{
+    line-height: 10px;
+    margin: 10px 0px 0px 10px;
+    font-size: small;
+    font-weight: normal;
+}
+
+.etiquetas-azules
+{
+    color: #436B9F !important;
+    padding: 2px;
+    clear: both;
+}
+
+.etiquetas-grises
+{
+    width: 50%;
+    padding: 2px;
+    overflow: hidden; /* Escondemos la parte sobrante */
+    white-space: nowrap; /* Indicamos que no realice salto de linea si no cabe en la anchura indicada */
+    text-overflow: ellipsis;
+}
+
+.tabs
+{
+    height: 540px;
+}
+
+.tabs ul
+{
+    color: #fff !important;
+}
+
+.car-select
+{
+    background: rgba(95, 95, 95, 0.6);
+    width: 100% !important;
+    position: absolute !important;
+    z-index: 10;
+    left: 0px;
+    top: 0px;
+    height: 100%;
+    display: none;
+}
+
+.btn-car
+{
+    border-radius: 50px;
+    width: 150px;
+    height: 50px;
+    background: #7892C2 linear-gradient(to bottom, #393939 5%, #5C5D5C 100%) repeat scroll 0% 0%;
+    color: #fff;
+    text-align: left;
+    margin: 90px 10px 20px 10px;
+    display: block;
+    float: left;
+    cursor: pointer;
+    overflow: hidden; /* Escondemos la parte sobrante */
+    white-space: nowrap; /* Indicamos que no realice salto de linea si no cabe en la anchura indicada */
+    text-overflow: ellipsis;
+}
+
+.btn-car:hover
+{
+    background: #7892C2 linear-gradient(to bottom, #7892C2 5%, #476E9E 100%) repeat scroll 0% 0%;
+}
+
+.centrar
+{
+    clear: both;
+    float: none;
+    margin: auto !important;
+}
+
+.btn-car img
+{
+    vertical-align: middle;
+    width: 48px;
+    height: 48px;
+}
+
+.car:hover .car-select
+{
+    display: block;
+}
+
+.expandir
+{
+    width: 95% !important;
+    height: 200px;
+}
+
+.expandir .cabeza .datos
+{
+    width: 85%;
+}
+
+.expandir .cabeza .datos label
+{
+    font-size: 12px !important;
+}
+
+.columnaI
+{
+    float: left;
+    width: 45% !important;
+    border-right: 1px solid #ccc;
+}
+
+.columnaD
+{
+    float: right;
+    width: 50%;
+}
+
+.flujo
+{
+    overflow-x: auto !important;
+    height: 250px;
+    width: 100%;
+}
+
+.extremos
+{
+    background: #476E9E linear-gradient(to bottom, #476E9E 5%, #7892C2 100%) repeat scroll 0% 0% !important;
+    border-radius: 50px !important;
+    font-weight:bold !important;
+    height: 55px !important;
+    width: 55px !important;
+    font-size: 18px !important;
+    margin: 10px -20px 0px 5px !important;
+    border:solid 3px #fff !important;
+}
+
+.extremos label
+{
+    color: #fff !important;
+}
+
+.flecharDerecha
+{
+    background: transparent url("/Recursos/imagenes/sigproc.png") no-repeat scroll center top !important;
+    -ms-transform: rotate(-90deg); /* IE 9 */
+    -webkit-transform: rotate(-90deg); /* Chrome, Safari, Opera */
+    transform: rotate(-90deg);
+    box-shadow: 0px 0px 0px #fff !important;
+    height: 60px !important;
+    margin: 0px 0px !important;
+    cursor:auto !important;
+    border:0px !important;
+}
+
+.pasos
+{
+    /*background: #3690C2 linear-gradient(to bottom, #3690C2 5%, #005797 100%) repeat scroll 0% 0%;*/
+    background: #EEF3FA linear-gradient(to bottom, #fff 5%, #EEF3FA 100%) repeat scroll 0% 0% ;
+    padding: 10px;
+    font-size: 15px;
+    height: 50px;
+    width: 100px;
+    font-weight: normal;
+    text-align: center;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    border-radius: 3px;
+    -webkit-box-shadow: 0px 0px 8px 2px rgba(194,194,194,1);
+    -moz-box-shadow: 0px 0px 8px 2px rgba(194,194,194,1);
+    box-shadow: 0px 0px 8px 2px rgba(194,194,194,1);
+    border:solid  1px #fff;
+    margin: 80px -15px 0px -15px;
+    display:inline-block;
+}
+
+.pasos label
+{
+    color: #436B9F;
+    text-align: center;
+    width:100%;
+    overflow: hidden; 
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.actual span
+{
+    background: transparent url("/Recursos/imagenes/notice.png") no-repeat scroll center top !important;
+    width:48px;
+    height:48px;
+    display:block;
+    position:relative;
+    left:20px;
+    top:40px;
+    cursor:pointer;
+}
+
+.termindo, .termindo label
+{
+    cursor:pointer;
+}
+
+.termindo span
+{
+    background: transparent url("/Recursos/imagenes/success.png") no-repeat scroll center top !important;
+    width:48px;
+    height:48px;
+    display:block;
+    position:relative;
+    left:20px;
+    top:40px;
+}
+
+.rechazado, .rechazado
+{
+    cursor:pointer;
+}
+
+.rechazado span
+{
+    background: transparent url("/Recursos/imagenes/error.png") no-repeat scroll center top !important;
+    width:48px;
+    height:48px;
+    display:block;
+    position:relative;
+    left:20px;
+    top:40px;
+}
+
+.paso-select
+{
+    width: 150px;
+    position: relative;
+    z-index: 10;
+    left: -40px;
+    top: -95px;
+    height: 100%;
+    /*display: none;*/
+    text-align:center;
+}
+
+.paso-select img
+{
+    height:36px;
+    width:36px;
+    float:left;
+    cursor:pointer;
+}
+
+/*.pasos:hover .paso-select
+{
+    display: block;
+}*/
+
+.pasos img
+{
+    display:block;
+    position:relative;
+    left:20px;
+    top:0px;
+}
+
+.fileUpload {
+    position: relative;
+    overflow: hidden;
+    margin: 5px 0px 5px 50px;
+    width:50px;
+    float:left !important;
+    padding:5px 20px;
+}
+
+.fileUpload input.upload {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}

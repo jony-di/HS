@@ -1,0 +1,556 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+    
+    <Comunes>
+        <ObtenerEncabezadoVacacionesEmpleado>
+            <campo leyenda="Id de Empleado" db_nombre="num_empleado" form_nombre="num_empleado" requerido="true" charsize="0" tipo="int" default=""/>
+            <sql>
+				<![CDATA[
+            BEGIN
+              SET LANGUAGE Español;
+              SELECT O.*, W.totaldias diasDerechoPeriodoActual,(W.totaldias - W.diaspendientes) diasGozadosPeriodoActual, W.diaspendientes saldoPeriodoActual, CONVERT(VARCHAR(10),W.periodo) + '-' + CONVERT(VARCHAR(10),W.periodoFin) periodo  FROM(
+	              SELECT 
+		              A.nombreCompleto nombre
+		              , C.nombredep departamento 
+		              , REPLACE(CONVERT(VARCHAR(20), GETDATE(),106),' ', '/') fechaSolicitud
+		              , CONVERT(VARCHAR(20), GETDATE(),103) fechaSolicitudISO
+		              , REPLACE(CONVERT(VARCHAR(20),A.fechaing,106),' ', '/') fechaIngreso
+		              , D.Nombre_Puesto puesto
+		              , E.Descripcion lugarTrabajo
+		              , SUM(G.diaspendientes) diasDerecho
+	              FROM 
+		              ES_emplplantilla A 
+		              LEFT OUTER JOIN ES_posiciones B ON A.num_posicion=B.num_plantilla 
+		              LEFT OUTER JOIN ES_departamentos C ON B.cve_departamento=C.cve_departamento
+		              LEFT OUTER JOIN ES_puestosgenericos D ON B.cve_puesto=D.cve_puesto
+		              LEFT OUTER JOIN ES_lugartrabajo E ON B.cve_lugartrabajo=E.cve_lugar
+		              LEFT OUTER JOIN ES_puestosdepartamento
+		              F ON B.cve_puesto=F.cve_puesto AND B.cve_departamento=F.cve_departamento
+		              LEFT OUTER JOIN VAC_VacacionesDerecho G ON G.num_empleado=A.id_empleado 
+	              WHERE A.id_empleado=@num_empleado
+	              GROUP BY A.nombreCompleto,C.nombredep,A.fechaing,D.Nombre_Puesto,E.Descripcion
+              )O
+              LEFT OUTER JOIN (SELECT diaspendientes,totaldias,periodo, periodoFin FROM VAC_VacacionesDerecho WHERE (DATEPART(YY,GETDATE()))=PeriodoFin AND num_empleado=@num_empleado)W ON 1=1
+           END
+				]]>
+            </sql>   
+        </ObtenerEncabezadoVacacionesEmpleado>
+
+        <ObtenerDiasDerechoVacaciones>
+            <campo leyenda="Id de Empleado" db_nombre="num_empleado" form_nombre="num_empleado" requerido="true" charsize="0" tipo="int" default=""/>
+            <sql>
+				<![CDATA[   
+          SET LANGUAGE Español;
+            SELECT 
+	               num_empleado, CONVERT(VARCHAR(20),periodo) + '-' + CONVERT(VARCHAR(20),periodoFin) periodo, totaldias,(totaldias-diaspendientes) diastomados, diaspendientes saldo     
+            FROM 
+                VAC_VacacionesDerecho 
+            WHERE num_empleado=@num_empleado;
+				]]>
+            </sql>   
+        </ObtenerDiasDerechoVacaciones>
+
+        <ObtenerDiasFeriados>
+            <sql>
+				<![CDATA[
+                SELECT CONVERT(VARCHAR(10),fecha,103) dia FROM VAC_diasferiados;
+				]]>
+            </sql>
+        </ObtenerDiasFeriados>
+
+        <ObtenerDiasVacaciones>
+            <campo leyenda="Número de Empleado" db_nombre="num_empleado" form_nombre="num_empleado" requerido="true" charsize="0" tipo="int" default=""/>
+            <sql>
+				<![CDATA[
+                SELECT CONVERT(VARCHAR(10),fechadia,103) dia FROM VAC_ProgVacFecha WHERE num_empleado=@num_empleado AND cve_progvac IN(SELECT cve_progvac FROM VAC_ProgVacaciones WHERE cve_estatus<>6);
+				]]>
+            </sql>
+        </ObtenerDiasVacaciones>
+
+      <ObtenerMisSolicitudes>
+        <campo leyenda="Número de empleado" db_nombre="num_empleado" form_nombre="num_empleado" requerido="true" charsize="30" tipo="string"/>
+        <sql>
+          <![CDATA[
+                BEGIN
+                    SET LANGUAGE Español;
+                      SELECT 
+		                    ROW_NUMBER() OVER(ORDER BY CONVERT(INT,A.cve_progvac) DESC) AS indiceRegistro,		
+			                    A.num_empleado,
+			                    B.nombrecompleto nombre_empleado,
+			                    G.descripcion estatus,
+			                    STUFF((
+								          SELECT ', ' + CONVERT(VARCHAR(200),fechadia) 
+								          FROM  VAC_ProgVacFecha
+								          WHERE cve_progvac = A.cve_progvac
+								          FOR XML PATH(''),TYPE).value('(./text())[1]','VARCHAR(MAX)')
+							            ,1,2,'') 
+							          AS fecha,
+			                    E.nombredep departamento,
+			                    D.Nombre_Puesto puesto,
+			                    A.cve_progvac num_solicitud,
+			                    COUNT(F.fechadia) diasprog,
+                        REPLACE(CONVERT(VARCHAR(20),fechaprog,106),' ','/') fechaprog
+	                    FROM 
+		                    VAC_ProgVacaciones A 
+		                    INNER JOIN ES_emplplantilla B ON A.num_empleado=B.id_empleado
+		                    INNER JOIN ES_posiciones C ON B.id_empleado=C.id_empleado
+		                    INNER JOIN ES_puestosgenericos D ON C.cve_puesto=D.cve_puesto
+		                    INNER JOIN ES_departamentos E ON C.cve_departamento=E.cve_departamento
+		                    INNER JOIN VAC_ProgVacFecha F ON A.cve_progvac=F.cve_progvac  AND A.periodo=F.periodo  
+                        INNER JOIN (SELECT cve_estatus, descripcion FROM SIS_estatus WHERE cve_modulo=3) G ON G.cve_estatus= A.cve_estatus
+                      WHERE A.num_empleado = @num_empleado
+                      GROUP BY 
+		                    A.num_empleado,
+		                    B.nombrecompleto,
+		                    G.descripcion,
+		                    E.nombredep,
+		                    D.Nombre_Puesto,
+		                    A.cve_progvac,
+                        A.fechaprog
+                END
+				  ]]>
+        </sql>
+      </ObtenerMisSolicitudes>
+
+      <ObtenerHistorialUnaSolicitud>
+        <campo leyenda="Número de solicitud" db_nombre="num_solicitud" form_nombre="num_solicitud" requerido="true" charsize="20" tipo="string"/>
+        <sql>
+          <![CDATA[      
+            SET LANGUAGE Español;
+              SELECT A.num_solicitud, B.descripcion estatus, C.nombre, REPLACE(CONVERT(VARCHAR(20),A.fecha,106),' ', '/') + '  ' + SUBSTRING(CONVERT(VARCHAR(20),A.fecha),13,10) fecha
+              FROM (SELECT num_solicitud, num_usuario_cambio,estatus, fecha  FROM VAC_HistorialSolicitudesVac WHERE num_solicitud=@num_solicitud) A 
+                INNER JOIN (SELECT cve_estatus, descripcion FROM SIS_estatus WHERE cve_modulo=3) B ON A.estatus=B.cve_estatus 
+                LEFT OUTER JOIN SG_usuarios C ON A.num_usuario_cambio=C.cve_usuario
+              ORDER BY A.fecha DESC
+				  ]]>
+        </sql>
+      </ObtenerHistorialUnaSolicitud>
+
+        <ObtenerListadoSolicitudes>
+            <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int"/>
+            <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int"/>
+            <campo leyenda="Número de empleado" db_nombre="num_empleado" form_nombre="num_empleado" requerido="false" charsize="30" tipo="string" default="%"/>
+            <campo leyenda="Día" db_nombre="dias" form_nombre="dias" requerido="false" charsize="20" tipo="string" default="%"/>
+            <campo leyenda="Nombre de empleado" db_nombre="nombre_empleado" form_nombre="nombre_empleado" requerido="false" charsize="200" tipo="string" default="%"/>
+            <campo leyenda="Estatus" db_nombre="estatus" form_nombre="estatus" requerido="false" charsize="10" tipo="string" default="%"/>
+            <campo leyenda="Departamento" db_nombre="departamento" form_nombre="departamento" requerido="false" charsize="200" tipo="string" default="%"/>
+            <campo leyenda="Puesto" db_nombre="puesto" form_nombre="puesto" requerido="false" charsize="200" tipo="string" default="%"/>
+            <campo leyenda="Periodo" db_nombre="periodo" form_nombre="periodo" requerido="false" charsize="10" tipo="string" default="%"/>
+            <campo leyenda="Número de solicitud" db_nombre="num_solicitud" form_nombre="num_solicitud" requerido="false" charsize="20" tipo="string" default="%"/>
+            <sql>
+				<![CDATA[
+                BEGIN            
+                  --DECLARE @cve_usuario INT=3;                        
+                    DECLARE @tEmpleadosVisibles AS TABLE(
+	                    num_empleado VARCHAR(30)
+                    )
+                    INSERT INTO @tEmpleadosVisibles
+                    EXEC PA_SG_CObtenerEmpleadosVisibles @cve_usuario
+                        
+	                --DECLARE @pagina INT=0;
+	                --DECLARE @longitudPagina INT=100;
+	                --DECLARE @num_empleado NVARCHAR(30)='%';
+	                --DECLARE @nombre_empleado NVARCHAR(50)='%';
+	                --DECLARE @estatus NVARCHAR(10)='%';
+	                --DECLARE @dias NVARCHAR(200)='%';
+	                --DECLARE @departamento NVARCHAR(50)='gener';
+	                --DECLARE @puesto varchar(20)='%';
+	                --DECLARE @periodo VARCHAR(20)='%';
+	                --DECLARE @num_solicitud varchar(20)='%';	
+
+	                SET NOCOUNT ON;
+	                DECLARE @inicio INT;
+	                SET @inicio= (@pagina-1)*@longitudPagina;	--Pagina debe ser mayor que 0;
+	                DECLARE @TablaAuxiliarPaginacion AS TABLE(
+		                indiceRegistro INT,
+		                num_empleado NVARCHAR(30),
+		                nombre_empleado NVARCHAR(200),
+		                estatus NVARCHAR(100),
+		                fecha NVARCHAR(200),
+		                departamento NVARCHAR(200),
+		                puesto VARCHAR(200),
+		                num_solicitud INT,
+		                diasProg INT,
+                    fechaprog DATETIME,
+                    periodo VARCHAR(20)
+	                )		
+	                INSERT INTO @TablaAuxiliarPaginacion		
+	                SELECT 
+		                ROW_NUMBER() OVER(ORDER BY CONVERT(INT,A.cve_progvac) DESC) AS indiceRegistro,		
+			                A.num_empleado,
+			                B.nombrecompleto,
+			                G.descripcion,
+			                STUFF((
+								SELECT ', ' + CONVERT(VARCHAR(200),fechadia) 
+								FROM  VAC_ProgVacFecha
+								WHERE cve_progvac = A.cve_progvac
+								FOR XML PATH(''),TYPE).value('(./text())[1]','VARCHAR(MAX)')
+							  ,1,2,'') 
+							AS fechadia,
+			                E.nombredep departamento,
+			                D.Nombre_Puesto puesto,
+			                A.cve_progvac,
+			                COUNT(F.fechadia) diasprog,
+                      A.fechaprog,
+                      CONVERT(VARCHAR(20),A.periodo) +'-' + CONVERT(VARCHAR(20),A.periodoFin) periodo
+	                FROM 
+		                VAC_ProgVacaciones A 
+                    INNER JOIN @tEmpleadosVisibles EV ON A.num_empleado=EV.num_empleado
+		                INNER JOIN ES_emplplantilla B ON A.num_empleado=B.id_empleado
+		                INNER JOIN ES_posiciones C ON B.id_empleado=C.id_empleado
+		                INNER JOIN ES_puestosgenericos D ON C.cve_puesto=D.cve_puesto
+		                INNER JOIN ES_departamentos E ON C.cve_departamento=E.cve_departamento
+		                LEFT OUTER JOIN VAC_ProgVacFecha F ON A.cve_progvac=F.cve_progvac  AND A.periodo=F.periodo
+                    INNER JOIN (SELECT cve_estatus, descripcion FROM SIS_estatus WHERE cve_modulo=3) G ON G.cve_estatus= A.cve_estatus
+	                WHERE 
+	                  ISNULL(A.num_empleado,'') like @num_empleado AND
+		                ISNULL(B.nombrecompleto,'') like '%' + @nombre_empleado + '%' AND
+		                ISNULL(A.cve_estatus,'') like @estatus AND
+		                ISNULL(F.fechadia,'') like @dias AND
+		                ISNULL(A.cve_progvac,'') like @num_solicitud AND		
+		                ISNULL(E.nombredep,'') like '%' + @departamento + '%' AND
+		                ISNULL(D.Nombre_Puesto,'') like '%' + @puesto + '%'
+	                GROUP BY 
+		                A.num_empleado,
+		                B.nombrecompleto,
+		                G.descripcion,
+                    A.periodo,
+                    A.periodoFin,
+		                E.nombredep,
+		                D.Nombre_Puesto,
+		                A.cve_progvac,
+                    A.fechaprog
+		
+	                --Paginacion	
+                  
+                  SET LANGUAGE Español;
+	                SELECT TOP(@longitudPagina)
+		                A.indiceRegistro,
+		                @@ROWCOUNT as totalRegistros,
+		                num_empleado,
+		                nombre_empleado,
+		                estatus,
+		                fecha,
+		                departamento,
+		                puesto,
+		                num_solicitud,
+		                diasprog,
+						        num_solicitud,
+                    REPLACE(CONVERT(VARCHAR(20),fechaprog,106),' ','/') fechaprog,
+                    periodo
+	                FROM @TablaAuxiliarPaginacion A	
+	                WHERE indiceRegistro > @inicio	 
+	                ORDER BY indiceRegistro ASC	
+                END
+				]]>
+            </sql>            
+        </ObtenerListadoSolicitudes>
+        
+		      <ObtenerDetalleSolicitud>
+                  <campo leyenda="Número de empleado" db_nombre="num_empleado" form_nombre="num_empleado" requerido="true" charsize="30" tipo="string"/>
+                  <campo leyenda="Número de solicitud" db_nombre="num_solicitud" form_nombre="num_solicitud" requerido="true" charsize="20" tipo="string"/>
+                  <sql>
+				            <![CDATA[
+                    BEGIN
+                      SET LANGUAGE Español;
+	                    --DECLARE @num_empleado INT=0;
+	                    --DECLARE @num_solicitud INT=0;
+                        DECLARE @imagenEscaneo VARCHAR(50);
+                        SET @imagenEscaneo=(SELECT TOP(1) nombreArchivo FROM VAC_HistorialSolicitudesVac WHERE num_solicitud=@num_solicitud AND estatus=3);
+	                      SELECT @imagenEscaneo escaneo, A.num_empleado, A.cve_progvac num_solicitud, G.descripcion estatus,  CONVERT(VARCHAR(20),A.periodo) +'-' + CONVERT(VARCHAR(20),A.periodoFin) periodo,  REPLACE(CONVERT(VARCHAR(20),B.fechadia,106),' ', '/') fechadia
+					             FROM VAC_ProgVacaciones A LEFT OUTER JOIN VAC_ProgVacFecha B ON A.cve_progvac=B.cve_progvac AND A.periodo=B.periodo 
+                              INNER JOIN (SELECT cve_estatus, descripcion FROM SIS_estatus WHERE cve_modulo=3) G ON G.cve_estatus= A.cve_estatus
+					             WHERE A.num_empleado=@num_empleado AND A.cve_progvac=@num_solicitud;
+				            END
+				            ]]>
+                </sql>
+        </ObtenerDetalleSolicitud>
+
+
+      <ObtenerDiasSolicitudPeriodo>
+        <campo leyenda="Número de empleado" db_nombre="num_empleado" form_nombre="num_empleado" requerido="true" charsize="30" tipo="string"/>
+        <campo leyenda="Periódo" db_nombre="periodo" form_nombre="periodo" requerido="true" charsize="30" tipo="string"/>
+        <sql>
+          <![CDATA[
+              BEGIN
+                SET LANGUAGE Español;
+	                SELECT CONVERT(VARCHAR(20),periodo) +'-' + CONVERT(VARCHAR(20),periodoFin) periodo, CONVERT(VARCHAR(20),fechadia) fechadia FROM VAC_ProgVacFecha 
+					        WHERE CONVERT(VARCHAR(20),periodo) +'-' + CONVERT(VARCHAR(20),periodoFin)= @periodo AND num_empleado=@num_empleado ORDER BY VAC_ProgVacFecha.fechadia DESC;
+				      END
+				      ]]>
+        </sql>
+      </ObtenerDiasSolicitudPeriodo>
+
+      <ObtenerDiasSolicitud>
+        <campo leyenda="Número de solicitud" db_nombre="num_solicitud" form_nombre="num_solicitud" requerido="true" charsize="20" tipo="string"/>
+        <sql>
+          <![CDATA[
+              BEGIN
+                SET LANGUAGE Español;
+	                SELECT CONVERT(VARCHAR(20),periodo) +'-' + CONVERT(VARCHAR(20),periodoFin) periodo, cve_progvac num_solicitud, CONVERT(VARCHAR(20),fechadia) fechadia FROM VAC_ProgVacFecha 
+					        WHERE cve_progvac=@num_solicitud ORDER BY VAC_ProgVacFecha.fechadia ASC;
+				      END
+				      ]]>
+        </sql>
+      </ObtenerDiasSolicitud>
+
+      <ObtenerRolParaSolicitudVacaciones>
+        <campo leyenda="Número de solicitud" db_nombre="num_solicitud" form_nombre="num_solicitud" requerido="true" charsize="20" tipo="string"/>
+        <sql>
+            <![CDATA[
+                  BEGIN                  
+                    --DECLARE @cve_usuarioPideInformacion VARCHAR(20)=3;
+                    --DECLARE @num_Solicitud VARCHAR(20)=1;
+
+                    DECLARE @num_empleadoDeSolicitud VARCHAR(20);
+	                  DECLARE @estatusDeSolicitud VARCHAR(20);
+	
+	                  SELECT @num_empleadoDeSolicitud=num_empleado,@estatusDeSolicitud=cve_estatus FROM VAC_ProgVacaciones WHERE cve_progvac= @num_Solicitud;
+	
+                      SELECT
+		                  CASE WHEN @estatusDeSolicitud < 5 THEN--!IMPORTANTE: Estatus debe ser menor que 5(VoBo RH)
+			                  CASE WHEN Z.cve_role=1 AND @estatusDeSolicitud=4 THEN--!IMPORTANTE: CVE_ROLE de VoBo RH=1 y Estatus debe ser 4(Autorizada)			 
+				                  'VoBoRH' 
+			                  ELSE 
+				                  CASE WHEN  Z.empleadoPideInformacion=Z.empleadoJefeDeSolicitud AND @estatusDeSolicitud=3 THEN 
+					                  'Jefe'
+				                  ELSE 
+					                  CASE WHEN Z.empleadoPideInformacion=Z.empleadoDeSolicitud THEN 
+						                  'Usuario' 
+					                  ELSE
+						                  'Otro'
+					                  END				
+				                  END
+			                  END
+		                  ELSE
+			                  'Solicitud cerrada'
+		                  END rol,@cve_usuarioPideInformacion  cve_usuarioPideInformacion, Z.*
+                      FROM(
+                          SELECT C.num_empleado empleadoPideInformacion, @num_empleadoDeSolicitud empleadoDeSolicitud,B.id_empleado empleadoJefeDeSolicitud, C.cve_role, @estatusDeSolicitud estatusDeSolicitud
+                          FROM(
+                              SELECT num_plantilladep FROM ES_posiciones  WHERE id_empleado=@num_empleadoDeSolicitud
+                          ) A
+                          LEFT OUTER JOIN ES_posiciones B ON B.num_plantilla=A.num_plantilladep
+                          LEFT OUTER JOIN (
+                              SELECT F.num_empleado,E.cve_role FROM
+                              (SELECT D.num_empleado, D.cve_perfil FROM SG_usuarios D WHERE D.cve_usuario=@cve_usuarioPideInformacion)F
+                              LEFT OUTER JOIN SG_perfilmodulorole E ON F.cve_perfil=E.cve_perfil AND cve_modulo=3--!IMPORTANTE: cve_modulo de Vacaciones=3
+                          )C ON 1=1
+                      )Z
+              END
+				    ]]>
+          </sql>
+      </ObtenerRolParaSolicitudVacaciones>
+
+      <RegistrarNotificacionSolicitud>
+        <campo leyenda="Número de solicitud" db_nombre="num_solicitud" form_nombre="num_solicitud" requerido="true" charsize="20" tipo="string"/>
+        <sql>
+          <![CDATA[
+            BEGIN
+                DECLARE @num_empleado VARCHAR(200);
+	              DECLARE @nombreEmpleado VARCHAR(200);
+	              DECLARE @dias INT;
+	              DECLARE @cve_usuario_jefe VARCHAR(200);
+
+		              DECLARE @estatus INT; SET @estatus=1;
+		              DECLARE @mensaje VARCHAR(500);
+
+	              SELECT @num_empleado=A.num_empleado, @nombreEmpleado=B.nombrecompleto, @dias=COUNT(A.fechadia), @cve_usuario_jefe=F.cve_usuario
+	              FROM VAC_ProgVacFecha A
+				              LEFT OUTER JOIN ES_emplplantilla B ON A.num_empleado=B.id_empleado
+				              LEFT OUTER JOIN ES_posiciones C ON A.num_empleado=C.id_empleado
+				              LEFT OUTER JOIN ES_posiciones D ON C.num_plantilladep=D.num_plantilla
+				              LEFT OUTER JOIN ES_emplplantilla E ON D.id_empleado=E.id_empleado
+				              LEFT OUTER JOIN SG_usuarios F ON E.id_empleado=F.num_empleado
+	              WHERE A.cve_progvac=@num_solicitud 
+	              GROUP BY A.num_empleado, B.nombrecompleto, E.id_empleado, F.cve_usuario, E.nombrecompleto
+	              IF @cve_usuario_jefe IS NOT NULL BEGIN
+		              INSERT INTO Notificaciones(num_usuario,fecha,nota,pagina,referencia) VALUES(@cve_usuario_jefe, GETDATE(), 'El empleado ' + @nombreEmpleado + ' solicitó ' + CONVERT(VARCHAR(20),@dias) + ' dias de vacaciones.', '/Modulos/Vacaciones/VacacionesUI/VAC_SolicitudEstatus.aspx?num_empleado=' + @num_empleado + '&num_solicitud=' + CONVERT(VARCHAR(20),@num_solicitud),'VAC_AUT_JEFE_' +@num_solicitud);
+		              SET @estatus=1;
+		              SET @mensaje='Notificación correcta';
+	              END  ELSE BEGIN
+		              SET @estatus=-1;
+		              SET @mensaje='No se encontró destinatario de notificación.';
+	              END
+                SELECT @estatus estatus, @mensaje mensaje;
+				    END
+				    ]]>
+        </sql>
+      </RegistrarNotificacionSolicitud>
+
+      <ObtenerEstatusUltimaSolicitud>
+          <campo leyenda="Número de empleado" db_nombre="num_empleado" form_nombre="num_empleado" requerido="true" charsize="30" tipo="string"/>
+          <sql>
+          <![CDATA[
+              BEGIN   
+                SELECT TOP(1) cve_estatus, cve_progvac num_solicitud, REPLACE(CONVERT(VARCHAR(20),fechaprog,103),'/','') fechaprog, num_empleado FROM VAC_ProgVacaciones WHERE num_empleado=@num_empleado ORDER BY cve_progvac DESC; 
+              END
+			     ]]>
+           </sql>
+      </ObtenerEstatusUltimaSolicitud>
+      
+    </Comunes>
+    
+    <ProcesoVacaciones>
+        <RegistrarSolicitud>
+            <campo leyenda="Número de empleado" db_nombre="num_empleado" form_nombre="num_empleado" requerido="true" charsize="30" tipo="string"/>
+            <campo leyenda="Días solicitados" db_nombre="diasSolicitados" form_nombre="diasSolicitados" requerido="true" charsize="200" tipo="string"/>
+            <campo leyenda="Estatus del proceso" db_nombre="estatusProceso" form_nombre="estatusProceso" requerido="true" charsize="200" tipo="int" default="1"/>
+            <campo leyenda="Subestatus" db_nombre="subestatusProceso" form_nombre="subestatusProceso" requerido="true" charsize="200" tipo="int" default="1"/>
+            <campo leyenda="Nota" db_nombre="nota" form_nombre="nota" requerido="true" charsize="300" tipo="string" default="Registro de Alta de Vacaciones"/>
+            <sql>
+				<![CDATA[
+                BEGIN
+                -- PRAMETROS
+	                --DECLARE @num_empleado VARCHAR(20);SET @num_empleado='5168';
+	                --DECLARE @diasSolicitados VARCHAR(500);SET @diasSolicitados='17-12-2015,17-12-2015,17-12-2015,17-12-2015,17-12-2015,17-12-2015,17-12-2015';
+	                --DECLARE @num_usuario_cambio VARCHAR(30); SET @num_usuario_cambio='5124';
+	                --DECLARE @estatusProceso SMALLINT;SET @estatusProceso=1;
+	                --DECLARE @subestatusProceso SMALLINT; SET @subestatusProceso=1;
+	                --DECLARE @nota VARCHAR(500); SET @nota='Registro de Alta de vacaciones';
+                        
+                --METODO	
+	                DECLARE @tDiasSolicitados AS TABLE (fechaDia DATE);
+	                SET DATEFORMAT dmy;
+	                DECLARE @diasVacaciones INT;
+	                DECLARE @diasRegistrar INT;
+                  DECLARE @minDia DATE;
+                  DECLARE @maxDia DATE;
+                  DECLARE @numDias INT;
+	                INSERT INTO @tDiasSolicitados SELECT DISTINCT(spliter) FROM dbo.Split(@diasSolicitados, ',');	
+                  SELECT @diasVacaciones=COUNT(fechaDia), @numDias=COUNT(fechaDia), @minDia=MIN(fechaDia), @maxDia=MAX(fechaDia) FROM @tDiasSolicitados;                
+                    
+	                DECLARE @tdiasRepetidos AS TABLE(diaRepetido DATE);
+	                DECLARE @diasRepetidos INT;
+	                INSERT INTO @tdiasRepetidos SELECT A.fechaDia FROM @tDiasSolicitados A INNER JOIN VAC_ProgVacFecha B ON A.fechaDia=B.fechadia AND num_empleado=@num_empleado WHERE B.cve_progvac NOT IN(SELECT cve_progvac FROM VAC_ProgVacaciones WHERE num_empleado=@num_empleado AND cve_estatus = 6);
+	                SET @diasRepetidos=@@ROWCOUNT;
+	                IF @diasRepetidos = 0 BEGIN
+		                DECLARE @estatus INT; SET @estatus=1;
+		                DECLARE @mensaje VARCHAR(500);
+		                --Obtenemos Siguiente numero de solicitud
+		                DECLARE @num_solicitud INT;
+		                SET @num_solicitud=(SELECT ISNULL(MAX(a.cve_progvac),0) + 1 num_siguiente FROM (SELECT cve_progvac FROM VAC_ProgVacaciones GROUP BY cve_progvac)a);
+		                --Registramos solicitud de vacaciones por periodo, si la solicitud requiere uno o mas periodo para completar el numero de dias solicitados.
+		                DECLARE @diasPeriodoAntiguo INT;SET @diasPeriodoAntiguo=NULL;--IMPORTANTE
+		                DECLARE @periodoIniAntiguo INT;
+		                DECLARE @periodoFinAntiguo INT;	
+			
+		                --Intentamos registrar las vacaciones solicitadas, agotando los dias disponibles desde los periodos mas antiguos al mas actual.
+		                BEGIN TRANSACTION T
+		                WHILE @diasVacaciones > 0 AND @estatus=1 BEGIN
+			                --Obtenemos los dis disponibles del periodo mas antiguo 
+			                SELECT TOP(1) @diasPeriodoAntiguo=A.diaspendientes, @periodoIniAntiguo=A.periodo, @periodoFinAntiguo=A.PeriodoFin 
+			                FROM VAC_VacacionesDerecho A WHERE A.diaspendientes > 0 AND A.num_empleado=@num_empleado AND GETDATE() < A.FechaVencimiento  ORDER BY A.periodo ASC;								
+			                IF @diasPeriodoAntiguo > 0 BEGIN
+				                IF @diasVacaciones > @diasPeriodoAntiguo BEGIN
+					                SET @diasRegistrar= @diasPeriodoAntiguo;
+				                END ELSE BEGIN
+					                SET @diasRegistrar= @diasVacaciones;
+				                END
+				                IF @diasPeriodoAntiguo - @diasRegistrar < 0 BEGIN
+					                SET @estatus=-1;
+				                END ELSE IF @diasVacaciones=0 BEGIN
+					                SET @estatus=1;
+				                END
+				                INSERT INTO VAC_ProgVacaciones(cve_progvac,  cve_estatus, fechaprog,fecha_cambio, num_empleado, diasprog, periodo, periodoFin)
+					                VALUES(@num_solicitud, @estatusProceso, GETDATE(),GETDATE(), @num_empleado, @diasRegistrar, @periodoIniAntiguo, @periodoFinAntiguo);
+				
+				                UPDATE VAC_VacacionesDerecho SET diaspendientes=(diaspendientes - @diasRegistrar), diastomados=(diastomados + @diasRegistrar) WHERE num_empleado=@num_empleado AND periodo=@periodoIniAntiguo AND diaspendientes=@diasPeriodoAntiguo;			                                
+                                
+			                    --Si existen disponibles vacaciones, entonces registramos los dias de las vacaciones solicitados en el detalle.
+			                    INSERT INTO VAC_ProgVacFecha(cve_progvac, fechadia, num_empleado, periodo, periodoFin) SELECT TOP(@diasRegistrar) @num_solicitud, fechaDia, @num_empleado,@periodoIniAntiguo, @periodoFinAntiguo FROM @tDiasSolicitados ORDER BY fechaDia ASC;
+                                DELETE FROM @tDiasSolicitados WHERE fechaDia IN(SELECT TOP(@diasRegistrar) fechaDia FROM @tDiasSolicitados ORDER BY fechaDia ASC);
+                                
+				                SET @diasVacaciones=(@diasVacaciones - @diasRegistrar);	
+				                SET @diasPeriodoAntiguo= NULL;
+						
+			                END ELSE BEGIN
+				                SET @estatus=-1;
+			                END	
+		                END
+		                IF @estatus > 0 BEGIN
+			                --Registramos el numero de solicitud, como el último folio en la tabla de Secuencias
+			                UPDATE Secuencias SET secuencia= @num_solicitud WHERE tabla = 'VAC_ProgVacaciones' AND campo='cve_progvac';
+			                IF @@ROWCOUNT =0 BEGIN
+				                INSERT INTO Secuencias(secuencia, tabla, campo) VALUES(@num_solicitud,'VAC_ProgVacaciones','cve_progvac');
+			                END
+			                --Registramos en el Historial
+			                INSERT INTO VAC_HistorialSolicitudesVac(fecha,num_solicitud,num_usuario_cambio,estatus,subestatus,nota)
+				                VALUES(GETDATE(),@num_solicitud, @num_usuario_cambio,@estatusProceso, @subestatusProceso, @nota);
+			                --Si llegamos hasta aquí, entonces procedemos con la transacción.
+			                COMMIT TRANSACTION T;
+			                SET @estatus= 1;
+			                SET @mensaje= 'Solictud de vacaciones procesado correctamente.';
+		                END ELSE BEGIN
+			                SET @estatus= -1;
+			                SET @mensaje= 'No se tienen dias disponibles, suficientes para la solicitud.';
+			                ROLLBACK TRANSACTION T;	
+		                END
+		                SELECT @estatus estatus, @mensaje mensaje, @num_solicitud num_solicitud, REPLACE(CONVERT(VARCHAR(20),@minDia,106),' ', '/') de, REPLACE(CONVERT(VARCHAR(20),@maxDia,106),' ', '/') hasta, @numDias numDiasSolicitados;
+	                END ELSE BEGIN
+		                SET @estatus= -11;
+		                SET @mensaje= 'No se registró la solicitud, contiene dias solicitados previamente.';	
+		                SELECT @estatus estatus, @mensaje mensaje, CONVERT(VARCHAR(10),V.diaRepetido) diaRepetido  FROM @tdiasRepetidos V;
+	                END	
+                END				
+				      ]]>
+            </sql>
+        </RegistrarSolicitud>
+      
+        <ResolverEstatus>
+          <campo leyenda="Número de solicitud" db_nombre="num_solicitud" form_nombre="num_solicitud" requerido="true" charsize="20" tipo="string"/>
+          <campo leyenda="Estatus del proceso" db_nombre="estatusProceso" form_nombre="estatusProceso" requerido="true" charsize="200" tipo="int"/>
+          <campo leyenda="Subestatus" db_nombre="subestatusProceso" form_nombre="subestatusProceso" requerido="true" charsize="200" tipo="int" default="1"/>
+          <campo leyenda="Nota" db_nombre="nota" form_nombre="nota" requerido="true" charsize="300" tipo="string" default="Registro de Impresión de solicitud"/>
+          <campo leyenda="Nombre de archivo" db_nombre="nombreArchivo" form_nombre="nombreArchivo" requerido="true" charsize="50" tipo="string" default="_"/>
+          <sql>
+            <![CDATA[
+                  BEGIN  
+		                DECLARE @estatus INT; SET @estatus=1;
+		                DECLARE @mensaje VARCHAR(500);SET @mensaje='Actualización correcta de estatus.';
+                    DECLARE @estatusSolicitud INT; SET @estatusSolicitud=(SELECT cve_estatus FROM VAC_ProgVacaciones WHERE cve_progvac=@num_solicitud);
+                      --Actualizamos el estatus de la solicitud,siempre y cuando no este cancelada.
+                      IF(@estatusSolicitud<6)BEGIN                    
+                        IF(@estatusProceso=3 AND @estatusSolicitud=1)BEGIN
+                            SELECT -1 estatus, 'No se puede escanear, necesita haber impreso antes la solicitud.' mensaje;
+                        END ELSE BEGIN
+                          IF(@estatusProceso=6)BEGIN--Si es cancelación, devolver días por cancelación de solicitud.
+                              UPDATE VAC_VacacionesDerecho
+	                            SET VAC_VacacionesDerecho.diaspendientes= VAC_VacacionesDerecho.diaspendientes + B.diasProg, 
+		                            VAC_VacacionesDerecho.diastomados= VAC_VacacionesDerecho.diastomados - B.diasprog
+	                            FROM VAC_VacacionesDerecho 
+		                            INNER JOIN VAC_ProgVacaciones B ON VAC_VacacionesDerecho.periodo=B.periodo AND VAC_VacacionesDerecho.num_empleado=B.num_empleado
+	                            WHERE B.cve_progvac=@num_solicitud;
+                              --DELETE FROM VAC_ProgVacFecha WHERE cve_progvac=@num_solicitud;
+                          END
+				                  UPDATE  VAC_ProgVacaciones SET cve_estatus=@estatusProceso, fecha_cambio=GETDATE() WHERE cve_progvac=@num_solicitud AND cve_estatus <=@estatusProceso;
+			                    --Registramos en el Historial
+                          UPDATE VAC_HistorialSolicitudesVac SET fecha=GETDATE() WHERE  num_solicitud=@num_solicitud AND estatus=@estatusProceso;
+                          IF @@ROWCOUNT =0 BEGIN
+				                    INSERT INTO VAC_HistorialSolicitudesVac(fecha,num_solicitud,num_usuario_cambio,estatus,subestatus,nota,nombreArchivo)
+				                    VALUES(GETDATE(),@num_solicitud, @num_usuario_cambio,@estatusProceso, @subestatusProceso, @nota,@nombreArchivo);	
+			                    END
+                          IF @estatusProceso IN(4,5,6,7)BEGIN
+                            DELETE FROM Notificaciones WHERE referencia='VAC_AUT_JEFE_' + CONVERT(VARCHAR(20),@num_solicitud);
+                          END
+                          SELECT @estatus estatus, @mensaje mensaje;
+                       END
+                      END ELSE BEGIN
+                        SELECT @estatus estatus, 'No se puede cambiar de estatus, porque la solicitud fué cancelada.' mensaje;                        
+                      END
+                  END
+				  ]]>
+          </sql>
+      </ResolverEstatus>
+      <ObtenerEstatusSolicitud>
+        <campo leyenda="Número de solicitud" db_nombre="num_solicitud" form_nombre="num_solicitud" requerido="true" charsize="0" tipo="int"/>
+        <sql>
+            <![CDATA[
+               BEGIN 
+                  SELECT cve_estatus FROM VAC_ProgVacaciones WHERE cve_progvac=@num_solicitud;
+               END
+				  ]]>
+          </sql>
+      </ObtenerEstatusSolicitud>
+    </ProcesoVacaciones>
+</Secciones>

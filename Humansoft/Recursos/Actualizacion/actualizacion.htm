@@ -1,0 +1,209 @@
+﻿<!DOCTYPE html>
+<html style="" class=" js flexbox canvas canvastext webgl no-touch geolocation postmessage no-websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients no-cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers applicationcache svg inlinesvg smil svgclippaths" lang="es"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>NAVEGA FELIZ</title>
+    <meta name="description" content="Una herramienta que ahorra tiempo a los desarrolladores. Detecta si el navegador está actualizado y aconseja al usuario que actualice a una nueva versión.">
+    <meta name="author" content="Bürocratik - www.burocratik.com">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <!-- Sharing -->
+    <meta property="og:title" content="NAVEGA FELIZ">
+    <meta property="og:description" content="Una herramienta que ahorra tiempo a los desarrolladores. Detecta si el navegador está actualizado y aconseja al usuario que actualice a una nueva versión.">
+    <meta property="og:url" content="http://outdatedbrowser.com/">
+    <meta property="og:image" content="http://outdatedbrowser.com/public/files/pics/outdated-social.jpg">
+    <meta property="og:site_name" content="NAVEGA FELIZ">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="NAVEGA FELIZ">
+    <meta name="twitter:description" content="Una herramienta que ahorra tiempo a los desarrolladores. Detecta si el navegador está actualizado y aconseja al usuario que actualice a una nueva versión.">
+    <meta property="og:image" content="http://outdatedbrowser.com/public/files/pics/outdated-social.jpg">
+    <meta name="twitter:domain" content="http://outdatedbrowser.com/">
+    <!-- Icons -->
+    <link rel="shortcut icon" href="http://outdatedbrowser.com/public/imgs/favicon.ico">
+    <meta name="msapplication-TileColor" content="#f5b722">
+    <meta name="msapplication-TileImage" content="http://outdatedbrowser.com/public/imgs/windows-title-288x288.png">
+    <meta name="msapplication-square150x150logo" content="http://outdatedbrowser.com/public/imgs/id/windows-title-288x288.png">
+    <!-- Styles -->
+    <link rel="stylesheet" type="text/css" href="Outdated%20Browser%20Archivos/fonts.css">
+    <link rel="stylesheet" href="css/outdatedBrowser.css">
+    <link rel="stylesheet" href="css/awards.css">
+    <link rel="stylesheet" href="css/mobile.css">
+
+    <!--[if lte IE 9]>
+        <script type="text/javascript" src="js/html5.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/ie9-and-down.min.css" />
+    <![endif]-->
+
+
+    <!--[if lte IE 8]>
+        <link rel="stylesheet" type="text/css" href="css/ie8-and-down.min.css" />
+    <![endif]-->
+
+    <script src="js/modernizr-2.js"></script>
+    <noscript>
+        <style type="text/css">
+            .menu, .newBrowser{display: none;}
+            .disabledJS{display: block;}
+            .c_browsers.hideBrowsers{opacity: 1;}
+            .browser .statistic, .browser .download{display: block; opacity: 0; margin-left: 0; left: 0; width: 100%;}
+            .browser .download a{ max-width: 210px; width: 80%;}
+            .browser:hover .statistic, .browser:hover .download{opacity: 1;}
+        </style>
+    </noscript>
+
+</head>
+<body class="noajax  home allowHover chromeBg">
+
+<!--      <div id="awwwards" class="right black">
+        <a href="http://www.awwwards.com/web-design-awards/outdated-browser" target="_blank" data-track="Awwwards" title="Site of the Day">Site of the Day: Wednesday 25, June</a>
+    </div>
+      <div id="awwwardsDev" class="right black">
+        <a href="http://www.awwwards.com/web-design-awards/outdated-browser" target="_blank" data-track="Awwwards" title="Developer Award">Developer Award: Wednesday 25, June</a>
+    </div> -->
+
+<div class="pusher">
+    <!-- LOAD CONTENT -->
+    <div class="loadContent current">
+        
+
+
+<div id="content" class="home">
+
+    <div id="preload" aria-hidden="true">
+        <img src="imgs/browsers-bg.png" alt="">
+        <img src="imgs/operatingsystems-bg.png" alt="">
+    </div>
+
+
+    <div class="inner">
+
+        <!--  HEADER  -->
+        <header class="title" role="banner">
+            <div class="browserVersion newBrowser">
+                <h1>Navega feliz</h1>
+                <p>Conectado. No tengas miedo. ¡Actualiza hoy tu navegador!</p>
+            </div>
+            <div class="browserVersion disabledJS">
+                <h1>NAVEGA FELIZ</h1>
+                <p>El Javascript no está activado en su navegador. Por favor, activarlo para una mejor experiencia.</p>
+            </div>
+            <div class="browserVersion ifMobile">
+                <h1>NAVEGA FELIZ</h1>
+                <p>Esta es una herramienta para el ordenador de sobremesa, <br> pero no dude en explorar.</p>
+            </div>
+        <!-- end HEADER  -->
+        </header>
+
+
+
+
+        <!-- SECTION -->
+        <!-- DATA SOURCE:
+        Browser Version: http://caniuse.com/usage_table.php
+        Browser Statistics: http://gs.statcounter.com/
+        -->
+        <section class="c_browsers sorted kwicks kwicks-horizontal kwicks-processed">
+
+            <!-- BROWSER - Chrome -->
+            <div style="left:0px;width:448px;" id="chrome" class="browser kwicks-expanded" rel="">
+                <h3 class="statistic"><span>53.1%</span> Personas que utilizan<br>este navegador</h3>
+                <div class="center">
+                    <h2><span></span> GOOGLE CHROME</h2>
+                    <div class="download">
+                        <a href="http://www.google.com/chrome" target="_blank" class="browserlink" data-track="Google Chrome">DESCARGAR</a>
+                        <h4>VERSIÓN <span>43</span></h4>
+                    </div>
+                </div>
+                <div class="available">
+                    <p class="info">“Un nuevo y rápido navegador de Google ¡Pruébalo ahora!”</p>
+                </div>
+            </div>
+
+            <!-- BROWSER - Firefox -->
+            <div style="left:448px;width:208px;" id="firefox" class="browser kwicks-collapsed" rel="">
+                <h3 class="statistic"><span>17.4%</span> Personas que utilizan<br>este navegador</h3>
+                <div class="center">
+                    <h2><span></span> MOZILLA FIREFOX</h2>
+                    <div class="download">
+                        <a href="http://www.mozilla.org/firefox/new/" target="_blank" class="browserlink" data-track="Mozilla Firefox">DESCARGAR</a>
+                        <h4>VERSIÓN <span>39</span></h4>
+                    </div>
+                </div>
+                <div class="available">
+                    <p class="info">“Tu seguridad online es la la principal prioridad de Firefox. Firefox es gratuito y hecho para sacar el mayor partido posible a la web.”</p>
+                </div>
+            </div>
+
+            <!-- BROWSER - Internet Explorer -->
+            <div style="left:656px;width:208px;" id="internetExplorer" class="browser kwicks-collapsed" rel="">
+                <h3 class="statistic"><span>19.8%</span> Personas que utilizan<br>este navegador</h3>
+                <div class="center">
+                    <h2><span></span> INTERNET EXPLORER</h2>
+                    <div class="download">
+                        <a href="http://windows.microsoft.com/internet-explorer/" target="_blank" class="browserlink" data-track="Internet Explorer">DESCARGAR</a>
+                        <h4>VERSIÓN <span>11</span></h4>
+                    </div>
+                </div>
+                <div class="available">
+                  <p class="info">“Diseñado para ayudarte a tomar el control de tu privacidad y navegar con seguridad . Gratis, de &nbsp;Microsoft.”</p>
+                </div>
+            </div>
+            
+
+            <!-- BROWSER - Safari -->
+            <div style="left:864px;width:208px;" id="safari" class="browser kwicks-collapsed" rel="">
+                <h3 class="statistic"><span>6.2%</span> Personas que utilizan<br>este navegador</h3>
+                <div class="center">
+                    <h2><span></span> APPLE SAFARI</h2>
+                    <div class="download">
+                        <a href="http://support.apple.com/downloads/#safari" target="_blank" class="browserlink" data-track="Apple Safari">DESCARGAR</a>
+                        <h4>VERSIÓN <span>8</span></h4>
+                    </div>
+                </div>
+                <div class="available">
+                <p class="info">“ Safari, de Apple; para Mac y Windows. El navegador más innovador del mundo.”</p>
+                </div>
+            </div>
+
+            <!-- BROWSER - Opera -->
+            <div style="right:0;width:208px;" id="opera" class="browser kwicks-collapsed" rel="">
+                <h3 class="statistic"><span>1.7%</span> Personas que utilizan<br>este navegador</h3>
+                <div class="center">
+                    <h2><span></span> OPERA</h2>
+                    <div class="download">
+                        <a href="http://www.opera.com/download" target="_blank" data-track="Opera" class="browserlink">DESCARGAR</a>
+                        <h4>VERSIÓN <span>30</span></h4>
+                    </div>
+                </div>
+                <div class="available">
+                    <p class="info">“El navegador más rápido de la Tierra- seguro, potente y fácil de usar- con una excelente protección de la privacidad. Y gratis.”</p>
+                </div>
+            </div>
+        <!-- end SECTION -->
+        </section>
+        <!-- <section class="c_browsers sorted kwicks kwicks-horizontal"></section> -->
+    <!-- end .inner -->
+    </div>
+<!-- end #content -->
+</div>    </div>
+    <!-- end .loadContent -->
+    <div class="loadContent next">
+    </div>
+    <!-- end .loadContent -->
+<!-- end .pusher -->
+</div>
+    <!-- end .container -->
+    </div>
+    
+    <!-- ============= SCRIPTS ============= -->
+    <script src="js/jquery-1.js"></script>
+    <script src="js/outdatedBrowser.js"></script>
+
+    <!--[if !IE]><!-->
+      <script type="text/javascript" src="js/main.js"></script>
+    <!--<![endif]-->
+    <!--[if gte IE 9]>
+        <script type="text/javascript" src="js/main.min.js"></script>
+    <![endif]-->
+
+</body></html>

@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+    <Empresas>
+    
+    <obtenerSiguienteClave>
+        <sql>
+            BEGIN
+            SELECT ISNULL(MAX(cve_empresa),0) + 1 clave FROM SG_empresas;
+            END
+        </sql>   
+    </obtenerSiguienteClave>
+    
+    <Nuevo>
+        <campo leyenda="Clave" db_nombre="cve_empresa" form_nombre="cve_empresa" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Nombre" db_nombre="nombre" form_nombre="nombre"  requerido="true" charsize="150" tipo="string" default=""/>
+        <campo leyenda="RFC" db_nombre="rfc" form_nombre="rfc"  requerido="true" charsize="50" tipo="string" default=""/>
+        <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="false"  charsize="10" tipo="bool"  default="true"/>
+        <campo leyenda="ClavePais" db_nombre="cve_pais" form_nombre="cve_pais" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="FechaAlta" db_nombre="fechaalta" form_nombre="fechaalta"  requerido="true" charsize="50" tipo="string" default=""/>
+        <campo leyenda="RazonSocial" db_nombre="razonsocial" form_nombre="razonsocial"  requerido="true" charsize="50" tipo="string" default=""/>
+        <campo leyenda="ClaveGiro" db_nombre="cve_giro" form_nombre="cve_giro" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Calle" db_nombre="calle" form_nombre="calle"  requerido="true" charsize="50" tipo="string" default=""/>
+        <campo leyenda="Colonia" db_nombre="colonia" form_nombre="colonia"  requerido="true" charsize="50" tipo="string" default=""/>
+        <campo leyenda="Delegmunic" db_nombre="delegmunic" form_nombre="delegmunic"  requerido="true" charsize="50" tipo="string" default=""/>
+        <campo leyenda="Estado" db_nombre="estado" form_nombre="estado"  requerido="true" charsize="50" tipo="string" default=""/>
+        <campo leyenda="Cp" db_nombre="cp" form_nombre="cp"  requerido="true" charsize="50" tipo="string" default=""/>
+        
+        <sql>
+            BEGIN
+                SET NOCOUNT ON;
+                BEGIN TRY
+                    INSERT INTO SG_empresas(
+                        cve_empresa,
+                        nombre,
+                        rfc,
+                        activo,
+                        cve_pais,
+                        fechaalta,
+                        razonsocial,
+                        idusuariocreo,
+                        cve_giro,
+                        calle,
+                        colonia,
+                        delegmunic,
+                        estado,
+                        cp
+                    )
+                    VALUES(
+                        @cve_empresa,
+                        @nombre,
+                        @rfc,
+                        @activo,
+                        @cve_pais,
+                        convert(datetime,@fechaalta,103),
+                        @razonsocial,
+                        @idusuariocreo,
+                        @cve_giro,
+                        @calle,
+                        @colonia,
+                        @delegmunic,
+                        @estado,
+                        @cp 
+                    )
+                    SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+                END TRY BEGIN CATCH
+                    SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+                END CATCH
+            END
+        </sql>
+   </Nuevo>
+
+    <obtenerCatalogo>
+        <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+        <campo leyenda="Clave" db_nombre="cve_empresa" form_nombre="cve_empresa"  requerido="false"  charsize="0" tipo="int"  default=""/>
+        <sql>
+            BEGIN
+	            SET NOCOUNT ON;
+	            SET DATEFORMAT dmy;
+	            DECLARE @inicio INT;
+	            SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+	            DECLARE @TablaAuxiliarPaginacion AS TABLE(
+		            indiceRegistro INT, 
+		            cve_empresa SMALLINT,
+		            nombre VARCHAR(80),
+		            rfc VARCHAR(20),
+		            activo BIT,
+		            cve_pais SMALLINT,
+		            fechaalta DATETIME,
+		            razonsocial VARCHAR(255),
+		            idusuariocreo VARCHAR(20),
+		            cve_giro SMALLINT,
+		            calle VARCHAR(150),
+		            colonia VARCHAR(100),
+		            delegmunic VARCHAR(100),
+		            estado VARCHAR(100),
+		            cp VARCHAR(15)
+	            )		
+	            INSERT INTO @TablaAuxiliarPaginacion		
+	            SELECT 
+		            ROW_NUMBER() OVER(ORDER BY CONVERT(INT,cve_empresa) DESC) AS indiceRegistro,		
+		            cve_empresa,
+		            nombre,
+		            rfc,
+		            activo,
+		            cve_pais ,
+		            fechaalta,
+		            razonsocial,
+		            idusuariocreo,
+		            cve_giro,
+		            calle,
+		            colonia,
+		            delegmunic,
+		            estado,
+		            cp
+	            FROM 
+		            SG_empresas	
+	            WHERE 
+		            ( ((CONVERT(VARCHAR(20),cve_empresa) like '%' + @criterio + '%') OR (nombre like '%' + @criterio + '%') OR (rfc like '%' + @criterio + '%')) AND @cve_empresa=0) 
+		            OR ((cve_empresa=@cve_empresa) AND (@cve_empresa !=0))
+		
+	            --Paginacion	
+	            SELECT TOP(@longitudPagina)
+		            indiceRegistro,
+		            @@ROWCOUNT as totalRegistros,
+		            cve_empresa,
+		            nombre,
+		            rfc,
+		            activo,
+		            cve_pais ,
+		            CONVERT(VARCHAR(40),fechaalta,103)  fechaalta,
+		            razonsocial,
+		            idusuariocreo,
+		            cve_giro,
+		            calle,
+		            colonia,
+		            delegmunic,
+		            estado,
+		            cp
+	            FROM @TablaAuxiliarPaginacion
+	            WHERE indiceRegistro > @inicio	 
+	            ORDER BY indiceRegistro ASC
+            END
+        </sql>        
+    </obtenerCatalogo>
+
+     <Editar>        
+        <campo leyenda="Clave" db_nombre="cve_empresa" form_nombre="cve_empresa" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Nombre" db_nombre="nombre" form_nombre="nombre"  requerido="true" charsize="150" tipo="string" default=""/>
+        <campo leyenda="RFC" db_nombre="rfc" form_nombre="rfc"  requerido="true" charsize="50" tipo="string" default=""/>
+        <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="true" charsize="50" tipo="string" default=""/>
+        <campo leyenda="ClavePais" db_nombre="cve_pais" form_nombre="cve_pais" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="FechaAlta" db_nombre="fechaalta" form_nombre="fechaalta"  requerido="true" charsize="50" tipo="string" default=""/>
+        <campo leyenda="RazonSocial" db_nombre="razonsocial" form_nombre="razonsocial"  requerido="true" charsize="50" tipo="string" default=""/>
+        <campo leyenda="IdUsuarioCreo" db_nombre="idusuariocreo" form_nombre="idusuariocreo" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="ClaveGiro" db_nombre="cve_giro" form_nombre="cve_giro" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Calle" db_nombre="calle" form_nombre="calle"  requerido="true" charsize="50" tipo="string" default=""/>
+        <campo leyenda="Colonia" db_nombre="colonia" form_nombre="colonia"  requerido="true" charsize="50" tipo="string" default=""/>
+        <campo leyenda="Delegmunic" db_nombre="delegmunic" form_nombre="delegmunic"  requerido="true" charsize="50" tipo="string" default=""/>
+        <campo leyenda="Estado" db_nombre="estado" form_nombre="estado"  requerido="true" charsize="50" tipo="string" default=""/>
+        <campo leyenda="Cp" db_nombre="cp" form_nombre="cp"  requerido="true" charsize="50" tipo="string" default=""/>
+        <sql>
+          BEGIN
+          SET NOCOUNT ON;
+          BEGIN TRY
+          UPDATE SG_empresas
+          SET
+          cve_empresa=@cve_empresa,
+          nombre=@nombre,
+          activo=@activo,
+          rfc=@rfc,
+          cve_pais=@cve_pais,
+          razonsocial=@razonsocial,
+          cve_giro=@cve_giro,
+          calle=@calle,
+          colonia=@colonia,
+          delegmunic=@delegmunic,
+          estado=@estado,
+          cp=@cp
+          WHERE cve_empresa= @cve_empresa
+          SELECT 1  estatus, 'Registro actualizado correctamente' mensaje;
+          END TRY BEGIN CATCH
+          SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+          END CATCH
+          END
+        </sql>
+    </Editar>
+</Empresas>  
+</Secciones>  
+    
+    
+    
+    
+

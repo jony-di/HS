@@ -1,0 +1,400 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Secciones>
+  <filtros>
+    <obtenerestatus>
+      <sql>
+        <![CDATA[
+          SELECT cve_estatus, descripcion FROM SIS_estatus WHERE cve_modulo=2;
+        ]]>
+      </sql>
+    </obtenerestatus>
+  </filtros>
+  <catalogoConfigAsig>
+    <obtenerSiguienteClave>
+      <sql>
+        <![CDATA[
+          BEGIN
+            SELECT ISNULL(MAX(cve_asignacion),0) + 1 as 'clave' FROM CON_Asignacion;
+          END
+        ]]>
+      </sql>
+    </obtenerSiguienteClave>
+    <Nuevo>
+      <campo leyenda="Clave" db_nombre="cve_asignacion" form_nombre="clave" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Nombre" db_nombre="nombre" form_nombre="nombre" requerido="true" charsize="2000" tipo="string" default=""/>
+      <campo leyenda="Maximo Asignacion" db_nombre="MaximoAsignacion" form_nombre="max" requerido="false" charsize="0" tipo="int" default="0"/>
+      <campo leyenda="Salario Minimo" db_nombre="SalarioMinimo" form_nombre="smax" requerido="false" charsize="0" tipo="int" default="0"/>
+      <campo leyenda="Salario Maximo" db_nombre="SalarioMaximo" form_nombre="smin" requerido="false" charsize="0" tipo="int" default="0"/>
+      <campo leyenda="Prioridad" db_nombre="Prioridad" form_nombre="prioridad" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Jefe" db_nombre="jefe" form_nombre="jefe" requerido="false" charsize="10" tipo="bool"  default="false"/>
+      <campo leyenda="Activo" db_nombre="Activo" form_nombre="activo" requerido="false"  charsize="10" tipo="bool" default="true"/>
+      <sql>
+        <![CDATA[
+           SET NOCOUNT ON;
+          BEGIN TRY
+          INSERT INTO CON_Asignacion(
+          cve_asignacion
+          ,nombre
+          ,MaximoAsignacion
+          ,SalarioMinimo
+          ,SalarioMaximo
+          ,UltimaAsignacion
+          ,Prioridad
+          ,Jefe
+          ,Activo)
+          VALUES(
+           @cve_asignacion
+          ,@nombre
+          ,@MaximoAsignacion
+          ,@SalarioMinimo
+          ,@SalarioMaximo
+          ,0
+          ,@Prioridad
+          ,@Jefe
+          ,@Activo
+          )
+            SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+          END TRY BEGIN CATCH
+            SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+          END CATCH
+        ]]>
+      </sql>
+    </Nuevo>
+    <obtenerconfig>
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+      <sql>
+        <![CDATA[
+          SET NOCOUNT ON;
+          DECLARE @inicio INT;
+          SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+          DECLARE @TablaAuxiliarPaginacion AS TABLE(
+           indiceRegistro INT
+          ,cve_asignacion INT
+          ,nombre VARCHAR(100)
+          ,MaximoAsignacion SMALLINT
+          ,SalarioMinimo MONEY
+          ,SalarioMaximo MONEY
+          ,Prioridad SMALLINT
+          ,Jefe BIT
+          ,Activo BIT)
+
+          INSERT INTO @TablaAuxiliarPaginacion
+          SELECT ROW_NUMBER() OVER(ORDER BY CONVERT(INT,cve_asignacion ) DESC) AS indiceRegistro
+          ,cve_asignacion 
+          ,nombre 
+          ,MaximoAsignacion
+          ,SalarioMinimo 
+          ,SalarioMaximo 
+          ,Prioridad 
+          ,Jefe
+          ,Activo
+          FROM CON_Asignacion
+          WHERE (CONVERT(VARCHAR(20),cve_asignacion) like '%' + @criterio + '%') 
+          OR (CONVERT(VARCHAR(20),nombre) like '%' + @criterio + '%') 
+          OR (CONVERT(VARCHAR(20),MaximoAsignacion) like '%' + @criterio + '%')
+
+          SELECT TOP(@longitudPagina)
+          indiceRegistro,
+          @@ROWCOUNT as totalRegistros
+          ,cve_asignacion 
+          ,nombre
+          ,MaximoAsignacion
+          ,SalarioMinimo
+          ,SalarioMaximo
+          ,Prioridad
+          ,Jefe
+          ,Activo
+          FROM @TablaAuxiliarPaginacion a
+          WHERE indiceRegistro > @inicio
+          ORDER BY Prioridad DESC
+        ]]>
+      </sql>
+    </obtenerconfig>
+    <seleccConfig>
+      <campo leyenda="Clave" db_nombre="cve_asignacion" form_nombre="clave" requerido="true" charsize="0" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+          SELECT 
+          cve_asignacion,nombre,MaximoAsignacion,SalarioMinimo,SalarioMaximo,Prioridad,Jefe,Activo
+          FROM CON_Asignacion
+          WHERE cve_asignacion=@cve_asignacion
+        ]]>
+      </sql>
+    </seleccConfig>
+    <editConfig>
+      <campo leyenda="Clave" db_nombre="cve_asignacion" form_nombre="clave" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Nombre" db_nombre="nombre" form_nombre="nombre" requerido="true" charsize="2000" tipo="string" default=""/>
+      <campo leyenda="Maximo Asignacion" db_nombre="MaximoAsignacion" form_nombre="max" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Salario Minimo" db_nombre="SalarioMinimo" form_nombre="smin" requerido="true" charsize="10" tipo="float" default=""/>
+      <campo leyenda="Salario Maximo" db_nombre="SalarioMaximo" form_nombre="smax" requerido="true" charsize="10" tipo="float" default=""/>
+      <campo leyenda="Prioridad" db_nombre="Prioridad" form_nombre="prioridad" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Activo" db_nombre="Activo" form_nombre="activo" requerido="false"  charsize="10" tipo="bool" default="true"/>
+      <campo leyenda="Jefe" db_nombre="Jefe" form_nombre="jefe" requerido="false" charsize="10" tipo="bool" default="false"/>
+      <sql>
+        <![CDATA[
+          SET NOCOUNT ON;
+          BEGIN TRY
+            UPDATE CON_Asignacion
+            SET
+            cve_asignacion=@cve_asignacion
+            ,nombre=@nombre
+            ,MaximoAsignacion=@MaximoAsignacion
+            ,SalarioMinimo=@SalarioMinimo
+            ,SalarioMaximo=@SalarioMaximo
+            ,Prioridad=@Prioridad
+            ,Jefe=@Jefe
+            ,Activo=@Activo
+            WHERE
+            cve_asignacion=@cve_asignacion
+            SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+          END TRY BEGIN CATCH
+            SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+          END CATCH
+        ]]>
+      </sql>
+    </editConfig>
+  </catalogoConfigAsig>
+  <!--**************************************************************************************************************************************-->
+  <detalleConfigAsig>
+    <llenarRegion>
+      <campo leyenda="No Config" db_nombre="cve_config" form_nombre="cve_config" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+            SELECT A.cve_region,A.nombre
+            FROM SG_region A
+            INNER JOIN CON_AsignacionRegion B
+            ON A.cve_region=B.cve_region
+            AND B.cve_asignacion=@cve_config
+            WHERE A.activo=1
+         ]]>
+      </sql>
+    </llenarRegion>
+    <obtenerRegion>
+      <campo leyenda="No Config" db_nombre="cve_config" form_nombre="cve_config" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+            SELECT A.cve_region, A.nombre
+            FROM SG_region A
+            LEFT JOIN CON_AsignacionRegion B
+            ON  A.cve_region=B.cve_region
+            AND B.cve_asignacion=@cve_config
+            WHERE A.activo=1
+            AND B.cve_region IS NULL
+         ]]>
+      </sql>
+    </obtenerRegion>
+    <llenarPuestos>
+      <campo leyenda="No Config" db_nombre="cve_config" form_nombre="cve_config" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+         SELECT A.cve_puesto,A.Nombre_Puesto
+        FROM ES_puestosgenericos A
+        INNER JOIN CON_AsignacionPuesto B
+        ON A.cve_puesto=B.cve_puesto
+        AND B.cve_asignacion=@cve_config
+         ]]>
+      </sql>
+    </llenarPuestos>
+    <obtenerPuestos>
+      <campo leyenda="No Config" db_nombre="cve_config" form_nombre="cve_config" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+         SELECT A.cve_puesto,A.Nombre_Puesto
+        FROM ES_puestosgenericos A
+        LEFT JOIN CON_AsignacionPuesto B
+        ON A.cve_puesto=B.cve_puesto
+        AND B.cve_asignacion=@cve_config
+        WHERE B.cve_puesto IS NULL
+         ]]>
+      </sql>
+    </obtenerPuestos>
+    <llenarDepartamentos>
+      <campo leyenda="No Config" db_nombre="cve_config" form_nombre="cve_config" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+          SELECT A.cve_empresa,A.cve_departamento,A.nombredep
+          FROM ES_departamentos A
+          INNER JOIN CON_AsignacionEmpresaDepartamento B
+          ON A.cve_empresa=B.cve_empresa
+          AND A.cve_departamento=B.cve_departamento
+          AND B.cve_asignacion=@cve_config
+          WHERE A.activo=1
+         ]]>
+      </sql>
+    </llenarDepartamentos>
+    <obtenerDepartamentos>
+      <campo leyenda="No Config" db_nombre="cve_config" form_nombre="cve_config" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+          SELECT A.cve_empresa,A.cve_departamento,A.nombredep
+          FROM ES_departamentos A
+          LEFT JOIN CON_AsignacionEmpresaDepartamento B
+          ON A.cve_empresa=B.cve_empresa
+          AND A.cve_departamento=B.cve_departamento
+          AND B.cve_asignacion=@cve_config
+          WHERE A.activo=1
+          AND B.cve_empresa IS NULL
+          AND B.cve_departamento IS NULL
+         ]]>
+      </sql>
+    </obtenerDepartamentos>
+    <llenarReclutadores>
+      <campo leyenda="No Config" db_nombre="cve_config" form_nombre="cve_config" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+            SELECT a.cve_usuario, a.nombre  FROM (
+            SELECT aa.cve_usuario, aa.nombre 
+            FROM SG_usuarios aa
+            INNER JOIN SG_perfilmodulorole bb
+            ON aa.cve_perfil = bb.cve_perfil
+            and bb.cve_modulo = 4 --Modulo Contrataciones
+            and bb.cve_role IN (2,3) --Rol Reclutadores
+            )A
+            INNER JOIN CON_AsignacionReclutador B
+            ON A.cve_usuario=B.cve_usuario
+            AND B.cve_asignacion=@cve_config
+         ]]>
+      </sql>
+    </llenarReclutadores>
+    <obtenerReclutadores>
+      <campo leyenda="No Config" db_nombre="cve_config" form_nombre="cve_config" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+            SELECT a.cve_usuario, a.nombre  FROM (
+            SELECT aa.cve_usuario, aa.nombre 
+            FROM SG_usuarios aa
+            INNER JOIN SG_perfilmodulorole bb
+            ON aa.cve_perfil = bb.cve_perfil
+            and bb.cve_modulo = 4 --Modulo Contrataciones
+            and bb.cve_role =3 --Rol Reclutadores
+            )A
+            LEFT JOIN CON_AsignacionReclutador B
+            ON A.cve_usuario=B.cve_usuario
+            AND B.cve_asignacion=@cve_config
+            WHERE B.cve_usuario  IS NULL
+         ]]>
+      </sql>
+    </obtenerReclutadores>
+    <obtenerJefesReclutadores>
+      <campo leyenda="No Config" db_nombre="cve_config" form_nombre="cve_config" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+            SELECT a.cve_usuario, a.nombre  FROM (
+            SELECT aa.cve_usuario, aa.nombre 
+            FROM SG_usuarios aa
+            INNER JOIN SG_perfilmodulorole bb
+            ON aa.cve_perfil = bb.cve_perfil
+            and bb.cve_modulo = 4 --Modulo Contrataciones
+            and bb.cve_role =2 --Rol Reclutadores
+            )A
+            LEFT JOIN CON_AsignacionReclutador B
+            ON A.cve_usuario=B.cve_usuario
+            AND B.cve_asignacion=@cve_config
+            WHERE B.cve_usuario  IS NULL
+         ]]>
+      </sql>
+    </obtenerJefesReclutadores>
+    <agregarRegion>
+      <campo leyenda="Valores" db_nombre="valores" form_nombre="valores"  requerido="true"  charsize="2000" tipo="string"  default=""/>
+      <sql>
+        <![CDATA[
+          SET NOCOUNT ON;
+          BEGIN TRY
+            DECLARE @QRY NVARCHAR(MAX)='INSERT INTO CON_AsignacionRegion(cve_asignacion,cve_region) VALUES' + @valores
+            EXEC(@QRY)
+            SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+          END TRY BEGIN CATCH
+            SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+          END CATCH
+         ]]>
+      </sql>
+    </agregarRegion>
+    <agregarReclutadores>
+      <campo leyenda="Valores" db_nombre="valores" form_nombre="valores"  requerido="true"  charsize="2000" tipo="string"  default=""/>
+      <sql>
+        <![CDATA[
+          SET NOCOUNT ON;
+          BEGIN TRY
+            DECLARE @QRY NVARCHAR(MAX)='INSERT INTO CON_AsignacionReclutador(cve_asignacion,cve_usuario) VALUES' + @valores
+            EXEC(@QRY)
+            SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+          END TRY BEGIN CATCH
+            SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+          END CATCH
+         ]]>
+      </sql>
+    </agregarReclutadores>
+    <agregarDep>
+      <campo leyenda="Valores" db_nombre="valores" form_nombre="valores"  requerido="true"  charsize="2000" tipo="string"  default=""/>
+      <sql>
+        <![CDATA[
+          SET NOCOUNT ON;
+          BEGIN TRY
+            DECLARE @QRY NVARCHAR(MAX)='INSERT INTO CON_AsignacionEmpresaDepartamento(cve_asignacion,cve_empresa,cve_departamento) VALUES' + @valores
+            EXEC(@QRY)
+            SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+          END TRY BEGIN CATCH
+            SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+          END CATCH
+         ]]>
+      </sql>
+    </agregarDep>
+    <agregarPuestos>
+      <campo leyenda="Valores" db_nombre="valores" form_nombre="valores"  requerido="true"  charsize="2000" tipo="string"  default=""/>
+      <sql>
+        <![CDATA[
+          SET NOCOUNT ON;
+          BEGIN TRY
+            DECLARE @QRY NVARCHAR(MAX)='INSERT INTO CON_AsignacionPuesto(cve_asignacion,cve_puesto) VALUES' + @valores
+            EXEC(@QRY)
+            SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+          END TRY BEGIN CATCH
+            SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+          END CATCH
+         ]]>
+      </sql>
+    </agregarPuestos>
+    
+    <eliminarRegion>
+      <campo leyenda="No Config" db_nombre="cve_asignacion" form_nombre="cve_config" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="No Region" db_nombre="cve_region" form_nombre="cve_region" requerido="true" charsize="10" tipo="int" default=""/>
+
+      <sql>
+        <![CDATA[
+          DELETE CON_AsignacionRegion WHERE cve_asignacion=@cve_asignacion AND cve_region=@cve_region 
+        ]]>
+      </sql>
+    </eliminarRegion>
+    <eliminarDep>
+      <campo leyenda="No Config" db_nombre="cve_asignacion" form_nombre="cve_config" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="No Empresa" db_nombre="cve_empresa" form_nombre="cve_empresa" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="No Departamento" db_nombre="cve_departamento" form_nombre="cve_departamento" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+          DELETE CON_AsignacionEmpresaDepartamento WHERE cve_asignacion=@cve_asignacion AND cve_empresa=@cve_empresa AND cve_departamento=@cve_departamento
+        ]]>
+      </sql>
+    </eliminarDep>
+    <eliminarReclutadores>
+      <campo leyenda="No Config" db_nombre="cve_asignacion" form_nombre="cve_config" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="No Config" db_nombre="cve_usuario" form_nombre="cve_usuario" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+            DELETE CON_AsignacionReclutador WHERE cve_asignacion=@cve_asignacion AND cve_usuario=@cve_usuario
+        ]]>
+      </sql>
+    </eliminarReclutadores>
+    <eliminarPuestos>
+      <campo leyenda="No Config" db_nombre="cve_asignacion" form_nombre="cve_config" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="No Puesto" db_nombre="cve_puesto" form_nombre="cve_puesto" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+            DELETE CON_AsignacionPuesto WHERE cve_asignacion=@cve_asignacion AND cve_puesto=@cve_puesto
+        ]]>
+      </sql>
+    </eliminarPuestos>
+  </detalleConfigAsig>
+</Secciones>
+

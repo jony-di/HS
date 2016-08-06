@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Secciones>
+    <Idiomas>
+    <obtenerSiguienteClave>
+        <sql>
+            BEGIN
+            SET NOCOUNT ON;
+            DECLARE @siguiente AS INT;
+            SELECT ISNULL(MAX(cve_idioma),0) + 1 cve_idioma, ISNULL(MAX(cve_pais),0) + 1 cve_pais FROM SG_idiomas;
+            END
+        </sql>   
+    </obtenerSiguienteClave>
+    
+    <Nuevo>
+        <campo leyenda="ClavePais" db_nombre="cve_pais" form_nombre="cve_pais" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="ClaveIdioma" db_nombre="cve_idioma" form_nombre="cve_idioma" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Pais" db_nombre="pais" form_nombre="pais"  requerido="true" charsize="150" tipo="string" default=""/>
+        <campo leyenda="NombreMoneda" db_nombre="nombremoneda" form_nombre="nombremoneda"  requerido="true" charsize="50" tipo="string" default=""/>
+        <campo leyenda="SignoMoneda" db_nombre="signomoneda" form_nombre="signomoneda"  requerido="true" charsize="50" tipo="string" default=""/>
+        <campo leyenda="Idioma" db_nombre="idioma" form_nombre="idioma"  requerido="true" charsize="50" tipo="string" default=""/>
+        <sql>
+            BEGIN
+	SET NOCOUNT ON;	
+	DECLARE @siguiente AS INT;
+	SET @siguiente= (SELECT MAX(cve_role) + 1 FROM SG_roles);
+	BEGIN TRY
+		INSERT INTO SG_idiomas(
+			cve_pais,
+			cve_idioma,
+			pais,
+			nombremoneda,
+			signomoneda,
+			idioma
+		)
+		VALUES(
+			@cve_pais,
+			@cve_idioma,
+			@pais,
+			@nombremoneda,
+			@signomoneda,
+			@idioma
+		)
+		SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+	END TRY BEGIN CATCH	
+		SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+	END CATCH	
+END
+
+        </sql>
+   </Nuevo>
+
+    <obtenerCatalogo>
+        <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+        <campo leyenda="Clave" db_nombre="cve_idioma" form_nombre="cve_idioma"  requerido="false"  charsize="0" tipo="int"  default=""/>
+        <sql>
+           BEGIN
+	SET NOCOUNT ON;
+	DECLARE @inicio INT;
+	SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+	DECLARE @TablaAuxiliarPaginacion AS TABLE(
+		indiceRegistro INT,
+		cve_pais SMALLINT,
+		cve_idioma SMALLINT,
+		pais VARCHAR(100),
+		nombremoneda VARCHAR(100),
+		signomoneda VARCHAR(2),
+		idioma VARCHAR(50)
+	)		
+	INSERT INTO @TablaAuxiliarPaginacion		
+	SELECT 
+		ROW_NUMBER() OVER(ORDER BY CONVERT(INT,cve_idioma) DESC) AS indiceRegistro,		
+		cve_pais,
+		cve_idioma,
+		pais,
+		nombremoneda,
+		signomoneda,
+		idioma
+	FROM 
+		SG_idiomas
+	WHERE  ( ((CONVERT(VARCHAR(20),cve_idioma) like '%' + @criterio + '%') OR (idioma like '%' + @criterio + '%')
+	 or (pais like '%' + @criterio + '%')or (nombremoneda like '%' + @criterio + '%')
+	or (signomoneda like '%' + @criterio + '%')) AND @cve_idioma=0) 
+		OR ((cve_idioma=@cve_idioma) AND (@cve_idioma!=0));
+		
+	--Paginacion	
+	SELECT TOP(@longitudPagina)
+		indiceRegistro,
+		@@ROWCOUNT as totalRegistros,
+		cve_pais,
+		cve_idioma,
+		pais,
+		nombremoneda,
+		signomoneda,
+		idioma
+	FROM @TablaAuxiliarPaginacion
+	WHERE indiceRegistro > @inicio	 
+	ORDER BY indiceRegistro ASC
+END
+
+        </sql>        
+    </obtenerCatalogo>
+
+     <Editar>
+         <campo leyenda="ClavePais" db_nombre="cve_pais" form_nombre="cve_pais" requerido="true" charsize="0" tipo="int" default=""/>
+         <campo leyenda="ClaveIdioma" db_nombre="cve_idioma" form_nombre="cve_idioma" requerido="true" charsize="0" tipo="int" default=""/>
+         <campo leyenda="Pais" db_nombre="pais" form_nombre="pais"  requerido="true" charsize="150" tipo="string" default=""/>
+         <campo leyenda="NombreMoneda" db_nombre="nombremoneda" form_nombre="nombremoneda"  requerido="true" charsize="50" tipo="string" default=""/>
+         <campo leyenda="SignoMoneda" db_nombre="signomoneda" form_nombre="signomoneda"  requerido="true" charsize="50" tipo="string" default=""/>
+         <campo leyenda="Idioma" db_nombre="idioma" form_nombre="idioma"  requerido="true" charsize="50" tipo="string" default=""/>
+        <sql>
+           BEGIN
+	SET NOCOUNT ON;	
+	BEGIN TRY
+		UPDATE SG_idiomas 
+		SET	
+		cve_pais=@cve_pais,
+		cve_idioma=@cve_idioma,
+		pais=@pais,
+		nombremoneda=@nombremoneda,
+		signomoneda=@signomoneda,
+		idioma=@idioma  		
+		WHERE cve_idioma= @cve_idioma
+		SELECT 1  estatus, 'Registro actualizado correctamente' mensaje;
+	END TRY BEGIN CATCH	
+		SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+	END CATCH	
+END
+        </sql>
+    </Editar>
+</Idiomas>  
+</Secciones>  
+    
+    
+    
+    
+

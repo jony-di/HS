@@ -1,0 +1,14 @@
+﻿
+@font-face {font-family: HelveticaN;src:url(/fonts/HelveticaNeue-Light.woff),url(/fonts/HelveticaNeue-Medium.ttf); font-weight:300;}
+
+body {font-size:14px;font-family:HelveticaN;width:800px;margin:auto;}
+b{float:left;margin-bottom:10px;clear:left;}
+label{float:left;clear:right;margin-bottom:10px;padding-left:10px;}
+
+fieldset{clear:both;padding:20px;border:1px solid #ddd;margin-bottom:20px;}
+fieldset label{float:left;clear:right;margin-bottom:10px;width:530px;border:0px;border-bottom:1px dashed #e3e3e3;display:block;min-height:30px;}
+fieldset b{float:left;clear:left;width:180px;text-align:right;margin-right:10px;}
+fieldset legend{text-align:center;font-weight:bolder;color:#666;}
+hr.cleaner{clear:both;border:0px;}
+button.aceptarmov{margin-top:30px;display:block;padding:5px;width:200px;text-align:center;margin:30px auto;cursor:pointer;}
+

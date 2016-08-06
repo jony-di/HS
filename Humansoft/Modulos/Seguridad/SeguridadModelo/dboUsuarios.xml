@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+    <Usuarios>
+    <obtenerSiguienteClave>
+        <sql>
+BEGIN
+	SET NOCOUNT ON;	
+	DECLARE @siguiente AS INT;
+	SELECT ISNULL(MAX(cve_usuario),0) + 1 clave FROM SG_usuarios;
+END
+
+        </sql>   
+    </obtenerSiguienteClave>
+    
+    <Nuevo>
+        <campo leyenda="Clave" db_nombre="cve_usuario" form_nombre="cve_usuario" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Nombre" db_nombre="nombre" form_nombre="nombre"  requerido="true" charsize="150" tipo="string" default=""/>
+        <campo leyenda="Usuario" db_nombre="usuario" form_nombre="usuario"  requerido="true" charsize="150" tipo="string" default=""/>
+        <campo leyenda="Password" db_nombre="password" form_nombre="password"  requerido="true" charsize="150" tipo="string" default=""/>
+        <campo leyenda="Email" db_nombre="email" form_nombre="email"  requerido="true" charsize="150" tipo="string" default=""/>
+        <campo leyenda="Perfil" db_nombre="cve_perfil" form_nombre="cve_perfil" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Empleado" db_nombre="num_empleado" form_nombre="num_empleado"  requerido="true" charsize="150" tipo="string" default=""/>
+        <campo leyenda="Seguridad" db_nombre="cve_seguridad" form_nombre="cve_seguridad" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="CuentaBloqueada" db_nombre="cuentabloqueada" form_nombre="cuentabloqueada"  requerido="true" charsize="50" tipo="bool" default="true"/>
+        <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="true" charsize="50" tipo="bool" default="true"/>
+        <campo leyenda="TipoPassword" db_nombre="cve_tipopassword" form_nombre="cve_tipopassword" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="PeridoCambia" db_nombre="periodocambiap" form_nombre="periodocambiap" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="CambiaP" db_nombre="cambiap" form_nombre="cambiap"  requerido="true" charsize="50" tipo="bool" default="true"/>
+        <campo leyenda="VecesLogin" db_nombre="veceslogin" form_nombre="veceslogin" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Sucursal" db_nombre="cve_sucursal" form_nombre="cve_sucursal" requerido="true" charsize="0" tipo="int" default=""/>
+
+        
+        <sql>
+				<![CDATA[
+BEGIN
+	SET NOCOUNT ON;
+	DECLARE @passwordReal VARCHAR(20);	
+	DECLARE @estatus SMALLINT;
+	DECLARE @mensaje VARCHAR(512);
+	
+	
+	SET @passwordReal= (SELECT TOP(1) passwordReal FROM ValidarTipoPassword(@password,@cve_tipopassword,@cve_usuario));
+	SET @estatus= (SELECT TOP(1) estatus FROM ValidarTipoPassword(@password,@cve_tipopassword,@cve_usuario));
+	SET @mensaje= (SELECT TOP(1) mensaje FROM ValidarTipoPassword(@password,@cve_tipopassword,@cve_usuario));
+	DECLARE @existeEmail INT;SET @existeEmail=(SELECT COUNT(cve_usuario) FROM SG_usuarios WHERE email like @email);
+	IF @existeEmail > 0 BEGIN
+		SELECT -1 AS estatus,  'Ya existe el E-mail, porfavor seleccione otro.' mensaje;
+	END ELSE BEGIN
+		IF @passwordReal IS NOT NULL BEGIN	
+			BEGIN TRY
+				INSERT INTO SG_usuarios(
+					cve_usuario,
+					nombre,
+					usuario,
+					[password],
+					email,
+					cve_perfil,
+					num_empleado,
+					cve_seguridad,
+					cuentabloqueada,
+					activo,
+					cve_tipopassword,
+					periodocambiap,
+					cambiap,
+					veceslogin,
+					cve_sucursal
+				)
+				VALUES(
+					@cve_usuario,
+					@nombre,
+					@usuario,
+					@passwordReal,
+					@email,
+					@cve_perfil,
+					@num_empleado,
+					@cve_seguridad,
+					@cuentabloqueada,
+					@activo,
+					@cve_tipopassword,
+					@periodocambiap,
+					@cambiap,
+					@veceslogin,
+					@cve_sucursal
+				)
+				INSERT INTO SG_logpassword(cve_usuario,fechacambio,[password]) VALUES(@cve_usuario, GETDATE(),@passwordReal);
+				SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+			END TRY BEGIN CATCH	
+				SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+			END CATCH
+		END	ELSE BEGIN
+			SELECT -1 AS estatus,  @mensaje mensaje;
+		END
+	END 
+END
+]]>
+
+        </sql>
+   </Nuevo>
+
+    <obtenerCatalogo>
+        <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+        <campo leyenda="Clave" db_nombre="cve_usuario" form_nombre="cve_usuario"  requerido="false"  charsize="0" tipo="int"  default=""/>
+        <sql>
+            <![CDATA[
+            BEGIN
+            SET NOCOUNT ON;
+            DECLARE @inicio INT;
+            SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+            DECLARE @TablaAuxiliarPaginacion AS TABLE(
+            indiceRegistro INT,
+            cve_usuario INT,
+            nombre VARCHAR(80),
+            usuario VARCHAR(80),
+            [password]  VARCHAR(20),
+            email  VARCHAR(80),
+            nombrePerfil VARCHAR(512),
+            nombreSucursal VARCHAR(512),
+            cve_perfil SMALLINT,
+            cve_menu SMALLINT,
+            num_empleado VARCHAR(20),
+            cve_seguridad SMALLINT,
+            cuentabloqueada BIT,
+            activo BIT,
+            cve_tipopassword TINYINT,
+            periodocambiap SMALLINT,
+            cambiap BIT,
+            veceslogin SMALLINT,
+            cve_sucursal SMALLINT
+            )
+            INSERT INTO @TablaAuxiliarPaginacion
+            SELECT
+            ROW_NUMBER() OVER(ORDER BY CONVERT(INT,cve_usuario) DESC) AS indiceRegistro,
+            A.cve_usuario,
+            A.nombre,
+            A.usuario,
+            A.[password],
+            A.email,
+            B.nombre nombrePerfil,
+            C.nombre nombreSucursal,
+            A.cve_perfil,
+            A.cve_menu,
+            A.num_empleado,
+            A.cve_seguridad,
+            A.cuentabloqueada,
+            A.activo,
+            A.cve_tipopassword,
+            A.periodocambiap,
+            A.cambiap,
+            A.veceslogin,
+            A.cve_sucursal
+            FROM
+            SG_usuarios	A
+            LEFT OUTER JOIN SG_perfil B ON A.cve_perfil=B.cve_perfil
+            LEFT OUTER JOIN SG_sucursales C ON A.cve_sucursal=C.cve_sucursal
+            WHERE ( ((CONVERT(VARCHAR(20),A.cve_usuario) like '%' + @criterio + '%') OR
+            (A.nombre like '%' + @criterio + '%')
+            OR (B.nombre like '%' + @criterio + '%')
+            OR (C.nombre like '%' + @criterio + '%')
+            OR (a.cuentabloqueada like '%' + @criterio + '%')
+            OR (A.num_empleado like @criterio)
+            OR (CASE WHEN(A.activo=1) THEN 'activo' ELSE 'inactivo' END like @criterio ))
+            AND @cve_usuario=0)
+            OR ((A.cve_usuario=@cve_usuario) AND (@cve_usuario!=0));
+            --Paginacion
+            SELECT TOP(@longitudPagina)
+            A.indiceRegistro,
+            @@ROWCOUNT as totalRegistros,
+            A.cve_usuario,
+            A.nombre,
+            A.usuario,
+            A.[password],
+            A.email,
+            A.nombrePerfil,
+            A.nombreSucursal,
+            A.cve_perfil,
+            A.cve_menu,
+            A.num_empleado,
+            A.cve_seguridad,
+            A.cuentabloqueada,
+            A.activo,
+            A.cve_tipopassword,
+            A.periodocambiap,
+            A.cambiap,
+            A.veceslogin,
+            A.cve_sucursal
+            FROM @TablaAuxiliarPaginacion A
+            WHERE indiceRegistro > @inicio
+            ORDER BY indiceRegistro ASC
+            END
+            ]]>
+
+        </sql>        
+    </obtenerCatalogo>
+
+     <Editar>
+         <campo leyenda="Clave" db_nombre="cve_usuario" form_nombre="cve_usuario" requerido="true" charsize="0" tipo="int" default=""/>
+         <campo leyenda="Nombre" db_nombre="nombre" form_nombre="nombre"  requerido="true" charsize="150" tipo="string" default=""/>
+         <campo leyenda="Usuario" db_nombre="usuario" form_nombre="usuario"  requerido="true" charsize="150" tipo="string" default=""/>
+         <campo leyenda="Password" db_nombre="password" form_nombre="password"  requerido="true" charsize="150" tipo="string" default=""/>
+         <campo leyenda="Email" db_nombre="email" form_nombre="email"  requerido="true" charsize="150" tipo="string" default=""/>
+         <campo leyenda="Perfil" db_nombre="cve_perfil" form_nombre="cve_perfil" requerido="true" charsize="0" tipo="int" default=""/>
+         <campo leyenda="Empleado" db_nombre="num_empleado" form_nombre="num_empleado"  requerido="true" charsize="150" tipo="string" default=""/>
+         <campo leyenda="Seguridad" db_nombre="cve_seguridad" form_nombre="cve_seguridad" requerido="true" charsize="0" tipo="int" default=""/>
+         <campo leyenda="CuentaBloqueada" db_nombre="cuentabloqueada" form_nombre="cuentabloqueada"  requerido="true" charsize="50" tipo="bool" default="true"/>
+         <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="true" charsize="50" tipo="bool" default="true"/>
+         <campo leyenda="TipoPassword" db_nombre="cve_tipopassword" form_nombre="cve_tipopassword" requerido="true" charsize="0" tipo="int" default=""/>
+         <campo leyenda="PeridoCambia" db_nombre="periodocambiap" form_nombre="periodocambiap" requerido="true" charsize="0" tipo="int" default=""/>
+         <campo leyenda="CambiaP" db_nombre="cambiap" form_nombre="cambiap"  requerido="true" charsize="50" tipo="bool" default="true"/>
+         <campo leyenda="VecesLogin" db_nombre="veceslogin" form_nombre="veceslogin" requerido="true" charsize="0" tipo="int" default=""/>
+         <campo leyenda="Sucursal" db_nombre="cve_sucursal" form_nombre="cve_sucursal" requerido="true" charsize="0" tipo="int" default=""/>
+        <sql>
+				<![CDATA[
+              BEGIN
+	              SET NOCOUNT ON;
+	              DECLARE @passwordReal VARCHAR(20);	
+	              DECLARE @estatus SMALLINT;
+	              DECLARE @mensaje VARCHAR(512);
+	
+	
+	              SET @passwordReal= (SELECT TOP(1) passwordReal FROM ValidarTipoPassword(@password,@cve_tipopassword,@cve_usuario));
+	              SET @estatus= (SELECT TOP(1) estatus FROM ValidarTipoPassword(@password,@cve_tipopassword,@cve_usuario));
+	              SET @mensaje= (SELECT TOP(1) mensaje FROM ValidarTipoPassword(@password,@cve_tipopassword,@cve_usuario));
+	              DECLARE @existeEmail INT;SET @existeEmail=(SELECT COUNT(cve_usuario) FROM SG_usuarios WHERE email like @email AND cve_usuario!=@cve_usuario);
+	              IF @existeEmail > 0 BEGIN
+		              SELECT -1 AS estatus,  'Ya existe el E-mail, porfavor seleccione otro.' mensaje;
+	              END ELSE BEGIN
+		              IF @passwordReal IS NOT NULL BEGIN	
+			              BEGIN TRY
+			                UPDATE SG_usuarios 
+			                SET	
+			                cve_usuario=@cve_usuario,
+			                nombre=@nombre,
+			                usuario=@usuario,      
+			                [password]=@passwordReal,
+			                email=@email,
+			                cve_perfil=@cve_perfil,
+			                num_empleado=@num_empleado,
+			                cve_seguridad=@cve_seguridad,
+			                cuentabloqueada=@cuentabloqueada,
+			                activo=@activo,			
+			                cve_tipopassword= @cve_tipopassword,
+			                periodocambiap=@periodocambiap,
+			                cambiap=@cambiap,
+			                veceslogin=@veceslogin,	
+			                cve_sucursal=@cve_sucursal
+			                WHERE cve_usuario= @cve_usuario
+			                SELECT 1  estatus, 'Registro actualizado correctamente' mensaje;
+		                END TRY BEGIN CATCH	
+			                SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+		                END CATCH	
+		              END	ELSE BEGIN
+			              SELECT -1 AS estatus,  @mensaje mensaje;
+		              END
+	              END 
+              END
+            ]]>
+        </sql>
+    </Editar>
+</Usuarios>  
+</Secciones>  
+    
+    
+    
+    
+

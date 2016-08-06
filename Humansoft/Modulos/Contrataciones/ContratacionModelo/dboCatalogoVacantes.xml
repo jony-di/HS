@@ -1,0 +1,667 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Secciones>
+  <catalogoVacante>
+    <obtenerSiguienteClave>
+      <sql>
+        <![CDATA[
+            SELECT ISNULL(MAX(cve_solicitudvacante),0) + 1 as 'clave' FROM CON_SolicitudVacante;
+        ]]>
+      </sql>
+    </obtenerSiguienteClave>
+    <esJefe>
+      <sql>
+        <![CDATA[
+          IF EXISTS(SELECT cve_role FROM SG_usuarios A
+          INNER JOIN SG_perfilmodulorole B
+          ON  A.cve_perfil=B.cve_perfil AND cve_modulo = 4 AND cve_role IN (2)
+          WHERE
+          A.cve_usuario=@usuario) BEGIN
+          SELECT 1 AS 'esJefe'
+          END
+          ELSE BEGIN
+            SELECT 0 AS 'esJefe'
+          END
+        ]]>
+      </sql>
+    </esJefe>
+    <Nuevo>
+      <campo leyenda="Posicion" db_nombre="num_plantilla" form_nombre="num_plantilla" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Comentarios" db_nombre="comentarios" form_nombre="comentarios"  requerido="false"  charsize="200" tipo="string"  default="Se genera la contratación automatica"/>
+      <sql>
+        <![CDATA[
+              SET NOCOUNT ON
+              DECLARE @Usuario_Asignado INT
+              DECLARE @cve_asignacion INT
+              DECLARE @UltimoAsignado INT
+              DECLARE @solicitud TABLE(cve_puesto INT, cve_departamento INT,cve_empresa INT,cve_region INT,salario MONEY)
+              /*Se obtiene toda la informacion de la posicion*/
+              INSERT INTO @solicitud SELECT A.cve_puesto,A.cve_departamento,A.cve_empresa,A.area,ISNULL(C.contratacion,0)
+              FROM ES_posiciones (NOLOCK) A
+              LEFT JOIN ES_tabulador C
+              ON A.cve_tabulador=C.tabulador
+              AND A.nivel=C.nivel AND C.activo=1
+              WHERE
+              A.num_plantilla=@num_plantilla
+              
+              DECLARE @POLITICAS TABLE(
+              cve_asignacion INT,
+              cve_puesto INT,
+              cve_empresa INT,
+              cve_departamento INT,
+              cve_region INT,
+              SalarioMinimo INT,
+              SalarioMaximo INT,
+              UltimaAsignacion INT,
+              Jefe INT
+              ,cve_usuario INT,
+              Consecutivo INT)
+              /*se obtienen todas las config activas*/
+              INSERT INTO @POLITICAS
+              SELECT
+              A.cve_asignacion
+              ,ISNULL(cve_puesto,0)
+              ,ISNULL(cve_empresa,0)
+              ,ISNULL(cve_departamento,0)
+              ,ISNULL(cve_region,0)
+              ,ISNULL(SalarioMinimo,0)
+              ,ISNULL(SalarioMaximo,0)
+              ,ISNULL(UltimaAsignacion,1)
+              ,ISNULL(Jefe,0)
+              ,ISNULL(cve_usuario,0)
+              ,ROW_NUMBER() OVER(PARTITION BY A.cve_asignacion ORDER BY cve_usuario)/*Se agrupa y ordena los usuarios para evitar modificar la infomacion cadaves que se inseta una vacante*/
+              FROM 
+              CON_Asignacion A 
+              LEFT JOIN CON_AsignacionEmpresaDepartamento B
+              ON A.cve_asignacion=B.cve_asignacion
+              LEFT JOIN CON_AsignacionPuesto C
+              ON A.cve_asignacion=C.cve_asignacion
+              LEFT JOIN CON_AsignacionReclutador D
+              ON A.cve_asignacion=D.cve_asignacion
+              LEFT JOIN CON_AsignacionRegion E
+              ON A.cve_asignacion=E.cve_asignacion
+              WHERE A.Activo=1
+              AND cve_usuario IS NOT NULL
+              ORDER BY Prioridad DESC
+
+              /*Se valida si existe la vacante*/
+              IF EXISTS( SELECT * FROM @solicitud) BEGIN
+	              /*Se obtene la cve de configuracion el usuario y el valor del sig a asignar con el siguiente query que ordena por criterio de calificacion*/
+	              SELECT TOP 1 @Usuario_Asignado =cve_usuario,
+	              @cve_asignacion=cve_asignacion,
+	              @UltimoAsignado=Sig
+	              FROM(
+	              SELECT B.cve_asignacion,B.cve_usuario,
+	              CASE WHEN A.cve_puesto=B.cve_puesto THEN 10000 ELSE 0 END +
+	              CASE WHEN A.cve_empresa =B.cve_empresa AND A.cve_departamento=B.cve_departamento THEN 1000 ELSE 0 END +
+	              CASE WHEN A.cve_region=B.cve_region THEN 100 ELSE 0 END +
+	              CASE WHEN A.salario BETWEEN B.SalarioMinimo AND B.SalarioMaximo THEN 10 ELSE 0 END +
+	              CASE WHEN B.JEFE=1 THEN 1 ELSE 0 END 'CALIF',
+	              CASE WHEN B.Consecutivo <= B.UltimaAsignacion THEN CASE WHEN (SELECT MAX(Consecutivo) FROM @POLITICAS WHERE B.cve_asignacion=cve_asignacion) = B.UltimaAsignacion THEN 1 ELSE 0 END ELSE 1 END  'LETOCA',
+	              CASE WHEN B.Consecutivo <= B.UltimaAsignacion THEN CASE WHEN (SELECT MAX(Consecutivo) FROM @POLITICAS WHERE B.cve_asignacion=cve_asignacion) = B.UltimaAsignacion THEN 1 ELSE B.Consecutivo END ELSE B.Consecutivo END  'Sig' 
+	              FROM @solicitud A
+	              INNER JOIN @POLITICAS B ON 1=1)T1
+	              WHERE LETOCA=1 
+	              GROUP BY cve_asignacion,cve_usuario,CALIF,LETOCA,sig
+	              ORDER BY CALIF DESC
+              END
+              ELSE BEGIN
+	              SELECT @Usuario_Asignado =cve_usuario,
+	              @cve_asignacion=cve_asignacion,
+	              @UltimoAsignado=UltimaAsignacion
+	              FROM @POLITICAS WHERE Jefe=1
+              END
+              IF NOT EXISTS (SELECT * FROM CON_SolicitudVacante WHERE num_plantilla=@num_plantilla AND cve_estatus IN (1,2,3,4,5)) BEGIN
+	              SET IMPLICIT_TRANSACTIONS ON
+	              BEGIN TRY
+		              DECLARE @IDvacante int=(SELECT ISNULL(MAX(cve_solicitudvacante),0)+1 FROM CON_SolicitudVacante)
+		              INSERT INTO CON_SolicitudVacante(cve_solicitudvacante,fechaSolicitud,cve_puesto,num_plantilla,cve_estatus,cve_usuario_solicitante,cve_usuario_asignado,fechaUltimoEstatus)
+		              SELECT
+		              @IDvacante
+		              ,GETDATE()
+		              ,cve_puesto
+		              ,num_plantilla
+		              ,1
+		              ,@usuario
+		              ,@Usuario_Asignado
+		              ,GETDATE()
+		              FROM ES_posiciones WHERE num_plantilla=@num_plantilla
+		              INSERT INTO CON_SolicitudVacanteHistorial(cve_solicitudvacante,fechaCambio,cve_estatus,cve_usuario_cambio,cve_puesto,num_plantilla,num_plantillaJefe,comentarios)
+		              SELECT
+		              @IDvacante
+		              ,GETDATE()
+		              ,1
+		              ,@usuario
+		              ,cve_puesto
+		              ,num_plantilla
+		              ,num_plantilladep
+		              ,@comentarios
+		              FROM ES_posiciones WHERE num_plantilla=@num_plantilla
+		              UPDATE CON_Asignacion SET UltimaAsignacion =@UltimoAsignado WHERE cve_asignacion = @cve_asignacion
+                  INSERT INTO Notificaciones(num_usuario,fecha,nota,pagina,referencia) VALUES(@Usuario_Asignado,GETDATE(),'Se te a asignado una nueva vacante','/Modulos/Contrataciones/ContratacionUI/CN_catalogoVacantes.aspx?vacante='+CONVERT(CHAR,@IDvacante),'CONT_AUTO_' + RTRIM(CONVERT(CHAR,@IDvacante)) + '_' + RTRIM(CONVERT(CHAR,@Usuario_Asignado)))
+		              COMMIT TRANSACTION
+	              SELECT 1 estatus, 'Registro guardado correctamente' mensaje;
+	              END TRY
+	              BEGIN CATCH
+		              ROLLBACK TRANSACTION
+		              SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+	              END CATCH
+              END
+              ELSE BEGIN
+	              SELECT 1 estatus, 'Registro guardado anteriormente' mensaje;
+              END
+        ]]>
+      </sql>
+    </Nuevo>
+    <obtenerVacantes>
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+      <sql>
+        <![CDATA[
+          SET NOCOUNT ON;
+          DECLARE @inicio INT;
+
+          SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+          DECLARE @TablaAuxiliarPaginacion AS TABLE(
+          indiceRegistro INT,
+          idVacante INT,
+          Vacante INT,
+          Puesto VARCHAR(MAX),
+          cve_puesto INT,
+          Fecha VARCHAR(10),
+          asignado VARCHAR(MAX),
+          Estatus VARCHAR(MAX),
+          Departamento VARCHAR(MAX))
+
+          SET NOCOUNT ON;
+          DECLARE @PosicionesVisibles TABLE (num_plantilla INT)
+          DECLARE @isReclutador TABLE (cve_role INT)
+
+          INSERT INTO @PosicionesVisibles  EXEC PA_SG_CObtenerPosicionesVisibles @usuario
+          DELETE @PosicionesVisibles WHERE num_plantilla = (SELECT num_plantilla FROM ES_posiciones A INNER JOIN SG_usuarios B ON A.id_empleado=B.num_empleado WHERE B.cve_usuario=@usuario)
+          
+          INSERT INTO @isReclutador SELECT cve_role FROM SG_usuarios A
+          INNER JOIN SG_perfilmodulorole B
+          ON  A.cve_perfil=B.cve_perfil AND cve_modulo = 4 AND cve_role IN (2,3)
+          WHERE
+          A.cve_usuario=@usuario
+
+          INSERT INTO @TablaAuxiliarPaginacion
+          SELECT ROW_NUMBER() OVER(ORDER BY A.fechaSolicitud DESC) AS indiceRegistro
+          ,A.cve_solicitudvacante AS 'idVacante'
+          ,A.num_plantilla
+          ,ISNULL(D.Nombre_Puesto,'No asignado')
+          ,A.cve_puesto
+          ,CONVERT(varchar(10),A.fechaSolicitud,103)
+          ,F.nombre
+          ,G.descripcion
+          ,ISNULL(E.nombredep,'No asignado')
+          FROM CON_SolicitudVacante A
+          INNER JOIN @PosicionesVisibles B
+          ON A.num_plantilla=B.num_plantilla
+          INNER JOIN ES_posiciones C
+          ON A.num_plantilla=C.num_plantilla
+          LEFT JOIN ES_puestosgenericos D
+          ON C.cve_puesto=D.cve_puesto
+          LEFT JOIN ES_departamentos E
+          ON C.cve_departamento=E.cve_departamento
+          LEFT JOIN SG_usuarios F
+          ON A.cve_usuario_asignado=F.cve_usuario
+          INNER JOIN SIS_estatus G
+          ON A.cve_estatus = G.cve_estatus
+          AND G.cve_modulo=4
+          WHERE (
+          ((@@ROWCOUNT=1 AND cve_usuario_asignado IN (CASE WHEN (SELECT cve_role FROM @isReclutador)=3 THEN @usuario ELSE cve_usuario_asignado END )) OR (@@ROWCOUNT=0))
+          AND ((CONVERT(VARCHAR(20),A.num_plantilla) like '%' + @criterio + '%') 
+          OR (CONVERT(VARCHAR(20),A.cve_puesto) like '%' + @criterio + '%') 
+          OR (D.Nombre_Puesto like '%' + @criterio + '%')
+          OR (E.nombredep  like '%' + @criterio + '%')));
+
+          SELECT TOP(@longitudPagina)
+          indiceRegistro,
+          @@ROWCOUNT as totalRegistros,
+          A.idVacante,
+          A.Vacante,
+          A.Puesto,
+          A.cve_puesto,
+          A.Fecha,
+          A.asignado,
+          A.Estatus,
+          A.Departamento
+          FROM @TablaAuxiliarPaginacion a
+          WHERE indiceRegistro > @inicio
+          ORDER BY indiceRegistro
+        ]]>
+      </sql>
+    </obtenerVacantes>
+    <obtenerHistorial>
+      <campo leyenda="Posicion" db_nombre="num_plantilla" form_nombre="num_plantilla" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Vacante" db_nombre="vacante" form_nombre="vacante" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+          SELECT A.cve_solicitudvacante AS 'numvacante'
+          ,ISNULL(B.Nombre_Puesto,'No asignado') AS 'vacante'
+          ,c.descripcion AS 'estatus'
+          ,CONVERT(VARCHAR(10), a.fechaCambio,103) as 'fecha'
+          ,CONVERT(VARCHAR(10), a.fechaCambio,108) as 'hora'
+          ,ISNULL(F.nombre,'Usuario no disponible') AS 'usuario'
+          ,ISNULL(A.comentarios,'Sin comentarios') AS 'comentarios'
+          FROM CON_SolicitudVacanteHistorial A
+          LEFT JOIN ES_puestosgenericos B
+          ON A.cve_puesto=B.cve_puesto
+          LEFT JOIN SG_usuarios F
+          ON A.cve_usuario_cambio=F.cve_usuario
+          INNER JOIN SIS_estatus C
+          ON c.cve_estatus=a.cve_estatus 
+          and c.cve_modulo=4
+          WHERE 
+          A.cve_solicitudvacante=@vacante
+          AND A.num_plantilla=@num_plantilla
+        ]]>
+      </sql>
+    </obtenerHistorial>
+    <obtenerDetalleVacante>
+      <campo leyenda="Vacante" db_nombre="vacante" form_nombre="vacante" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+        SELECT 
+          A.cve_solicitudvacante
+          ,A.num_plantilla
+          ,A.cve_puesto
+          ,ISNULL(E.Nombre_Puesto,'') AS NombrePuesto
+          ,G.descripcion as cve_estatus
+          ,ISNULL(D.nombredep,'') AS nombredep
+          ,F.nombre
+          ,CONVERT(VARCHAR,A.fechaSolicitud,103) AS fechaSolicitud
+          ,ISNULL(CONVERT(VARCHAR,A.fechaContratacion,103),'') AS fechaContratacion
+          ,CONVERT(DECIMAL(18,2),ISNULL(C.contratacion,0)) as sueldo
+          ,A.detalle
+          FROM CON_SolicitudVacante A
+          INNER JOIN ES_posiciones B
+          ON A.num_plantilla =B.num_plantilla
+          LEFT JOIN ES_tabulador C
+          ON B.cve_tabulador=C.tabulador
+          AND B.nivel=C.nivel
+          AND C.activo=1
+          LEFT JOIN ES_departamentos D
+          ON D.cve_departamento = B.cve_departamento
+          LEFT JOIN ES_puestosgenericos E
+          ON B.cve_puesto=E.cve_puesto
+          LEFT JOIN SG_usuarios F
+          ON A.cve_usuario_asignado=F.cve_usuario
+          INNER JOIN SIS_estatus G
+          ON A.cve_estatus = G.cve_estatus
+          AND G.cve_modulo=4
+          WHERE
+          A.cve_solicitudvacante=@vacante
+        ]]>
+      </sql>
+    </obtenerDetalleVacante>
+    <mostrarReclutadores>
+      <campo leyenda="Vacante" db_nombre="vacante" form_nombre="vacante" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+        SELECT a.cve_usuario, a.nombre  FROM (
+          SELECT aa.cve_usuario, aa.nombre 
+          FROM SG_usuarios aa
+          INNER JOIN SG_perfilmodulorole bb
+          ON aa.cve_perfil = bb.cve_perfil
+          and bb.cve_modulo = 4 --Modulo Contrataciones
+          and bb.cve_role IN (2,3) --Rol Reclutadores
+          )A
+          LEFT JOIN CON_SolicitudVacante B
+          ON A.cve_usuario=b.cve_usuario_asignado
+          AND B.cve_solicitudvacante=@vacante
+          WHERE b.cve_usuario_asignado is null
+        ]]>
+      </sql>
+    </mostrarReclutadores>
+    <editarDetalle>
+      <campo leyenda="Vacante" db_nombre="cve_solicitudvacante" form_nombre="cve_vacante" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Detalle" db_nombre="detalle" form_nombre="detalle" requerido="true" charsize="180" tipo="string" default=""/>
+      <sql>
+        <![CDATA[
+          BEGIN TRY
+              UPDATE CON_SolicitudVacante
+              SET detalle=@detalle
+              WHERE cve_solicitudvacante=@cve_solicitudvacante
+              
+              IF EXISTS(SELECT A.num_platilla
+                        FROM Es_PstPerfilValor A
+                        INNER JOIN ES_posiciones B
+                        ON A.num_platilla=B.cve_puesto
+                        INNER JOIN CON_SolicitudVacante C
+                        ON B.num_plantilla=C.num_plantilla
+                        WHERE cve_solicitudvacante=@cve_solicitudvacante
+                        GROUP BY num_platilla) BEGIN
+                  SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+                END 
+                ELSE BEGIN
+                  SELECT -1  estatus, 'No existe perfil para este puesto' mensaje;
+                END
+          END TRY 
+          BEGIN CATCH
+            SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+          END CATCH
+        ]]>
+      </sql>
+    </editarDetalle>
+    <cambiarReclutador>
+      <campo leyenda="Vacante" db_nombre="vacante" form_nombre="vacante" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Reclutador" db_nombre="reclutador" form_nombre="reclutador" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+          BEGIN TRY
+
+            INSERT INTO CON_SolicitudVacanteHistorial(cve_solicitudvacante,fechaCambio,cve_estatus,cve_usuario_cambio,cve_puesto,num_plantilla,num_plantillaJefe,comentarios)
+            SELECT
+            @Vacante
+            ,GETDATE()
+            ,1
+            ,@usuario
+            ,b.cve_puesto
+            ,a.num_plantilla
+            ,B.num_plantilladep
+            ,'Cambio del reclutador '+ C.nombre +' por el reclutador ' + (SELECT nombre FROM SG_usuarios WHERE cve_usuario=@reclutador)
+            FROM CON_SolicitudVacante a 
+            INNER JOIN ES_posiciones B
+            ON A.num_plantilla=B.num_plantilla
+            INNER JOIN SG_usuarios C
+            ON C.cve_usuario=a.cve_usuario_asignado
+            WHERE cve_solicitudvacante=@vacante
+            
+            UPDATE CON_SolicitudVacante
+            SET cve_usuario_asignado=@reclutador
+            WHERE 
+            cve_solicitudvacante=@vacante
+            
+            SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+          END TRY
+          BEGIN CATCH
+            SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+          END CATCH
+        ]]>
+      </sql>
+    </cambiarReclutador>
+  </catalogoVacante>
+  
+  <!--**********************************************************************************************************************************-->
+  <publicaciones>
+    <obtenerSiguienteClave>
+      <sql>
+        <![CDATA[
+            SELECT ISNULL(MAX(cve_publico),0) + 1 as 'clave' FROM CON_publicacion
+        ]]>
+      </sql>
+    </obtenerSiguienteClave>
+    <obtenerAgencias>
+      <sql>
+        <![CDATA[
+          SELECT cve_agencia,nombre FROM CON_agencia WHERE activa=1
+        ]]>
+      </sql>
+    </obtenerAgencias>
+    <obtenerOrigen>
+      <sql>
+        <![CDATA[
+          SELECT * 
+          FROM CON_agencia A
+          INNER JOIN CON_publicacion B
+          ON A.cve_agencia=B.cve_agencia
+          WHERE B.cve_solicitudvacante=@vacante
+          order by fecharegistro desc
+        ]]>
+      </sql>
+    </obtenerOrigen>
+    <nuevo>
+      <campo leyenda="Vacante" db_nombre="cve_solicitudvacante" form_nombre="cve_vacante" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Fecha de Publicacion" db_nombre="fechapublico" form_nombre="fecha" requerido="true" charsize="2000" tipo="string" default=""/>
+      <campo leyenda="Vigencia" db_nombre="vigencia" form_nombre="vigencia" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Emp. publico" db_nombre="emppublico" form_nombre="publicador" requerido="true" charsize="2000" tipo="string" default=""/>
+      <campo leyenda="Costo" db_nombre="costo" form_nombre="costo" requerido="true" charsize="10" tipo="float" default=""/>
+      <campo leyenda="Comentario" db_nombre="comentario" form_nombre="comentario" requerido="true" charsize="2000" tipo="string" default=""/>
+      <campo leyenda="Agencia" db_nombre="cve_agencia" form_nombre="agencia" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+        BEGIN TRY
+        SET LANGUAGE Español
+          DECLARE @cve_publico INT=(SELECT ISNULL(MAX(cve_publico),0) + 1 FROM CON_publicacion WHERE cve_solicitudvacante=@cve_solicitudvacante)
+          INSERT INTO CON_publicacion(
+          cve_solicitudvacante
+          ,cve_publico
+          ,fecharegistro
+          ,fechapublico
+          ,vigencia
+          ,emppublico
+          ,empcreoreg
+          ,costo
+          ,comentario
+          ,cve_agencia)
+          VALUES(
+           @cve_solicitudvacante
+          ,@cve_publico
+          ,GETDATE()
+          ,convert(datetime,@fechapublico,103)
+          ,@vigencia
+          ,@emppublico
+          ,@usuario
+          ,@costo
+          ,@comentario
+          ,@cve_agencia)
+          SET LANGUAGE us_english
+          
+          INSERT INTO CON_SolicitudVacanteHistorial(cve_solicitudvacante,fechaCambio,cve_estatus,cve_usuario_cambio,cve_puesto,num_plantilla,num_plantillaJefe,comentarios)
+          SELECT
+          @cve_solicitudvacante
+          ,GETDATE()
+          ,1
+          ,@usuario
+          ,b.cve_puesto
+          ,a.num_plantilla
+          ,B.num_plantilladep
+          ,'PUBLICADO EN '+C.nombre
+          FROM CON_SolicitudVacante a 
+          INNER JOIN ES_posiciones B
+          ON A.num_plantilla=B.num_plantilla
+          INNER JOIN CON_agencia C
+          ON C.cve_agencia=@cve_agencia
+          WHERE cve_solicitudvacante=@cve_solicitudvacante
+          
+          UPDATE CON_SolicitudVacante
+          SET cve_estatus=2
+          WHERE 
+          cve_solicitudvacante=@cve_solicitudvacante
+          AND cve_estatus=1
+          
+          SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+        END TRY BEGIN CATCH
+          SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+        END CATCH
+        ]]>
+      </sql>
+    </nuevo>
+    <editar>
+      <campo leyenda="Vacante" db_nombre="cve_solicitudvacante" form_nombre="cve_vacante" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Cve. Publico" db_nombre="cve_publico" form_nombre="cve_publico" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Fecha de Publicacion" db_nombre="fechapublico" form_nombre="fecha" requerido="true" charsize="2000" tipo="string" default=""/>
+      <campo leyenda="Vigencia" db_nombre="vigencia" form_nombre="vigencia" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Emp. publico" db_nombre="emppublico" form_nombre="publicador" requerido="true" charsize="2000" tipo="string" default=""/>
+      <campo leyenda="Costo" db_nombre="costo" form_nombre="costo" requerido="true" charsize="10" tipo="float" default=""/>
+      <campo leyenda="Comentario" db_nombre="comentario" form_nombre="comentario" requerido="true" charsize="2000" tipo="string" default=""/>
+      <campo leyenda="Agencia" db_nombre="cve_agencia" form_nombre="agencia" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+        BEGIN TRY
+          SET LANGUAGE Español
+            UPDATE CON_publicacion SET
+             fechapublico=CONVERT(datetime,@fechapublico,103)
+            ,vigencia=@vigencia
+            ,emppublico=@emppublico
+            ,costo=@costo
+            ,comentario=@comentario
+            ,cve_agencia=@cve_agencia
+            WHERE 
+            cve_solicitudvacante=@cve_solicitudvacante
+            AND cve_publico =@cve_publico
+            SET LANGUAGE us_english
+          SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+        END TRY BEGIN CATCH
+          SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+        END CATCH
+        ]]>
+      </sql>
+    </editar>
+    <obtenerRegistro>
+      <campo leyenda="Vacante" db_nombre="cve_solicitudvacante" form_nombre="cve_vacante" requerido="true" charsize="10" tipo="int" default=""/>
+      <campo leyenda="Cve. Publico" db_nombre="cve_publico" form_nombre="cve_publico" requerido="true" charsize="10" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+            SELECT 
+            cve_publico
+            ,CONVERT(VARCHAR(10),fechapublico,103) AS 'fechapublico'
+            ,vigencia
+            ,emppublico
+            ,costo
+            ,comentario
+            ,cve_agencia
+            FROM CON_publicacion
+            WHERE 
+            cve_solicitudvacante=@cve_solicitudvacante
+            AND cve_publico =@cve_publico
+        ]]>
+      </sql>
+    </obtenerRegistro>
+    <obtenerCatalogo>
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+      <campo leyenda="Clave" db_nombre="cve_solicitudvacante" form_nombre="cve_solicitudvacante"  requerido="false"  charsize="0" tipo="int"  default=""/>
+      <sql>
+        <![CDATA[
+            SET NOCOUNT ON;
+            DECLARE @inicio INT;
+            SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+            DECLARE @TablaAuxiliarPaginacion AS TABLE(
+            indiceRegistro INT,
+            cve_publico INT,
+            nombre VARCHAR(100),
+            fechapublico varchar(10),
+            vigencia INT,
+            costo MONEY,
+            emppublico VARCHAR(120))
+
+            INSERT INTO @TablaAuxiliarPaginacion
+            SELECT
+            ROW_NUMBER() OVER(ORDER BY CONVERT(INT,A.cve_publico ) DESC) AS indiceRegistro
+            ,A.cve_publico
+            ,B.nombre
+            ,CONVERT(varchar(10),A.fechapublico,103) AS 'fechapublico'
+            ,A.vigencia
+            ,CONVERT(decimal(18,2),A.costo) AS 'costo'
+            ,A.emppublico
+            FROM CON_publicacion A
+            INNER JOIN CON_agencia B
+            ON A.cve_agencia=B.cve_agencia
+            WHERE (((CONVERT(VARCHAR(20),A.cve_publico) like '%' + @criterio + '%') OR (B.nombre like '%' + @criterio + '%'))
+            OR(A.emppublico  like '%' + @criterio + '%'))
+            AND
+            A.cve_solicitudvacante=@cve_solicitudvacante
+            
+            --Paginacion
+            SELECT TOP(@longitudPagina)
+            indiceRegistro,
+            @@ROWCOUNT as totalRegistros,
+            cve_publico,
+            nombre,
+            fechapublico,
+            costo,
+            vigencia,
+            emppublico
+            FROM @TablaAuxiliarPaginacion a
+            WHERE indiceRegistro > @inicio
+            ORDER BY fechapublico DESC
+        ]]>
+      </sql>
+    </obtenerCatalogo>
+    <publicar>
+      <campo leyenda="Vacante" db_nombre="vacante" form_nombre="cve_vacante"  requerido="true"  charsize="50" tipo="string"/>
+      <sql>
+        <![CDATA[
+        
+        SELECT nombreTabla FROM (VALUES ('CON_SolicitudVacante|cve_solicitudvacante'))Q(nombreTabla);
+        
+        DECLARE @HORARIOS AS TABLE(
+         cve_turno INT
+        ,DE VARCHAR(10)
+        ,A VARCHAR(10)
+        ,ENTRADA VARCHAR(10)
+        ,SALIDA VARCHAR(10)
+        )
+        INSERT INTO @HORARIOS SELECT cve_turno
+        ,(SELECT descripcion FROM CTR_diassemana WHERE cve_diasemana= MIN(A.cve_diasemana))as 'DE'
+        ,(SELECT descripcion FROM CTR_diassemana WHERE cve_diasemana= MAX(A.cve_diasemana))as 'A' 
+        ,CONVERT(VARCHAR,max(horaentrada), 108) AS'ENTRADA'
+        ,CONVERT(VARCHAR,max(horasalida), 108) AS 'SALIDA'
+        FROM CTR_turnodet A 
+        GROUP BY cve_turno
+
+         SELECT TOP 1
+        cve_solicitudvacante
+        ,g.Nombre_Puesto as 'NombreVacante'
+        ,fechaSolicitud
+        ,a.cve_puesto AS 'puesto'
+        ,cve_estatus
+        ,a.num_plantilla
+        ,b.cve_tipoplantilla as 'tipoplantilla'
+        ,c.contratacion as 'salario'
+        ,rtrim(h.de) + ' a ' + h.A + ' ' + h.ENTRADA + ' - ' + h.SALIDA AS 'horario'
+        ,e.nombreestado as 'nombreestado'
+        ,f.nombremuni
+        ,detalle
+        ,g.cve_paqexamen
+        ,convert(text,'') as HTML
+        FROM CON_SolicitudVacante a
+        LEFT JOIN ES_posiciones b
+        ON a.num_plantilla=b.num_plantilla
+        LEFT JOIN ES_tabulador c
+        ON B.cve_tabulador=C.tabulador
+        AND B.nivel=C.nivel
+        LEFT JOIN ES_lugartrabajo d
+        on b.cve_lugartrabajo=b.cve_lugartrabajo
+        LEFT JOIN ES_estados e
+        ON d.cveestado=e.cve_estado
+        LEFT JOIN ES_municipio f
+        ON d.cveestado=f.cve_estado
+        AND d.cve_municipio=f.cve_municipio
+        INNER JOIN ES_puestosgenericos g
+        ON g.cve_puesto=a.cve_puesto
+        LEFT JOIN @HORARIOS h
+        ON b.turno=h.cve_turno
+        WHERE cve_solicitudvacante=@vacante
+        ]]>
+      </sql>
+    </publicar>
+    <obtenerPerfil>
+      <campo leyenda="Vacante" db_nombre="vacante" form_nombre="cve_vacante"  requerido="true"  charsize="50" tipo="string"/>
+      <sql>
+        <![CDATA[
+        SELECT C.descripcion AS 'Secc',B.descripcion AS 'SubSecc', CASE WHEN A.desvalor IS NULL THEN D.descripcion ELSE A.desvalor END AS 'Val'
+        FROM Es_PstPerfilValor a
+        INNER JOIN ES_pstperfilsubseccion B
+        ON A.cve_seccion =B.cve_seccion
+        AND A.cve_subseccion=B.cve_subseccion
+        INNER JOIN ES_pstperfilseccion C
+        ON B.cve_seccion=C.cve_seccion 
+        LEFT JOIN ES_catperdet D
+        ON A.cve_catalogo=D.cve_catalogo
+        AND A.cve_subcatalogo=D.cve_subcatalogo
+        INNER JOIN CON_SolicitudVacante G
+        ON A.num_platilla=G.cve_puesto
+        WHERE 
+        G.cve_solicitudvacante=@vacante
+        AND a.publicar=1
+        ]]>
+      </sql>
+    </obtenerPerfil>
+  </publicaciones>
+</Secciones>

@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+<PoliticaVacaciones>
+    
+    <obtenerSiguienteClave>
+        <sql>
+            BEGIN
+                SELECT ISNULL(MAX(cve_politica),0) + 1 clave FROM VAC_PoliVacMaes;
+            END
+        </sql>   
+    </obtenerSiguienteClave>
+    
+    <Nuevo>
+        <campo leyenda="Clave" db_nombre="cve_politica" form_nombre="clave" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Nombre" db_nombre="nombre" form_nombre="nombre"  requerido="true" charsize="200" tipo="string" default=""/>
+        <campo leyenda="Dias Permitidos" db_nombre="diaspermitidos" form_nombre="diaspermitidos"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Porcentaje De Anios" db_nombre="porcentajedeanios" form_nombre="porcentajedeanios"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Años vencimiento" db_nombre="anniosvenci" form_nombre="vencimiento"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="false"  charsize="10" tipo="bool"  default="true"/>
+        <sql>
+            BEGIN
+                SET NOCOUNT ON;
+                BEGIN TRY
+                    INSERT INTO VAC_PoliVacMaes(
+                        cve_politica,
+                        nombre,
+                        diaspermitidos,
+                        porcentajedeanios,
+                        anniosvenci,
+                        activo
+                    )
+                    VALUES(
+                        @cve_politica,
+                        @nombre,
+                        @diaspermitidos,
+                        @porcentajedeanios,
+                        @anniosvenci,
+                        @activo
+                    )
+                    SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+                END TRY BEGIN CATCH
+                    SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+                END CATCH
+            END
+        </sql>
+   </Nuevo>
+
+    <obtenerCatalogo>
+        <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+        <campo leyenda="Clave" db_nombre="cve_politica" form_nombre="cve_politica"  requerido="false"  charsize="0" tipo="int"  default=""/>
+        <sql>
+            BEGIN
+	            SET NOCOUNT ON;
+	            DECLARE @inicio INT;
+	            SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+	            DECLARE @TablaAuxiliarPaginacion AS TABLE(
+		            indiceRegistro INT,
+		            cve_politica INT,
+		            nombre VARCHAR(200),
+                    diaspermitidos INT,
+                    porcentajedeanios INT,
+                    anniosvenci INT,
+		            activo BIT
+	            )		
+	            INSERT INTO @TablaAuxiliarPaginacion		
+	            SELECT 
+		            ROW_NUMBER() OVER(ORDER BY CONVERT(INT,cve_politica) DESC) AS indiceRegistro,		
+                        cve_politica,
+                        nombre,
+                        diaspermitidos,
+                        porcentajedeanios,
+                        anniosvenci,
+                        activo
+	            FROM 
+		            VAC_PoliVacMaes
+	            WHERE  ( ((CONVERT(VARCHAR(20),cve_politica) like '%' + @criterio + '%') OR (nombre like '%' + @criterio + '%')) AND @cve_politica=0) 
+		            OR ((cve_politica=@cve_politica) AND (@cve_politica != 0));
+		
+	            --Paginacion	
+	            SELECT TOP(@longitudPagina)
+		            indiceRegistro,
+		            @@ROWCOUNT as totalRegistros,
+		            cve_politica,
+		            nombre,
+                diaspermitidos,
+                porcentajedeanios,
+                anniosvenci,
+		            activo
+	            FROM @TablaAuxiliarPaginacion
+	            WHERE indiceRegistro > @inicio	 
+	            ORDER BY indiceRegistro ASC
+            END         
+        </sql>        
+    </obtenerCatalogo>
+    <Editar>
+        <campo leyenda="Clave" db_nombre="cve_politica" form_nombre="clave" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Nombre" db_nombre="nombre" form_nombre="nombre"  requerido="true" charsize="200" tipo="string" default=""/>
+        <campo leyenda="DiasPermitidos" db_nombre="diaspermitidos" form_nombre="diaspermitidos"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="PorcentajeDeAnios" db_nombre="porcentajedeanios" form_nombre="porcentajedeanios"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Años vencimiento" db_nombre="anniosvenci" form_nombre="vencimiento"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Activo" db_nombre="activo" form_nombre="activo"  requerido="false"  charsize="10" tipo="bool"  default="true"/>
+        <sql>
+
+            BEGIN
+                SET NOCOUNT ON;
+                BEGIN TRY
+                    UPDATE VAC_PoliVacMaes
+                    SET
+                        cve_politica= @cve_politica,
+                        nombre=@nombre,
+                        diaspermitidos=@diaspermitidos,
+                        porcentajedeanios=@porcentajedeanios,
+                        anniosvenci=@anniosvenci
+                    WHERE cve_politica= @cve_politica
+                        SELECT 1  estatus, 'Registro actualizado correctamente' mensaje;
+                    END TRY BEGIN CATCH
+                    SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+                END CATCH
+            END
+        </sql>
+    </Editar>
+</PoliticaVacaciones>
+    
+    
+    
+    
+    
+    
+
+<PoliticaVacacionesDetalle>
+    <obtenerSiguienteClave>
+        <sql>
+            BEGIN
+                SELECT ISNULL(MAX(cve_politica),0) + 1 clave FROM VAC_PoliticaVacaciones;
+            END
+        </sql>   
+    </obtenerSiguienteClave>    
+    <Nuevo>
+        <campo leyenda="Clave de grupo políticas" db_nombre="cve_grupopoliticas" form_nombre="cve_grupopoliticas" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="Clave" db_nombre="cve_politica" form_nombre="cve_politica" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="anios" db_nombre="anios" form_nombre="anios" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="prestamos" db_nombre="diastomar" form_nombre="prestamos"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="primavacacional" db_nombre="primavacacional" form_nombre="primavacacional"  requerido="true" charsize="0" tipo="float" default=""/>
+        <sql>
+            BEGIN
+                SET NOCOUNT ON;
+                BEGIN TRY
+                    INSERT INTO VAC_PoliticaVacaciones(
+                        cve_grupopoliticas,
+                        cve_politica,
+                        anios,
+                        diastomar,
+                        primavacacional
+                    )
+                    VALUES(
+                        @cve_grupopoliticas,
+                        @cve_politica,
+                        @anios,
+                        @diastomar,
+                        @primavacacional
+                    )
+                    SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+                END TRY BEGIN CATCH
+                    SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+                END CATCH
+            END
+        </sql>
+   </Nuevo>
+
+    <obtenerCatalogo>
+        <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default="1"/>
+        <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default="10"/>
+        <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+        <campo leyenda="Clave grupo de política" db_nombre="cve_grupopolitica" form_nombre="cve_grupopolitica"  requerido="false"  charsize="0" tipo="int"  default=""/>
+        <campo leyenda="Clave" db_nombre="cve_politica" form_nombre="cve_politica"  requerido="false"  charsize="0" tipo="int"  default="0"/>
+        <sql>
+             BEGIN
+	            SET NOCOUNT ON;
+	            DECLARE @inicio INT;
+	            SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+	            DECLARE @TablaAuxiliarPaginacion AS TABLE(
+		                indiceRegistro INT,
+                    cve_grupopoliticas INT,
+		                cve_politica INT,
+		                anios INT,
+                    diastomar INT,
+                    primavacacional float
+	            )		
+	            INSERT INTO @TablaAuxiliarPaginacion		
+	            SELECT 
+		            ROW_NUMBER() OVER(ORDER BY CONVERT(INT,cve_politica) DESC) AS indiceRegistro,		
+                        cve_grupopoliticas,
+                        cve_politica,
+                        anios,
+                        diastomar,
+                        primavacacional
+	            FROM 
+		            VAC_PoliticaVacaciones
+	            WHERE (
+                        ( ((CONVERT(VARCHAR(20),cve_politica) like '%' + @criterio + '%') OR (primavacacional like '%' + @criterio + '%')) AND @cve_politica=0) 
+		                OR ((cve_politica=@cve_politica) AND (@cve_politica != 0)) 
+                    )AND cve_grupopoliticas=@cve_grupopolitica;
+		
+	            --Paginacion	
+	            SELECT TOP(@longitudPagina)
+		                indiceRegistro,
+		                @@ROWCOUNT as totalRegistros,
+                    cve_grupopoliticas,
+		                cve_politica,
+		                anios,
+                    diastomar,
+                    primavacacional
+	            FROM @TablaAuxiliarPaginacion
+	            WHERE indiceRegistro > @inicio	 
+	            ORDER BY anios ASC
+            END  
+        </sql>        
+    </obtenerCatalogo>
+    <Editar>
+        <campo leyenda="Clave" db_nombre="cve_politica" form_nombre="cve_politica" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="anios" db_nombre="anios" form_nombre="anios" requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="prestamos" db_nombre="diastomar" form_nombre="prestamos"  requerido="true" charsize="0" tipo="int" default=""/>
+        <campo leyenda="primavacacional" db_nombre="primavacacional" form_nombre="primavacacional"  requerido="true" charsize="0" tipo="float" default=""/>
+        <sql> 
+            BEGIN
+	            SET NOCOUNT ON;	
+	            BEGIN TRY
+		            UPDATE VAC_PoliticaVacaciones
+		            SET	
+		            cve_politica= @cve_politica,
+		            anios=@anios,
+		            diastomar=@diastomar,
+                    primavacacional=@primavacacional  
+		            WHERE cve_politica= @cve_politica
+		            SELECT 1  estatus, 'Registro actualizado correctamente' mensaje;
+	            END TRY BEGIN CATCH	
+		            SELECT -1 AS estatus,  'Error: ' + ERROR_MESSAGE() mensaje;
+	            END CATCH	
+            END
+        </sql>
+    </Editar>
+</PoliticaVacacionesDetalle>
+
+</Secciones>

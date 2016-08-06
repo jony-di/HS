@@ -1,0 +1,79 @@
+﻿body {}
+fieldset{border:1px solid #ddd;}
+fieldset legend{color:#666;}
+body div.busqueda{width:500px;margin-left:0px;font-size:10px;margin-bottom:5px;}
+body div.busqueda input.buscar{width:200px;}
+body .agregar{clear:both;padding:7px;float:right;margin:10px;}
+div.wrap{width:500px;float:right;}
+div.arbol-posiciones{width:300px;float:left;height:400px;}
+div.detalle-posicion{}
+div.detalle-posicion div.izq{float:left;width:45%;margin-left:5%;}
+div.detalle-posicion div.der{float:right;width:45%;}
+div.tree-posiciones{clear:both;display:block;width:100%;}
+.arbol{height:350px;overflow:auto;}
+body div.barra-botones{margin-bottom:-30px;margin-top:0px;}
+body hr.cleaner{clear:both;border:0px;padding:0px;margin:0px;}
+a.accion-interior{cursor:pointer;color:#6495ED;margin-left:30px;float:right;font-weight:bolder;margin-top:10px;}
+a.accion-interior:hover{font-weight:bolder;}
+div.barra-botones span{width:400px;}
+div.barra-botones span button{float:left;}
+div.barra-botones span button + button{float:right;}
+span.botones-posiciones{float:right;padding-top:10px;}
+span.botones-posiciones button{float:left; margin-right:30px;padding:5px 8px;}
+div.mascara div.principal div.catalogo table.lista tr.columnas th label{padding:10px;border-top-left-radius:5px;border-top-right-radius:5px;color:White; font-weight:bold;}
+div.mascara div.principal div.catalogo table.lista  tr.columnas th label{display:block; width:50px;float:left; background-color:#5F96CC;margin-left:5px; }
+fieldset.filtros-posiciones{clear:both;}
+div.wrap-posiciones{height:460px;overflow:auto;}
+div.mascara div.principal div.formulario button.cancelar{float:right; cursor:pointer;}  
+div.barra-botones span{width:290px;} 
+div.mascara div.principal div.formulario div.barra-botones {margin-top:0px;} 
+body div.wrap-posiciones label{float:left;margin:7px;font-size:13px;height:22px;clear:left;width:120px;text-align:right;}
+body div.wrap-posiciones input{float:left;clear:right;margin:7px;font-size:13px;height:22px;width:195px;}
+body div.wrap-posiciones select{float:left;clear:right;margin:7px;font-size:13px;height:22px;width:205px;}
+body div.wrap-posiciones input[type=checkbox]{margin:7px;height:auto;width:auto;float:left;clear:left;}
+fieldset.fldsetMT{margin-top:20px;margin-bottom:20px;}
+body div.smart-green{height:600px;}
+div.mascara div.principal div.formulario div.auxiliar {height:482px; overflow:auto; }
+div.mascara div.principal div.formulario div.columnaI {float:left;width:48%;}
+div.mascara div.principal div.formulario div.columnaD {float:right;width:48%;}
+div.mascara div.principal div.catalogo table.lista{padding-top:0px;}
+body{font-size:11px;}
+
+body div#busqueda button.criterio{float:left;margin-top:10px;margin-left:10px;clear:right;}
+body div#busqueda button.btnFormularios{padding:2px;}
+div.opciones-menu{position: relative;margin-left: -100px;z-index: 10000;display: block; float: left;}
+body .wrap-menu-criterio{width:1px;height:1px;}
+
+div.opciones-menu{width:190px;z-index:5000;padding-top:0px;position:absolute;margin-left:0px;margin-top: 35px;}
+div.OpcionesPosiciones{float:right;margin-right:100px;margin-top:10px;}
+div.OpcionesPosiciones div.opciones-menu{margin-left:0px;color:#333;margin-top: 5px;}
+div.opciones-menu ul{padding:0px;box-shadow: 1px 1px 1px #e8e8e8;border:1px solid #e8e8e8;list-style:none;margin:0px;padding-top:10px;padding-bottom:10px;border-radius:5px;background:#fff;margin-top:5px;width:200px;margin-left:5px;}
+
+div.opciones-menu li{padding:5px;padding-left:26px;text-align:left;display:block;cursor:pointer;font-size:14px;background:6px center url("/Recursos/imagenes/flecha-menu.png") no-repeat; }
+div.opciones-menu li:hover{color:#5F96CC;}
+span.criterio-busqueda{float:left;border:1px solid #ddd;padding:4px;margin-left:15px;margin-top:7px;}
+span.criterio-busqueda input{float:left;border:0px;background:transparent;height:24px;width:140px;}
+span.criterio-busqueda select{float:left;height:24px;width:140px;margin-right:10px;}
+form.frm-criterios-busqueda{float:right;min-width:610px;margin-right:10px;width:65%;}
+
+body div.wrap-posiciones  button.btnFormularios{width:40px;color:#eee;font-size:13px;height:auto;margin-left:0px;}
+body div.wrap-posiciones  button.btnFormularios img{width:15px;}
+body span.centrar-botones{width:250px;margin:auto;display:block;}
+img.btnUpdate{float:left;margin-right:30px;cursor:pointer;}
+.opciones-menu .titulo{background:none;}
+.opciones-menu .titulo:hover{color:#333;}
+.opciones-menu h3{padding:2px;margin:2px;}
+.opciones-menu hr{margin:2px;}
+
+div.barra-botones span{width:290px;} 
+div.mascara div.principal div.formulario div.seleccion-barra {margin-top:-37px;} 
+
+body div.wrap-posiciones button.peque{width:20px;height:23px;margin:7px 0px;float:left;clear:right;}
+body div.wrap-posiciones input.politicaVacaciones,body div.wrap-posiciones input.tabulador{width:170px;}
+body div.wrap-posiciones input.politicaVacaciones,body div.wrap-posiciones input.conBoton{width:170px;}
+
+.agrupacion{padding:5px;float:left;}
+
+div.mascara div.principal iframe {    width: 900px;    height: 684px;    float: left;    background-color: transparent;}
+
+

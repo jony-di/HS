@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<Secciones>
+<Flujos>
+    <ObtenerSiguienteClave>
+        <sql>
+        <![CDATA[
+            BEGIN
+              SELECT ISNULL(MAX(cve_flujo),0) + 1 cve_flujo FROM CTR_Flujos;
+            END
+        ]]>
+        </sql>   
+    </ObtenerSiguienteClave>
+    
+    <Nuevo>
+      <campo leyenda="Clave" db_nombre="cve_flujo" form_nombre="cve_flujo" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Descripción" db_nombre="descripcion" form_nombre="descripcion" requerido="true" charsize="200" tipo="string"/>
+        <sql>          
+          <![CDATA[
+              BEGIN
+                  SET NOCOUNT ON;
+                  SET DATEFORMAT dmy;
+                  BEGIN TRY
+                    INSERT INTO CTR_flujos(
+	                      cve_flujo,
+	                      descripcion,
+	                      activo
+                    )
+                    VALUES(
+	                      @cve_flujo,
+	                      @descripcion,
+	                      1
+                    );                    
+                    SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+                  END TRY BEGIN CATCH
+                      SELECT -1 AS estatus,  'Error: No se guardo el registro. Detalle:' + ERROR_MESSAGE() mensaje;
+                  END CATCH
+              END
+          ]]>
+        </sql>
+   </Nuevo>
+
+    <ObtenerCatalogo>
+      <campo leyenda="Página" db_nombre="pagina" form_nombre="pagina" requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Longitud de página" db_nombre="longitudPagina" form_nombre="longitudPagina"  requerido="true" charsize="0" tipo="int" default=""/>
+      <campo leyenda="Criterio" db_nombre="criterio" form_nombre="criterio"  requerido="false"  charsize="200" tipo="string"  default=""/>
+      <sql>
+        <![CDATA[
+            BEGIN
+	            SET NOCOUNT ON;
+	            DECLARE @inicio INT;
+	            SET @inicio= (@pagina-1)*@longitudPagina;--Pagina debe ser mayor que 0;
+	            DECLARE @TablaAuxiliarPaginacion AS TABLE(
+		            indiceRegistro INT,
+	              cve_flujo INT,
+	              descripcion VARCHAR(200),
+	              activo BIT
+	            )
+	            INSERT INTO @TablaAuxiliarPaginacion
+	            SELECT 
+		            ROW_NUMBER() OVER(ORDER BY descripcion, descripcion) AS indiceRegistro,
+	              cve_flujo,
+	              descripcion,
+	              activo
+	            FROM 
+		            CTR_flujos
+	              WHERE  CONVERT(VARCHAR(20), cve_flujo) like @criterio OR descripcion like '%' + @criterio + '%' ;
+		
+	            --Paginacion
+	            SELECT TOP(@longitudPagina)
+		            indiceRegistro,
+		            @@ROWCOUNT as totalRegistros,
+		            cve_flujo,
+	              descripcion,
+	              activo
+	            FROM @TablaAuxiliarPaginacion
+	            WHERE indiceRegistro > @inicio	 
+	            ORDER BY indiceRegistro ASC
+            END
+        ]]>
+      </sql>
+    </ObtenerCatalogo>
+
+    <ObtenerDetalleFlujo>
+      <campo leyenda="Clave" db_nombre="cve_flujo" form_nombre="cve_flujo" requerido="true" charsize="0" tipo="int" default=""/>
+      <sql>
+        <![CDATA[
+                BEGIN
+	                SET NOCOUNT ON;
+                  SELECT 
+	                  cve_flujo,
+	                  descripcion,
+	                  activo
+                  FROM CTR_flujos
+                  WHERE cve_flujo=@cve_flujo
+                END
+            ]]>
+      </sql>
+    </ObtenerDetalleFlujo>
+
+    <Editar>
+      <campo leyenda="Clave" db_nombre="cve_flujo" form_nombre="cve_flujo" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Descripción" db_nombre="descripcion" form_nombre="descripcion" requerido="true" charsize="200" tipo="string"/>
+      <campo leyenda="Activo" db_nombre="activo" form_nombre="activo" requerido="true" charsize="0" tipo="bool" default="false"/>      
+      <sql>
+        <![CDATA[
+                BEGIN
+                    SET NOCOUNT ON;
+                    BEGIN TRY
+                      UPDATE CTR_flujos
+                      SET
+	                        descripcion=@descripcion,
+	                        activo=@activo
+                       WHERE cve_flujo=@cve_flujo
+                      SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+                    END TRY BEGIN CATCH
+                        SELECT -1 AS estatus,  'Error: No se guardo el registro. Detalle:' + ERROR_MESSAGE() mensaje;
+                    END CATCH
+                END
+            ]]>
+      </sql>
+    </Editar>
+</Flujos>
+  <Pasos>
+    <Nuevo>
+      <campo leyenda="Clave" db_nombre="cve_flujo" form_nombre="cve_flujo" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Estatus" db_nombre="cve_estatus" form_nombre="cve_estatus" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Roles" db_nombre="cve_role" form_nombre="cve_role" requerido="false" charsize="2000" tipo="string"/>
+      <sql>
+        <![CDATA[
+              BEGIN
+                  SET NOCOUNT ON;
+                  SET DATEFORMAT dmy;
+                  BEGIN TRY
+                    DECLARE @orden INT;
+                    DELETE FROM CTR_flujoestatusrole WHERE cve_flujo=@cve_flujo AND cve_estatus=@cve_estatus;
+                    
+                    SET @orden=ISNULL((SELECT MAX(orden) orden FROM CTR_flujoestatusorden WHERE cve_flujo=@cve_flujo GROUP BY cve_flujo ) + 1,1);
+                    INSERT INTO CTR_flujoestatusorden(cve_flujo,cve_estatus,orden) VALUES(@cve_flujo, @cve_estatus, @orden );
+                    INSERT INTO CTR_flujoestatusrole SELECT @cve_estatus, spliter, @cve_flujo FROM dbo.Split(@cve_role,',');
+                    SELECT @orden orden, 1  estatus, 'Registro guardado correctamente' mensaje, @cve_estatus cve_estatus;
+                  END TRY BEGIN CATCH
+                      SELECT -(ERROR_NUMBER ( )) AS estatus,  'Error: No se guardo el registro. Detalle:' + ERROR_MESSAGE() mensaje;                      
+                  END CATCH
+              END
+          ]]>
+      </sql>
+    </Nuevo>
+
+    <ObtenerPasosFlujo>
+      <campo leyenda="Clave" db_nombre="cve_flujo" form_nombre="cve_flujo" requerido="true" charsize="0" tipo="int"/>
+      <sql>
+        <![CDATA[
+              SELECT Q.cve_flujo, Q.orden, Q.cve_estatus,R.descripcion sestatusmodulo,
+	              (SELECT B.descripcion + ', ' AS 'data()' FROM CTR_flujoestatusroleaccion A INNER JOIN CTR_flujoacciones B ON A.cve_accion=B.cve_accion AND A.cve_flujo=Q.cve_flujo AND A.cve_estatus=Q.cve_estatus FOR XML PATH('')) acciones,
+	              (SELECT B.descripcion + ', ' AS 'data()' FROM CTR_flujoestatusrole A INNER JOIN CTR_flujoroles B ON A.cve_role=B.cve_role AND A.cve_flujo=Q.cve_flujo AND A.cve_estatus=Q.cve_estatus FOR XML PATH('')) roles,
+	              (SELECT B.nombrecompleto + ', ' AS 'data()' FROM CTR_flujoestatusroleempleados A INNER JOIN ES_emplplantilla B ON A.num_empleado=B.id_empleado AND A.cve_flujo=@cve_flujo AND A.cve_estatus=Q.cve_estatus FOR XML PATH('')) empleados
+              FROM CTR_flujoestatusorden Q 
+              INNER JOIN SIS_estatus R ON Q.cve_estatus=R.cve_estatus WHERE cve_flujo=@cve_flujo AND R.cve_modulo=5
+              ORDER BY orden ASC
+          ]]>
+      </sql>
+    </ObtenerPasosFlujo>
+
+    <ObtenerDetallePaso>
+      <campo leyenda="Clave de flujo" db_nombre="cve_flujo" form_nombre="cve_flujo" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Clave de estatus" db_nombre="cve_estatus" form_nombre="cve_estatus" requerido="false" charsize="0" tipo="int"/>
+      <campo leyenda="Orden" db_nombre="pasoAnterior" form_nombre="pasoAnterior" requerido="false" charsize="0" tipo="int" />
+      <sql>
+        <![CDATA[
+            DECLARE @orden INT;
+            SET @orden=(SELECT TOP(1) orden FROM CTR_flujoestatusorden WHERE cve_flujo=@cve_flujo AND cve_estatus= @cve_estatus);
+            IF(@cve_estatus IS NULL)BEGIN
+              SET @orden=(SELECT TOP(1) MIN(orden) FROM CTR_flujoestatusorden WHERE orden> @pasoAnterior);
+              SET @cve_estatus=(SELECT TOP(1) cve_estatus FROM CTR_flujoestatusorden WHERE cve_flujo=@cve_flujo AND orden=@orden);
+            END            
+            
+	          SELECT
+              B.cve_role
+              ,A.cve_estatus
+              ,A.orden
+            FROM(VALUES(@cve_estatus, @orden)) AS A(cve_estatus,orden) 
+            LEFT OUTER JOIN (SELECT cve_role FROM CTR_flujoestatusrole A WHERE cve_flujo= @cve_flujo AND cve_estatus= @cve_estatus)B ON 1=1;
+       ]]>
+      </sql>
+    </ObtenerDetallePaso>
+
+    <ObtenerEmpleadosAccionesRole>
+      <campo leyenda="Clave de flujo" db_nombre="cve_flujo" form_nombre="cve_flujo" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Clave de estatus" db_nombre="cve_estatus" form_nombre="cve_estatus" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Clave de role" db_nombre="cve_role" form_nombre="cve_role" requerido="true" charsize="0" tipo="int"/>
+      <sql>
+        <![CDATA[
+	              SELECT A.num_empleado, B.nombrecompleto FROM CTR_flujoestatusroleempleados A INNER JOIN ES_emplplantilla B ON A.num_empleado=B.id_empleado AND A.cve_flujo=@cve_flujo AND A.cve_estatus=@cve_estatus AND cve_role=@cve_role;
+	              SELECT A.cve_accion, A.descripcion, CASE WHEN B.cve_accion IS NULL THEN NULL ELSE 'true' END esDeRol FROM CTR_flujoacciones A LEFT OUTER JOIN (SELECT * FROM CTR_flujoestatusroleaccion WHERE cve_flujo=@cve_flujo AND cve_estatus=@cve_estatus AND cve_role=@cve_role)B ON A.cve_accion=B.cve_accion ORDER BY esDeRol DESC,Descripcion
+
+       ]]>
+      </sql>
+    </ObtenerEmpleadosAccionesRole>
+
+    <GuardarEmpleadosAccionesRole>
+      <campo leyenda="Clave" db_nombre="cve_flujo" form_nombre="cve_flujo" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Clave" db_nombre="cve_estatus" form_nombre="cve_estatus" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Clave" db_nombre="cve_role" form_nombre="cve_role" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Clave" db_nombre="num_empleados" form_nombre="num_empleados" requerido="false" charsize="2000" tipo="string"/>
+      <campo leyenda="Clave" db_nombre="cve_acciones" form_nombre="cve_acciones" requerido="false" charsize="2000" tipo="string"/>
+      <sql>
+        <![CDATA[
+          BEGIN TRY
+              DELETE FROM CTR_flujoestatusroleempleados WHERE cve_flujo=@cve_flujo AND cve_estatus=@cve_estatus AND cve_role=@cve_role;
+              DELETE FROM CTR_flujoestatusroleaccion WHERE cve_flujo=@cve_flujo AND cve_estatus=@cve_estatus AND cve_role=@cve_role;
+	            INSERT INTO CTR_flujoestatusroleempleados(cve_flujo,cve_estatus,cve_role, num_empleado)  SELECT @cve_flujo,@cve_estatus,@cve_role, spliter FROM dbo.split(@num_empleados,',');
+	            INSERT INTO CTR_flujoestatusroleaccion(cve_flujo,cve_estatus,cve_role, cve_accion)  SELECT @cve_flujo,@cve_estatus,@cve_role, spliter FROM dbo.split(@cve_acciones,',');
+              SELECT 1  estatus, 'Registro guardado correctamente' mensaje;
+          END TRY BEGIN CATCH
+              SELECT -(ERROR_NUMBER ( )) AS estatus,  'Error: No se guardo el registro. Detalle:' + ERROR_MESSAGE() mensaje;
+          END CATCH
+       ]]>
+      </sql>
+    </GuardarEmpleadosAccionesRole>
+
+    <Editar>
+      <campo leyenda="Clave" db_nombre="cve_flujo" form_nombre="cve_flujo" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Estatus" db_nombre="cve_estatus" form_nombre="cve_estatus" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Estatus" db_nombre="cve_estatusAnterior" form_nombre="cve_estatusAnterior" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Roles" db_nombre="cve_role" form_nombre="cve_role" requerido="false" charsize="2000" tipo="string"/>
+      <sql>
+        <![CDATA[
+              BEGIN
+                  SET NOCOUNT ON;
+                  SET DATEFORMAT dmy;
+                  BEGIN TRY
+                    DELETE FROM CTR_flujoestatusrole WHERE cve_flujo=@cve_flujo AND cve_estatus=@cve_estatusAnterior;
+                    
+                    INSERT INTO CTR_flujoestatusrole SELECT @cve_estatus, spliter, @cve_flujo FROM dbo.Split(@cve_role,',');                    
+                    UPDATE CTR_flujoestatusorden SET cve_estatus=@cve_estatus WHERE cve_flujo=@cve_flujo AND cve_estatus=@cve_estatusAnterior;
+                    SELECT 1  estatus, 'Registro guardado correctamente' mensaje, (SELECT orden FROM  CTR_flujoestatusorden WHERE cve_flujo=@cve_flujo AND cve_estatus= @cve_estatus) orden, @cve_estatus cve_estatus;
+                  END TRY BEGIN CATCH
+                      SELECT -(ERROR_NUMBER ( )) AS estatus,  'Error: No se guardo el registro. Detalle:' + ERROR_MESSAGE() mensaje;
+                  END CATCH
+              END
+          ]]>
+      </sql>
+    </Editar>
+
+    <EliminarPaso>
+      <campo leyenda="Clave" db_nombre="cve_flujo" form_nombre="cve_flujo" requerido="true" charsize="0" tipo="int"/>
+      <campo leyenda="Clave de estatus" db_nombre="cve_estatus" form_nombre="cve_estatus" requerido="false" charsize="0" tipo="int"/>
+      <campo leyenda="Orden" db_nombre="orden" form_nombre="orden" requerido="false" charsize="0" tipo="int" />
+      <sql>
+        <![CDATA[
+              BEGIN
+                  SET NOCOUNT ON;
+                  SET DATEFORMAT dmy;
+                  BEGIN TRY
+                    IF @cve_estatus IS NULL BEGIN
+                      SELECT @cve_estatus=cve_estatus FROM CTR_flujoestatusorden WHERE cve_flujo=@cve_flujo AND orden=@orden;
+                    END
+                    DELETE FROM CTR_flujoestatusorden WHERE cve_flujo=@cve_flujo AND cve_estatus=@cve_estatus;
+                    IF @@ROWCOUNT > 0BEGIN
+                      UPDATE CTR_flujoestatusorden SET orden=orden - 1 WHERE orden>@orden AND cve_flujo=@cve_flujo;
+                    END
+                    DELETE FROM CTR_flujoestatusroleaccion WHERE cve_flujo=@cve_flujo AND cve_estatus=@cve_estatus;
+                    DELETE FROM CTR_flujoestatusrole WHERE cve_flujo=@cve_flujo AND cve_estatus=@cve_estatus;
+                    DELETE FROM CTR_flujoestatusroleempleados WHERE cve_flujo=@cve_flujo AND cve_estatus=@cve_estatus;                    
+                    
+                    SELECT 1  estatus, 'Paso eliminado correctamente' mensaje;
+                  END TRY BEGIN CATCH
+                      SELECT -(ERROR_NUMBER ( )) AS estatus,  'Error: No se guardo el registro. Detalle:' + ERROR_MESSAGE() mensaje;
+                  END CATCH
+              END
+          ]]>
+      </sql>      
+    </EliminarPaso>
+    
+  </Pasos>
+</Secciones>
